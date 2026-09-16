@@ -79,7 +79,6 @@ elif st.session_state.nav_mode == "Player_Login":
     col_pl1, col_pl2 = st.columns(2)
     with col_pl1:
         if st.button("Entra nella mia scheda", type="primary", use_container_width=True):
-            # Password coincide esattamente con il nome di battesimo
             if player_pwd_input.strip().lower() == selected_fname.lower():
                 st.session_state.authenticated_player = selected_fname
                 st.session_state.nav_mode = "Player_Dashboard"
@@ -129,7 +128,6 @@ elif st.session_state.nav_mode == "Player_Dashboard":
             
     st.markdown("---")
     
-    # Pre-popoliamo i valori del giocatore nei default della dashboard HTML
     p_tech = current_player['tech']
     p_mental = current_player['mental']
     c_tech = current_player['c_tech']
@@ -369,7 +367,6 @@ elif st.session_state.nav_mode == "Player_Dashboard":
         </header>
 
         <div class="main-container">
-            <!-- ACTIONS -->
             <div class="card">
                 <h2>Actions & Sharing</h2>
                 <div class="actions-grid">
@@ -380,7 +377,6 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                 </div>
             </div>
 
-            <!-- CHARTS -->
             <div class="charts-grid">
                 <div class="card">
                     <h2 class="tech-title">Technical Skills</h2>
@@ -392,7 +388,6 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                 </div>
             </div>
 
-            <!-- SELF EVALUATION -->
             <div class="card">
                 <h2>My Ratings (Self-Evaluation)</h2>
                 <div class="controls-grid">
@@ -417,7 +412,6 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                 </div>
             </div>
 
-            <!-- COACH EVALUATION (READ-ONLY / FIXED FOR PLAYER) -->
             <div class="card">
                 <h2 class="coach-title">📋 Coach Evaluation & Comparison</h2>
                 <p style="font-size:0.85rem; color:var(--text-muted); text-align:center; margin-top:0;">Evaluations assigned by your coach.</p>
@@ -595,9 +589,9 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                     
                     let diffHtml = '';
                     if (diff > 0) {{
-                        diffHtml = `<span class="badge-pos">+${diff} (You > Coach)</span>`;
+                        diffHtml = `<span class="badge-pos">+${{diff}} (You > Coach)</span>`;
                     }} else if (diff < 0) {{
-                        diffHtml = `<span class="badge-neg">${diff} (You < Coach)</span>`;
+                        diffHtml = `<span class="badge-neg">${{diff}} (You < Coach)</span>`;
                         gaps.push({{ label: allLabels[index], myVal, coachVal, diff }});
                     }} else {{
                         diffHtml = `<span class="badge-eq">= (Perfect)</span>`;
