@@ -1,4 +1,15 @@
-<!DOCTYPE html>
+import streamlit as st
+import streamlit.components.v1 as components
+
+# Configurazione della pagina Streamlit
+st.set_page_config(
+    page_title="Padel Performance Dashboard",
+    page_icon="🎾",
+    layout="wide"
+)
+
+# HTML, CSS e JavaScript completi della tua dashboard incorporati in modo sicuro
+html_code = """<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -21,9 +32,10 @@
             background-color: var(--bg-primary);
             color: var(--text-main);
             margin: 0;
+            padding: 12px;
             -webkit-tap-highlight-color: transparent;
         }
-        st.markdown("""<style> header h1 { color: var(--accent-blue); margin: 0 0 4px 0; font-size: 1.4rem; } </style>""", unsafe_allow_html=True)
+        header { text-align: center; margin-bottom: 16px; }
         header h1 { color: var(--accent-blue); margin: 0 0 4px 0; font-size: 1.4rem; }
         header p { color: var(--text-muted); margin: 0; font-size: 0.8rem; }
         
@@ -289,7 +301,6 @@
         const mentalKeys = ['chemistry', 'errorManagement', 'positioning', 'focus', 'stamina', 'intensity'];
         const mentalLabels = ['Intesa', 'Errori', 'Posizione', 'Focus', 'Resistenza', 'Intensità'];
 
-        // DISEGNATORE RADAR CANVAS NATIVO
         function drawRadarChart(canvasId, labels, dataValues, lineColor, fillColor) {
             const canvas = document.getElementById(canvasId);
             if (!canvas) return;
@@ -313,7 +324,6 @@
             const numAxes = labels.length;
             const levels = 5;
 
-            // Griglia ragnatela
             for (let l = 1; l <= levels; l++) {
                 const r = (radius / levels) * l;
                 ctx.beginPath();
@@ -330,7 +340,6 @@
                 ctx.stroke();
             }
 
-            // Assi ed Etichette
             ctx.font = 'bold 10px -apple-system, sans-serif';
             ctx.fillStyle = '#94a3b8';
             ctx.textAlign = 'center';
@@ -353,7 +362,6 @@
                 ctx.fillText(labels[i], lx, ly);
             }
 
-            // Poligono Dati
             ctx.beginPath();
             for (let i = 0; i < numAxes; i++) {
                 const val = Math.max(1, Math.min(10, dataValues[i]));
@@ -371,7 +379,6 @@
             ctx.lineWidth = 2.5;
             ctx.stroke();
 
-            // Punti
             for (let i = 0; i < numAxes; i++) {
                 const val = Math.max(1, Math.min(10, dataValues[i]));
                 const r = (radius / 10) * val;
@@ -435,7 +442,6 @@
             return url.toString();
         }
 
-        // 💬 CONDIVISIONE WHATSAPP
         function shareOnWhatsApp() {
             const fname = document.getElementById('firstName').value.trim();
             const lname = document.getElementById('lastName').value.trim();
@@ -448,14 +454,12 @@
             const avgMental = (mVals.reduce((a,b)=>a+b,0) / mVals.length).toFixed(1);
             
             const shareUrl = generateShareUrl();
-            
-            const text = `🎾 *Scheda Valutazione Padel*\n👤 *Giocatore:* ${name}\n\n⚡ *Media Tecnica:* ${avgTech}/10\n🧠 *Media Tattica/Mental:* ${avgMental}/10\n\nApri la scheda completa qui:\n${shareUrl}`;
+            const text = `🎾 *Scheda Valutazione Padel*\\n👤 *Giocatore:* ${name}\\n\\n⚡ *Media Tecnica:* ${avgTech}/10\\n🧠 *Media Tattica/Mental:* ${avgMental}/10\\n\\nApri la scheda completa qui:\\n${shareUrl}`;
             
             const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
             window.open(waUrl, '_blank');
         }
 
-        // 💾 SALVA RISULTATO COME IMMAGINE PNG
         function saveResultAsImage() {
             const fname = document.getElementById('firstName').value.trim() || 'Giocatore';
             const lname = document.getElementById('lastName').value.trim() || '';
@@ -466,11 +470,9 @@
             cCanvas.height = 700;
             const ctx = cCanvas.getContext('2d');
 
-            // Sfondo
             ctx.fillStyle = '#0f172a';
             ctx.fillRect(0, 0, 800, 700);
 
-            // Header
             ctx.fillStyle = '#1e293b';
             ctx.fillRect(20, 20, 760, 80);
             ctx.strokeStyle = 'rgba(255,255,255,0.1)';
@@ -485,7 +487,6 @@
             ctx.fillStyle = '#94a3b8';
             ctx.fillText('Valutazione Prestazionale Personalizzata', 400, 80);
 
-            // Disegna Grafico Tecnico a sinistra
             const techCanvas = document.getElementById('techCanvas');
             ctx.fillStyle = '#1e293b';
             ctx.fillRect(20, 110, 370, 360);
@@ -496,7 +497,6 @@
             ctx.fillText('Abilità Tecniche', 205, 140);
             ctx.drawImage(techCanvas, 30, 150, 350, 300);
 
-            // Disegna Grafico Mental a destra
             const mentalCanvas = document.getElementById('mentalCanvas');
             ctx.fillStyle = '#1e293b';
             ctx.fillRect(410, 110, 370, 360);
@@ -507,7 +507,6 @@
             ctx.fillText('Atteggiamento & Tattica', 595, 140);
             ctx.drawImage(mentalCanvas, 420, 150, 350, 300);
 
-            // Dettaglio Valori in Basso
             ctx.fillStyle = '#1e293b';
             ctx.fillRect(20, 480, 760, 190);
             ctx.strokeRect(20, 480, 760, 190);
@@ -515,7 +514,6 @@
             ctx.font = 'bold 14px -apple-system, sans-serif';
             ctx.textAlign = 'left';
             
-            // Colonna Tecnica
             ctx.fillStyle = '#38bdf8';
             ctx.fillText('TECNICA:', 40, 510);
             techKeys.forEach((id, idx) => {
@@ -528,7 +526,6 @@
                 ctx.fillText(`${label}: ${val}/10`, 40 + col * 170, 535 + row * 24);
             });
 
-            // Colonna Mental
             ctx.fillStyle = '#a855f7';
             ctx.font = 'bold 14px -apple-system, sans-serif';
             ctx.fillText('TATTICA & MENTAL:', 430, 510);
@@ -543,13 +540,10 @@
             });
 
             const dataUrl = cCanvas.toDataURL('image/png');
-
-            // Prova a scaricare direttamente
             const link = document.createElement('a');
-            link.download = `Padel_Performance_${fname}_${lname}.png`.replace(/\s+/g, '_');
+            link.download = `Padel_Performance_${fname}_${lname}.png`.replace(/\\s+/g, '_');
             link.href = dataUrl;
             
-            // Mostra Modale con Immagine per salvataggio facile su mobile
             document.getElementById('modalTitle').innerText = '🖼️ Immagine Generata!';
             document.getElementById('modalContent').innerHTML = `
                 <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0;">Tieni premuto sull'immagine per salvarla nelle tue foto o scaricarla:</p>
@@ -621,3 +615,7 @@
     </script>
 </body>
 </html>
+"""
+
+# Renderizza l'intera app all'interno di Streamlit con altezza ottimizzata e scroll abilitato
+components.html(html_code, height=1150, scrolling=True)
