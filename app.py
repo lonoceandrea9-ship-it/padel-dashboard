@@ -23,6 +23,7 @@
             margin: 0;
             -webkit-tap-highlight-color: transparent;
         }
+        st.markdown("""<style> header h1 { color: var(--accent-blue); margin: 0 0 4px 0; font-size: 1.4rem; } </style>""", unsafe_allow_html=True)
         header h1 { color: var(--accent-blue); margin: 0 0 4px 0; font-size: 1.4rem; }
         header p { color: var(--text-muted); margin: 0; font-size: 0.8rem; }
         
