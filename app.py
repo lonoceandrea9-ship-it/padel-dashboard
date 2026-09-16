@@ -5,7 +5,7 @@ import json
 
 # Streamlit page configuration
 st.set_page_config(
-    page_title="Padel Performance Hub",
+    page_title="Nac Padel Team Performance Hub",
     page_icon="🎾",
     layout="wide"
 )
@@ -20,102 +20,316 @@ if "authenticated_coach" not in st.session_state:
 if "authenticated_player" not in st.session_state:
     st.session_state.authenticated_player = None
 
+if "language" not in st.session_state:
+    st.session_state.language = "English"
+
+# Dizionario delle traduzioni per la schermata Home e di Login
+translations = {
+    "English": {
+        "welcome": "🎾 Welcome to Nac Padel Team Performance Hub",
+        "select_lang": "Select your language / Seleziona la lingua:",
+        "select_area": "Select your access area to continue:",
+        "player_title": "👤 Player Area",
+        "player_desc": "Access your password-protected personal profile to view and update your evaluations.",
+        "player_btn": "Log in as Player",
+        "coach_title": "📋 Coach Area",
+        "coach_desc": "Restricted access for coaching staff to manage data, plan training sessions, and generate team pairings.",
+        "coach_btn": "Log in as Coach",
+        "player_login_title": "🔐 Player Area Access",
+        "player_login_desc": "Select your name and enter your password (your password is your **first name**).",
+        "select_profile": "Select your profile:",
+        "pwd_label": "Password (Enter your first name)",
+        "enter_profile": "Enter My Profile",
+        "back_home": "⬅️ Back to Home",
+        "wrong_pwd": "❌ Incorrect password! Remember that your password is your first name.",
+        "coach_login_title": "🔒 Coach Area Authentication",
+        "coach_login_desc": "Enter the security password to access management tools.",
+        "coach_pwd_label": "Coach Password",
+        "verify_pwd": "Verify Password",
+        "wrong_coach_pwd": "❌ Incorrect password! Please try again."
+    },
+    "Italiano": {
+        "welcome": "🎾 Benvenuto in Nac Padel Team Performance Hub",
+        "select_lang": "Seleziona la lingua:",
+        "select_area": "Seleziona l'area di accesso per continuare:",
+        "player_title": "👤 Area Giocatore",
+        "player_desc": "Accedi al tuo profilo personale protetto da password per visualizzare e aggiornare le tue valutazioni.",
+        "player_btn": "Accedi come Giocatore",
+        "coach_title": "📋 Area Allenatore",
+        "coach_desc": "Accesso riservato allo staff tecnico per gestire i dati, pianificare gli allenamenti e generare le coppie.",
+        "coach_btn": "Accedi come Allenatore",
+        "player_login_title": "🔐 Accesso Area Giocatore",
+        "player_login_desc": "Seleziona il tuo nome e inserisci la password (la password è il tuo **nome**).",
+        "select_profile": "Seleziona il tuo profilo:",
+        "pwd_label": "Password (Inserisci il tuo nome)",
+        "enter_profile": "Entra nel mio profilo",
+        "back_home": "⬅️ Torna alla Home",
+        "wrong_pwd": "❌ Password errata! Ricorda che la tua password è il tuo nome.",
+        "coach_login_title": "🔒 Autenticazione Area Allenatore",
+        "coach_login_desc": "Inserisci la password di sicurezza per accedere agli strumenti di gestione.",
+        "coach_pwd_label": "Password Allenatore",
+        "verify_pwd": "Verifica Password",
+        "wrong_coach_pwd": "❌ Password errata! Riprova."
+    },
+    "Español": {
+        "welcome": "🎾 Bienvenido a Nac Padel Team Performance Hub",
+        "select_lang": "Selecciona tu idioma:",
+        "select_area": "Selecciona tu área de acceso para continuar:",
+        "player_title": "👤 Área de Jugador",
+        "player_desc": "Accede a tu perfil personal protegido por contraseña para ver y actualizar tus evaluaciones.",
+        "player_btn": "Iniciar sesión como Jugador",
+        "coach_title": "📋 Área de Entrenador",
+        "coach_desc": "Acceso restringido para el cuerpo técnico para gestionar datos, planificar entrenamientos y generar parejas.",
+        "coach_btn": "Iniciar sesión como Entrenador",
+        "player_login_title": "🔐 Acceso al Área de Jugador",
+        "player_login_desc": "Selecciona tu nombre e introduce tu contraseña (tu contraseña es tu **nombre**).",
+        "select_profile": "Selecciona tu perfil:",
+        "pwd_label": "Contraseña (Introduce tu nombre)",
+        "enter_profile": "Entrar a mi perfil",
+        "back_home": "⬅️ Volver al Inicio",
+        "wrong_pwd": "❌ ¡Contraseña incorrecta! Recuerda que tu contraseña es tu nombre.",
+        "coach_login_title": "🔒 Autenticación del Área de Entrenador",
+        "coach_login_desc": "Introduce la contraseña de seguridad para acceder a las herramientas de gestión.",
+        "coach_pwd_label": "Contraseña de Entrenador",
+        "verify_pwd": "Verificar Contraseña",
+        "wrong_coach_pwd": "❌ ¡Contraseña incorrecta! Inténtalo de nuevo."
+    },
+    "Svenska": {
+        "welcome": "🎾 Välkommen till Nac Padel Team Performance Hub",
+        "select_lang": "Välj ditt språk:",
+        "select_area": "Välj ditt åtkomstområde för att fortsätta:",
+        "player_title": "👤 Spelarområde",
+        "player_desc": "Få tillgång till din lösenordsskyddade personliga profil för att visa och uppdatera dina utvärderingar.",
+        "player_btn": "Logga in som spelare",
+        "coach_title": "📋 Tränarområde",
+        "coach_desc": "Begränsad åtkomst för tränarstab för att hantera data, planera träningspass och generera lag.",
+        "coach_btn": "Logga in som tränare",
+        "player_login_title": "🔐 Åtkomst till spelarområde",
+        "player_login_desc": "Välj ditt namn och ange ditt lösenord (ditt lösenord är ditt **förnamn**).",
+        "select_profile": "Välj din profil:",
+        "pwd_label": "Lösenord (Ange ditt förnamn)",
+        "enter_profile": "Gå till min profil",
+        "back_home": "⬅️ Tillbaka till start",
+        "wrong_pwd": "❌ Felaktigt lösenord! Kom ihåg att ditt lösenord är ditt förnamn.",
+        "coach_login_title": "🔒 Autentisering för tränarområde",
+        "coach_login_desc": "Ange säkerhetslösenordet för att komma åt hanteringsverktyg.",
+        "coach_pwd_label": "Tränarlösenord",
+        "verify_pwd": "Verifiera lösenord",
+        "wrong_coach_pwd": "❌ Felaktigt lösenord! Försök igen."
+    },
+    "Nederlands": {
+        "welcome": "🎾 Welkom bij Nac Padel Team Performance Hub",
+        "select_lang": "Selecteer uw taal:",
+        "select_area": "Selecteer uw toegangsgebied om door te gaan:",
+        "player_title": "👤 Spelersgebied",
+        "player_desc": "Toegang tot uw met een wachtwoord beveiligde persoonlijke profiel om uw evaluaties te bekijken en bij te werken.",
+        "player_btn": "Inloggen als speler",
+        "coach_title": "📋 Coachgebied",
+        "coach_desc": "Beperkte toegang voor de technische staf om data te beheren, trainingen te plannen en koppels te genereren.",
+        "coach_btn": "Inloggen als coach",
+        "player_login_title": "🔐 Toegang Spelersgebied",
+        "player_login_desc": "Selecteer uw naam en voer uw wachtwoord in (uw wachtwoord is uw **voornaam**).",
+        "select_profile": "Selecteer uw profiel:",
+        "pwd_label": "Wachtwoord (Voer uw voornaam in)",
+        "enter_profile": "Naar mijn profiel",
+        "back_home": "⬅️ Terug naar Home",
+        "wrong_pwd": "❌ Onjuist wachtwoord! Vergeet niet dat uw wachtwoord uw voornaam is.",
+        "coach_login_title": "🔒 Authenticatie Coachgebied",
+        "coach_login_desc": "Voer het beveiligingswachtwoord in om toegang te krijgen tot de beheertools.",
+        "coach_pwd_label": "Coach Wachtwoord",
+        "verify_pwd": "Verifieer Wachtwoord",
+        "wrong_coach_pwd": "❌ Onjuist wachtwoord! Probeer het opnieuw."
+    },
+    "Dansk": {
+        "welcome": "🎾 Velkommen til Nac Padel Team Performance Hub",
+        "select_lang": "Vælg dit sprog:",
+        "select_area": "Vælg dit adgangsområde for at fortsætte:",
+        "player_title": "👤 Spillerområde",
+        "player_desc": "Få adgang til din adgangskodebeskyttede personlige profil for at se og opdatere dine evalueringer.",
+        "player_btn": "Log ind som spiller",
+        "coach_title": "📋 Trænerområde",
+        "coach_desc": "Begrænset adgang for trænerstaben til at administrere data, planlægge træningspas og generere holdparringer.",
+        "coach_btn": "Log ind som træner",
+        "player_login_title": "🔐 Adgang til spillerområde",
+        "player_login_desc": "Vælg dit navn og indtast din adgangskode (din adgangskode er dit **fornavn**).",
+        "select_profile": "Vælg din profil:",
+        "pwd_label": "Adgangskode (Indtast dit fornavn)",
+        "enter_profile": "Gå til min profil",
+        "back_home": "⬅️ Tilbage til Start",
+        "wrong_pwd": "❌ Forkert adgangskode! Husk at din adgangskode er dit fornavn.",
+        "coach_login_title": "🔒 Godkendelse af trænerområde",
+        "coach_login_desc": "Indtast sikkerhedsadgangskoden for at få adgang til administrationsværktøjer.",
+        "coach_pwd_label": "Træneradgangskode",
+        "verify_pwd": "Bekræft adgangskode",
+        "wrong_coach_pwd": "❌ Forkert adgangskode! Prøv igen."
+    }
+}
+
+t = translations[st.session_state.language]
+
 # Complete roster of players with side information ("Left" or "Right")
-squad_players = [
-    {"fname": "Álvaro", "lname": "Gomez", "side": "Left", "tech": [7, 7, 7, 6, 8, 6], "mental": [8, 7, 7, 7, 8, 7], "c_tech": [6, 6, 6, 5, 7, 5], "c_mental": [7, 6, 6, 6, 7, 6]},
-    {"fname": "Yannik", "lname": "Langeslag", "side": "Left", "tech": [8, 6, 7, 7, 7, 5], "mental": [7, 6, 8, 6, 7, 6], "c_tech": [7, 5, 6, 6, 6, 4], "c_mental": [6, 5, 7, 5, 6, 5]},
-    {"fname": "Josu", "lname": "Usabiaga", "side": "Right", "tech": [6, 8, 7, 7, 6, 7], "mental": [6, 8, 6, 8, 7, 7], "c_tech": [5, 7, 6, 6, 5, 6], "c_mental": [5, 7, 5, 7, 6, 6]},
-    {"fname": "Benjamin", "lname": "Thyrell", "side": "Left", "tech": [7, 7, 8, 6, 7, 6], "mental": [8, 7, 7, 7, 8, 7], "c_tech": [6, 6, 7, 5, 6, 5], "c_mental": [7, 6, 6, 6, 7, 6]},
-    {"fname": "Alexander", "lname": "Wennstam", "side": "Left", "tech": [8, 8, 7, 7, 8, 6], "mental": [7, 7, 8, 8, 7, 7], "c_tech": [7, 7, 6, 6, 7, 5], "c_mental": [6, 6, 7, 7, 6, 6]},
-    {"fname": "Andrea", "lname": "Lonoce", "side": "Right", "tech": [8, 7, 8, 7, 9, 6], "mental": [9, 7, 8, 8, 9, 7], "c_tech": [8, 7, 8, 7, 9, 6], "c_mental": [9, 7, 8, 8, 9, 7]},
-    {"fname": "Mikkel", "lname": "Hoff", "side": "Right", "tech": [7, 6, 7, 6, 7, 5], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4], "c_mental": [6, 5, 6, 6, 6, 5]},
-    {"fname": "Pedro", "lname": "Rios", "side": "Right", "tech": [8, 8, 8, 7, 8, 7], "mental": [8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6], "c_mental": [7, 7, 7, 7, 7, 7]},
-    {"fname": "Hector", "lname": "Guerrero", "side": "Right", "tech": [7, 7, 7, 7, 7, 6], "mental": [7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 6, 6, 5], "c_mental": [6, 6, 6, 6, 6, 6]},
-    {"fname": "Gonzalo", "lname": "Diez de Onate", "side": "Left", "tech": [8, 7, 8, 7, 8, 6], "mental": [8, 7, 8, 8, 8, 7], "c_tech": [7, 6, 7, 6, 7, 5], "c_mental": [7, 6, 7, 7, 7, 6]},
-    {"fname": "Julio", "lname": "Morales", "side": "Right", "tech": [7, 6, 7, 6, 7, 5], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4], "c_mental": [6, 5, 6, 6, 6, 5]},
-    {"fname": "Lars", "lname": "Mikkelsen", "side": "Left", "tech": [7, 7, 7, 6, 8, 6], "mental": [8, 7, 7, 7, 8, 7], "c_tech": [6, 6, 6, 5, 7, 5], "c_mental": [7, 6, 6, 6, 7, 6]},
-    {"fname": "Joahn", "lname": "Lohman", "side": "Left", "tech": [7, 6, 7, 6, 7, 5], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4], "c_mental": [6, 5, 6, 6, 6, 5]},
-    {"fname": "Nacho", "lname": "Saracho", "side": "Right", "tech": [8, 8, 8, 7, 8, 7], "mental": [8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6], "c_mental": [7, 7, 7, 7, 7, 7]},
-    {"fname": "Peter", "lname": "Gustafsson", "side": "Left", "tech": [7, 7, 7, 6, 7, 6], "mental": [7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5], "c_mental": [6, 6, 6, 6, 6, 6]},
-    {"fname": "Juanjo", "lname": "Lopez Benitez", "side": "Left", "tech": [8, 8, 8, 7, 8, 7], "mental": [8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6], "c_mental": [7, 7, 7, 7, 7, 7]},
-    {"fname": "Sascha", "lname": "Van De Bilt", "side": "Right", "tech": [7, 7, 7, 6, 7, 6], "mental": [7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5], "c_mental": [6, 6, 6, 6, 6, 6]},
-    {"fname": "Fernando", "lname": "Oribe", "side": "Right", "tech": [8, 7, 8, 7, 8, 6], "mental": [8, 7, 8, 8, 8, 7], "c_tech": [7, 6, 7, 6, 7, 5], "c_mental": [7, 6, 7, 7, 7, 6]},
-    {"fname": "Doug", "lname": "Ramsay", "side": "Left", "tech": [7, 6, 7, 6, 7, 5], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4], "c_mental": [6, 5, 6, 6, 6, 5]}
-]
+if "squad_players" not in st.session_state:
+    st.session_state.squad_players = [
+        {"fname": "Álvaro", "lname": "Gomez", "side": "Left", "tech": [7, 7, 7, 6, 8, 6], "mental": [8, 7, 7, 7, 8, 7], "c_tech": [6, 6, 6, 5, 7, 5], "c_mental": [7, 6, 6, 6, 7, 6]},
+        {"fname": "Yannik", "lname": "Langeslag", "side": "Left", "tech": [8, 6, 7, 7, 7, 5], "mental": [7, 6, 8, 6, 7, 6], "c_tech": [7, 5, 6, 6, 6, 4], "c_mental": [6, 5, 7, 5, 6, 5]},
+        {"fname": "Josu", "lname": "Usabiaga", "side": "Right", "tech": [6, 8, 7, 7, 6, 7], "mental": [6, 8, 6, 8, 7, 7], "c_tech": [5, 7, 6, 6, 5, 6], "c_mental": [5, 7, 5, 7, 6, 6]},
+        {"fname": "Benjamin", "lname": "Thyrell", "side": "Left", "tech": [7, 7, 8, 6, 7, 6], "mental": [8, 7, 7, 7, 8, 7], "c_tech": [6, 6, 7, 5, 6, 5], "c_mental": [7, 6, 6, 6, 7, 6]},
+        {"fname": "Alexander", "lname": "Wennstam", "side": "Left", "tech": [8, 8, 7, 7, 8, 6], "mental": [7, 7, 8, 8, 7, 7], "c_tech": [7, 7, 6, 6, 7, 5], "c_mental": [6, 6, 7, 7, 6, 6]},
+        {"fname": "Andrea", "lname": "Lonoce", "side": "Right", "tech": [8, 7, 8, 7, 9, 6], "mental": [9, 7, 8, 8, 9, 7], "c_tech": [8, 7, 8, 7, 9, 6], "c_mental": [9, 7, 8, 8, 9, 7]},
+        {"fname": "Mikkel", "lname": "Hoff", "side": "Right", "tech": [7, 6, 7, 6, 7, 5], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4], "c_mental": [6, 5, 6, 6, 6, 5]},
+        {"fname": "Pedro", "lname": "Rios", "side": "Right", "tech": [8, 8, 8, 7, 8, 7], "mental": [8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6], "c_mental": [7, 7, 7, 7, 7, 7]},
+        {"fname": "Hector", "lname": "Guerrero", "side": "Right", "tech": [7, 7, 7, 7, 7, 6], "mental": [7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 6, 6, 5], "c_mental": [6, 6, 6, 6, 6, 6]},
+        {"fname": "Gonzalo", "lname": "Diez de Onate", "side": "Left", "tech": [8, 7, 8, 7, 8, 6], "mental": [8, 7, 8, 8, 8, 7], "c_tech": [7, 6, 7, 6, 7, 5], "c_mental": [7, 6, 7, 7, 7, 6]},
+        {"fname": "Julio", "lname": "Morales", "side": "Right", "tech": [7, 6, 7, 6, 7, 5], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4], "c_mental": [6, 5, 6, 6, 6, 5]},
+        {"fname": "Lars", "lname": "Mikkelsen", "side": "Left", "tech": [7, 7, 7, 6, 8, 6], "mental": [8, 7, 7, 7, 8, 7], "c_tech": [6, 6, 6, 5, 7, 5], "c_mental": [7, 6, 6, 6, 7, 6]},
+        {"fname": "Joahn", "lname": "Lohman", "side": "Left", "tech": [7, 6, 7, 6, 7, 5], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4], "c_mental": [6, 5, 6, 6, 6, 5]},
+        {"fname": "Nacho", "lname": "Saracho", "side": "Right", "tech": [8, 8, 8, 7, 8, 7], "mental": [8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6], "c_mental": [7, 7, 7, 7, 7, 7]},
+        {"fname": "Peter", "lname": "Gustafsson", "side": "Left", "tech": [7, 7, 7, 6, 7, 6], "mental": [7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5], "c_mental": [6, 6, 6, 6, 6, 6]},
+        {"fname": "Juanjo", "lname": "Lopez Benitez", "side": "Left", "tech": [8, 8, 8, 7, 8, 7], "mental": [8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6], "c_mental": [7, 7, 7, 7, 7, 7]},
+        {"fname": "Sascha", "lname": "Van De Bilt", "side": "Right", "tech": [7, 7, 7, 6, 7, 6], "mental": [7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5], "c_mental": [6, 6, 6, 6, 6, 6]},
+        {"fname": "Fernando", "lname": "Oribe", "side": "Right", "tech": [8, 7, 8, 7, 8, 6], "mental": [8, 7, 8, 8, 8, 7], "c_tech": [7, 6, 7, 6, 7, 5], "c_mental": [7, 6, 7, 7, 7, 6]},
+        {"fname": "Doug", "lname": "Ramsay", "side": "Left", "tech": [7, 6, 7, 6, 7, 5], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4], "c_mental": [6, 5, 6, 6, 6, 5]}
+    ]
 
 # --- HOME SELECTION SCREEN ---
 if st.session_state.nav_mode == "Home":
-    st.title("🎾 Welcome to Padel Performance Hub")
-    st.markdown("Select your access area to continue:")
+    # Selettore della lingua in alto a destra o in evidenza
+    lang_col1, lang_col2 = st.columns([4, 1])
+    with lang_col2:
+        selected_lang = st.selectbox(
+            t["select_lang"], 
+            ["English", "Italiano", "Español", "Svenska", "Nederlands", "Dansk"],
+            index=["English", "Italiano", "Español", "Svenska", "Nederlands", "Dansk"].index(st.session_state.language)
+        )
+        if selected_lang != st.session_state.language:
+            st.session_state.language = selected_lang
+            st.rerun()
+
+    st.title(t["welcome"])
+    st.markdown(t["select_area"])
     
     col_home1, col_home2 = st.columns(2)
     
     with col_home1:
-        st.markdown("### 👤 Player Area")
-        st.markdown("Access your password-protected personal profile to view and update your evaluations.")
-        if st.button("Log in as Player", use_container_width=True, type="primary"):
+        st.markdown(f"### {t['player_title']}")
+        st.markdown(t["player_desc"])
+        if st.button(t["player_btn"], use_container_width=True, type="primary"):
             st.session_state.nav_mode = "Player_Login"
             st.rerun()
             
     with col_home2:
-        st.markdown("### 📋 Coach Area")
-        st.markdown("Restricted access for coaching staff to manage data, plan training sessions, and generate team pairings.")
-        if st.button("Log in as Coach", use_container_width=True):
+        st.markdown(f"### {t['coach_title']}")
+        st.markdown(t["coach_desc"])
+        if st.button(t["coach_btn"], use_container_width=True):
             st.session_state.nav_mode = "Coach_Login"
             st.rerun()
 
 # --- PLAYER LOGIN ---
 elif st.session_state.nav_mode == "Player_Login":
-    st.title("🔐 Player Area Access")
-    st.markdown("Select your name and enter your password (your password is your **first name**).")
+    st.title(t["player_login_title"])
+    st.markdown(t["player_login_desc"])
     
-    player_options = [f"{p['fname']} {p['lname']} ({p['side']})" for p in squad_players]
-    selected_player_str = st.selectbox("Select your profile:", player_options)
+    player_options = [f"{p['fname']} {p['lname']} ({p['side']})" for p in st.session_state.squad_players]
+    selected_player_str = st.selectbox(t["select_profile"], player_options)
     
     selected_fname = selected_player_str.split(" ")[0]
     
-    player_pwd_input = st.text_input("Password (Enter your first name)", type="password")
+    player_pwd_input = st.text_input(t["pwd_label"], type="password")
     
     col_pl1, col_pl2 = st.columns(2)
     with col_pl1:
-        if st.button("Enter My Profile", type="primary", use_container_width=True):
+        if st.button(t["enter_profile"], type="primary", use_container_width=True):
             if player_pwd_input.strip().lower() == selected_fname.lower():
                 st.session_state.authenticated_player = selected_fname
                 st.session_state.nav_mode = "Player_Dashboard"
                 st.rerun()
             else:
-                st.error("❌ Incorrect password! Remember that your password is your first name.")
+                st.error(t["wrong_pwd"])
     with col_pl2:
-        if st.button("⬅️ Back to Home", use_container_width=True):
+        if st.button(t["back_home"], use_container_width=True):
             st.session_state.nav_mode = "Home"
             st.rerun()
 
 # --- COACH LOGIN ---
 elif st.session_state.nav_mode == "Coach_Login":
-    st.title("🔒 Coach Area Authentication")
-    st.markdown("Enter the security password to access management tools.")
+    st.title(t["coach_login_title"])
+    st.markdown(t["coach_login_desc"])
     
     COACH_PASSWORD = "padelcoach2026"
     
-    pwd_input = st.text_input("Coach Password", type="password")
+    pwd_input = st.text_input(t["coach_pwd_label"], type="password")
     
     col_btn1, col_btn2 = st.columns(2)
     with col_btn1:
-        if st.button("Verify Password", type="primary", use_container_width=True):
+        if st.button(t["verify_pwd"], type="primary", use_container_width=True):
             if pwd_input == COACH_PASSWORD:
                 st.session_state.authenticated_coach = True
-                st.session_state.nav_mode = "Coach"
+                st.session_state.nav_mode = "Coach_Dashboard"
                 st.rerun()
             else:
-                st.error("❌ Incorrect password! Please try again.")
+                st.error(t["wrong_coach_pwd"])
     with col_btn2:
-        if st.button("⬅️ Back to Home", use_container_width=True):
+        if st.button(t["back_home"], use_container_width=True):
             st.session_state.nav_mode = "Home"
             st.rerun()
 
+# --- COACH MANAGEMENT DASHBOARD ---
+elif st.session_state.nav_mode == "Coach_Dashboard":
+    col_top1, col_top2 = st.columns([6, 1])
+    with col_top1:
+        st.title("📋 Coach Dashboard - Squad Management & Evaluations")
+        st.markdown("As a coach, you can view all players and modify their **Coach Evaluations & Comparisons**.")
+    with col_top2:
+        if st.button("🚪 Log Out"):
+            st.session_state.authenticated_coach = False
+            st.session_state.nav_mode = "Home"
+            st.rerun()
+            
+    st.markdown("---")
+    
+    player_options = [f"{p['fname']} {p['lname']} ({p['side']})" for p in st.session_state.squad_players]
+    selected_player_str = st.selectbox("Select player to review/edit coach evaluations:", player_options)
+    
+    selected_idx = player_options.index(selected_player_str)
+    current_player = st.session_state.squad_players[selected_idx]
+    
+    st.subheader(f"Editing Coach Ratings for: {current_player['fname']} {current_player['lname']}")
+    st.info("💡 As coach, you can modify the values below and save them. The player will see these updates in read-only mode.")
+    
+    with st.form("coach_edit_form"):
+        st.markdown("#### Technical Skills (Coach Evaluation)")
+        c_tech_inputs = []
+        tech_labels = ['Volley', 'Smash', 'Bandeja', 'Serve', 'Defense', 'Chiquita']
+        
+        cols = st.columns(3)
+        for i, label in enumerate(tech_labels):
+            with cols[i % 3]:
+                val = st.slider(f"{label} (Coach)", 1, 10, int(current_player['c_tech'][i]), key=f"coach_tech_{i}")
+                c_tech_inputs.append(val)
+                
+        st.markdown("#### Tactics & Mental Skills (Coach Evaluation)")
+        c_mental_inputs = []
+        mental_labels = ['Chemistry', 'Error Management', 'Positioning', 'Focus', 'Stamina', 'Intensity']
+        
+        cols2 = st.columns(3)
+        for i, label in enumerate(mental_labels):
+            with cols2[i % 3]:
+                val = st.slider(f"{label} (Coach)", 1, 10, int(current_player['c_mental'][i]), key=f"coach_mental_{i}")
+                c_mental_inputs.append(val)
+                
+        submitted_coach = st.form_submit_button("💾 Save Coach Evaluations", type="primary")
+        if submitted_coach:
+            st.session_state.squad_players[selected_idx]['c_tech'] = c_tech_inputs
+            st.session_state.squad_players[selected_idx]['c_mental'] = c_mental_inputs
+            st.success(f"Successfully updated coach evaluations for {current_player['fname']} {current_player['lname']}!")
+
+    if st.button("⬅️ Back to Home"):
+        st.session_state.nav_mode = "Home"
+        st.rerun()
+
 # --- INDIVIDUAL PLAYER DASHBOARD ---
 elif st.session_state.nav_mode == "Player_Dashboard":
-    current_player = next((p for p in squad_players if p['fname'] == st.session_state.authenticated_player), None)
+    current_player = next((p for p in st.session_state.squad_players if p['fname'] == st.session_state.authenticated_player), None)
     
     col_top1, col_top2 = st.columns([6, 1])
     with col_top1:
@@ -138,7 +352,7 @@ elif st.session_state.nav_mode == "Player_Dashboard":
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-        <title>Padel Performance Dashboard</title>
+        <title>Nac Padel Team Performance Dashboard</title>
         <style>
             * {{ box-sizing: border-box; touch-action: manipulation; }}
             :root {{
@@ -251,7 +465,7 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                 accent-color: var(--accent-blue);
             }}
             .control-item.purple input[type="range"] {{ accent-color: var(--accent-purple); }}
-            .control-item.amber input[type="range"] {{ accent-color: #f59e0b; }}
+            .control-item.amber input[type="range"] {{ accent-color: #f59e0b; opacity: 0.8; cursor: not-allowed; }}
             .control-item .val-badge {{ font-weight: bold; min-width: 20px; text-align: right; }}
 
             .diff-table {{
@@ -414,7 +628,7 @@ elif st.session_state.nav_mode == "Player_Dashboard":
 
             <div class="card">
                 <h2 class="coach-title">📋 Coach Evaluation & Comparison</h2>
-                <p style="font-size:0.85rem; color:var(--text-muted); text-align:center; margin-top:0;">Evaluations assigned by your coach.</p>
+                <p style="font-size:0.85rem; color:var(--text-muted); text-align:center; margin-top:0;">Evaluations assigned by your coach (Read-only for players).</p>
                 
                 <div class="controls-grid">
                     <div class="control-group">
@@ -609,385 +823,97 @@ elif st.session_state.nav_mode == "Player_Dashboard":
 
                 if (gaps.length === 0) {{
                     const li = document.createElement('li');
-                    li.innerHTML = `<b>Great job!</b> There are no areas where the coach rates you below your expectations.`;
+                    li.innerHTML = `<b>Great job!</b> There are no areas where the coach rates you below your self-evaluation. Keep up the high standard!`;
                     insightsList.appendChild(li);
                 }} else {{
                     gaps.sort((a, b) => a.diff - b.diff);
-                    gaps.forEach(item => {{
+                    gaps.forEach(gap => {{
                         const li = document.createElement('li');
-                        li.innerHTML = `<b>${{item.label}} (You ${{item.myVal}} vs Coach ${{item.coachVal}}):</b> The coach identifies an important growth margin to work on.`;
+                        li.innerHTML = `<b>${{gap.label}}</b>: Your rating is ${{gap.myVal}}, but your coach rated you ${{gap.coachVal}} (Diff: ${{gap.diff}}). Focus on instructor feedback here.`;
                         insightsList.appendChild(li);
                     }});
                 }}
             }}
 
-            function renderAll() {{
-                const tVals = techKeys.map(id => parseInt(document.getElementById(id).value));
-                const mVals = mentalKeys.map(id => parseInt(document.getElementById(id).value));
+            function getTechValues() {{
+                return techKeys.map(k => parseInt(document.getElementById(k).value));
+            }}
 
-                techKeys.forEach((id, i) => document.getElementById(id + '-val').innerText = tVals[i]);
-                mentalKeys.forEach((id, i) => document.getElementById(id + '-val').innerText = mVals[i]);
-
-                drawRadarChart('techCanvas', techLabels, tVals, '#38bdf8', 'rgba(56, 189, 248, 0.3)');
-                drawRadarChart('mentalCanvas', mentalLabels, mVals, '#a855f7', 'rgba(168, 85, 247, 0.3)');
-
-                updateAnalysisAndTable();
+            function getMentalValues() {{
+                return mentalKeys.map(k => parseInt(document.getElementById(k).value));
             }}
 
             function onDataChange() {{
-                renderAll();
-                saveToLocalStorage();
+                techKeys.forEach(k => {{
+                    document.getElementById(k + '-val').innerText = document.getElementById(k).value;
+                }});
+                mentalKeys.forEach(k => {{
+                    document.getElementById(k + '-val').innerText = document.getElementById(k).value;
+                }});
+
+                drawRadarChart('techCanvas', techLabels, getTechValues(), '#38bdf8', 'rgba(56, 189, 248, 0.2)');
+                drawRadarChart('mentalCanvas', mentalLabels, getMentalValues(), '#a855f7', 'rgba(168, 85, 247, 0.2)');
+                updateAnalysisAndTable();
             }}
 
-            function saveToLocalStorage() {{
-                const data = {{
-                    fname: "{current_player['fname']}",
-                    lname: "{current_player['lname']}",
-                    side: "{current_player['side']}",
-                    tech: techKeys.map(id => document.getElementById(id).value),
-                    mental: mentalKeys.map(id => document.getElementById(id).value),
-                    c_tech: coachTechVals,
-                    c_mental: coachMentalVals
-                }};
-                try {{ localStorage.setItem('padel_dashboard_{current_player["fname"]}', JSON.stringify(data)); }} catch(e){{}}
+            window.onload = function() {{
+                onDataChange();
+            }};
+
+            function showToast(msg) {{
+                const t = document.getElementById('toastMsg');
+                t.innerText = msg;
+                t.style.display = 'block';
+                setTimeout(() => {{ t.style.display = 'none'; }}, 3000);
+            }}
+
+            function shareOnWhatsApp() {{
+                const tech = getTechValues();
+                const mental = getMentalValues();
+                const text = encodeURIComponent("🎾 Nac Padel Team Performance Hub - {current_player['fname']} {current_player['lname']}\\nTechnical avg: " + (tech.reduce((a,b)=>a+b,0)/6).toFixed(1) + "\\nMental avg: " + (mental.reduce((a,b)=>a+b,0)/6).toFixed(1));
+                window.open("https://api.whatsapp.com/send?text=" + text, "_blank");
+            }}
+
+            function saveResultAsImage() {{
+                showToast("Generating image preview...");
+                document.getElementById('modalTitle').innerText = "Card Snapshot Ready";
+                document.getElementById('modalContent').innerHTML = "<p style='font-size:0.85rem; color:#94a3b8;'>Long-press or right-click the charts above to save them directly, or take a screenshot.</p>";
+                document.getElementById('mainModal').style.display = 'flex';
+            }}
+
+            function shareOrCopyLink() {{
+                navigator.clipboard.writeText(window.location.href);
+                showToast("✓ Link copied to clipboard!");
             }}
 
             function exportJsonFile() {{
                 const data = {{
-                    fname: "{current_player['fname']}",
-                    lname: "{current_player['lname']}",
+                    player: "{current_player['fname']} {current_player['lname']}",
                     side: "{current_player['side']}",
-                    tech: techKeys.map(id => parseInt(document.getElementById(id).value)),
-                    mental: mentalKeys.map(id => parseInt(document.getElementById(id).value)),
-                    c_tech: coachTechVals,
-                    c_mental: coachMentalVals
+                    tech: getTechValues(),
+                    mental: getMentalValues(),
+                    coach_tech: coachTechVals,
+                    coach_mental: coachMentalVals
                 }};
-                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
-                const downloadAnchor = document.createElement('a');
-                downloadAnchor.setAttribute("href", dataStr);
-                downloadAnchor.setAttribute("download", `padel_{current_player['fname']}_{current_player['lname']}`.toLowerCase() + '.json');
-                document.body.appendChild(downloadAnchor);
-                downloadAnchor.click();
-                downloadAnchor.remove();
-            }}
-
-            function generateShareUrl() {{
-                const tVals = techKeys.map(id => document.getElementById(id).value).join(',');
-                const mVals = mentalKeys.map(id => document.getElementById(id).value).join(',');
-                let baseUrl = window.location.href.split('?')[0];
-                if (!baseUrl.startsWith('http')) baseUrl = 'https://padel-dashboard.local/';
-                const url = new URL(baseUrl);
-                url.searchParams.set('fname', "{current_player['fname']}");
-                url.searchParams.set('lname', "{current_player['lname']}");
-                url.searchParams.set('tech', tVals);
-                url.searchParams.set('mental', mVals);
-                return url.toString();
-            }}
-
-            function shareOnWhatsApp() {{
-                const text = `🎾 *Padel Card - {current_player['fname']} {current_player['lname']}*\\n\\nOpen card here:\\n${{generateShareUrl()}}`;
-                window.open(`https://wa.me/?text=${{encodeURIComponent(text)}}`, '_blank');
-            }}
-
-            function saveResultAsImage() {{
-                const cCanvas = document.createElement('canvas');
-                cCanvas.width = 800;
-                cCanvas.height = 700;
-                const ctx = cCanvas.getContext('2d');
-
-                ctx.fillStyle = '#0f172a';
-                ctx.fillRect(0, 0, 800, 700);
-                ctx.fillStyle = '#1e293b';
-                ctx.fillRect(20, 20, 760, 80);
-
-                ctx.font = 'bold 24px -apple-system, sans-serif';
-                ctx.fillStyle = '#38bdf8';
-                ctx.textAlign = 'center';
-                ctx.fillText("{current_player['fname']} {current_player['lname']} - Padel Card", 400, 55);
-
-                ctx.font = '14px -apple-system, sans-serif';
-                ctx.fillStyle = '#94a3b8';
-                ctx.fillText('Side: {current_player["side"]} • Self-Evaluation vs Coach', 400, 80);
-
-                const techCanvas = document.getElementById('techCanvas');
-                ctx.fillStyle = '#1e293b';
-                ctx.fillRect(20, 110, 370, 360);
-                ctx.drawImage(techCanvas, 30, 150, 350, 300);
-
-                const mentalCanvas = document.getElementById('mentalCanvas');
-                ctx.fillStyle = '#1e293b';
-                ctx.fillRect(410, 110, 370, 360);
-                ctx.drawImage(mentalCanvas, 420, 150, 350, 300);
-
-                const dataUrl = cCanvas.toDataURL('image/png');
-                const link = document.createElement('a');
-                link.download = `Padel_Card_{current_player['fname']}.png`;
-                
-                document.getElementById('modalTitle').innerText = '🖼️ Image Generated!';
-                document.getElementById('modalContent').innerHTML = `
-                    <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0;">Press and hold on the image to save it:</p>
-                    <img src="${{dataUrl}}" alt="Padel Card">
-                    <br>
-                    <a href="${{dataUrl}}" download="${{link.download}}" style="display:inline-block; padding:10px 16px; background:var(--accent-purple); color:#fff; text-decoration:none; font-weight:bold; border-radius:8px; margin-top:6px;">⬇️ Download Image</a>
-                `;
-                document.getElementById('mainModal').style.display = 'flex';
-            }}
-
-            async function shareOrCopyLink() {{
-                const shareUrl = generateShareUrl();
-                if (navigator.clipboard && window.isSecureContext) {{
-                    navigator.clipboard.writeText(shareUrl).then(showToast);
-                }} else {{
-                    document.getElementById('modalTitle').innerText = '📋 Copy your link';
-                    document.getElementById('modalContent').innerHTML = `
-                        <p style="font-size:0.85rem; color:var(--text-muted)">Select and copy the link:</p>
-                        <input type="text" value="${{shareUrl}}" readonly onclick="this.select()">
-                    `;
-                    document.getElementById('mainModal').style.display = 'flex';
-                }}
-            }}
-
-            function showToast() {{
-                const toast = document.getElementById('toastMsg');
-                toast.style.display = 'block';
-                setTimeout(() => {{ toast.style.display = 'none'; }}, 2000);
+                const blob = new Blob([JSON.stringify(data, null, 2)], {{type: 'application/json'}});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = "{current_player['fname']}_{current_player['lname']}_performance.json";
+                a.click();
             }}
 
             function closeModal() {{
                 document.getElementById('mainModal').style.display = 'none';
             }}
-
-            window.addEventListener('resize', renderAll);
-            window.addEventListener('load', () => {{
-                try {{
-                    const saved = localStorage.getItem('padel_dashboard_{current_player["fname"]}');
-                    if (saved) {{
-                        const parsed = JSON.parse(saved);
-                        if (parsed.tech) techKeys.forEach((id, i) => {{ if (parsed.tech[i]) document.getElementById(id).value = parsed.tech[i]; }});
-                        if (parsed.mental) mentalKeys.forEach((id, i) => {{ if (parsed.mental[i]) document.getElementById(id).value = parsed.mental[i]; }});
-                    }}
-                }} catch(e){{}}
-                renderAll();
-            }});
         </script>
     </body>
     </html>
     """
+
     components.html(html_code, height=1350, scrolling=True)
 
-# --- PROTECTED COACH AREA ---
-elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coach:
-    if st.button("🏠 Back to Home"):
+    if st.button("⬅️ Back to Home"):
+        st.session_state.authenticated_player = None
         st.session_state.nav_mode = "Home"
         st.rerun()
-
-    st.title("📋 Padel Coach - Management & Analysis Hub")
-    st.markdown("Centralized overview of squad performance, automatic group segmentation, training planning, and strict Left-Right pairings.")
-
-    tab_overview, tab_training, tab_pairing = st.tabs([
-        "📊 Team Overview & Groups", 
-        "🎯 Training Session Planner", 
-        "🤝 Automatic Pairing Generator"
-    ])
-
-    with tab_overview:
-        tech_labels = ['Volley', 'Smash', 'Bandeja', 'Serve', 'Defense', 'Chiquita']
-        mental_labels = ['Chemistry', 'Errors', 'Positioning', 'Focus', 'Stamina', 'Intensity']
-        all_labels = tech_labels + mental_labels
-
-        st.sidebar.markdown("---")
-        st.sidebar.header("📁 Data Management")
-        uploaded_files = st.sidebar.file_uploader(
-            "Upload player JSON files", 
-            type=["json"], 
-            accept_multiple_files=True
-        )
-
-        players_data = []
-
-        if uploaded_files:
-            for file in uploaded_files:
-                try:
-                    data = json.load(file)
-                    players_data.append({
-                        "fname": data.get("fname", "Name"),
-                        "lname": data.get("lname", "Lastname"),
-                        "side": data.get("side", "Right"),
-                        "tech": [int(x) for x in data.get("tech", [5]*6)],
-                        "mental": [int(x) for x in data.get("mental", [5]*6)],
-                        "c_tech": [int(x) for x in data.get("c_tech", [5]*6)],
-                        "c_mental": [int(x) for x in data.get("c_mental", [5]*6)]
-                    })
-                except Exception as e:
-                    st.sidebar.error(f"Error in file {file.name}: {e}")
-        else:
-            players_data = squad_players
-
-        total_players = len(players_data)
-        
-        summary_rows = []
-        player_weaknesses = {}
-
-        for p in players_data:
-            full_name = f"{p['fname']} {p['lname']}"
-            ct_vals = p['c_tech']
-            cm_vals = p['c_mental']
-            
-            avg_tech_coach = sum(ct_vals) / len(ct_vals)
-            avg_mental_coach = sum(cm_vals) / len(cm_vals)
-            
-            summary_rows.append({
-                "Player": full_name,
-                "Side": p['side'],
-                "Tech Average": round(avg_tech_coach, 1),
-                "Mental Average": round(avg_mental_coach, 1),
-                "Overall Average": round((avg_tech_coach + avg_mental_coach) / 2, 1)
-            })
-            
-            all_coach_scores = ct_vals + cm_vals
-            combined_skills = list(zip(all_labels, all_coach_scores))
-            combined_skills.sort(key=lambda x: x[1])
-            
-            worst_skills = [skill[0] for skill in combined_skills if skill[1] <= 6]
-            if not worst_skills:
-                worst_skills = [combined_skills[0][0]]
-                
-            player_weaknesses[full_name] = worst_skills
-
-        df_summary = pd.DataFrame(summary_rows)
-        squad_avg_overall = df_summary["Overall Average"].mean()
-
-        kpi1, kpi2, kpi3 = st.columns(3)
-        kpi1.metric(label="👥 Active Roster", value=f"{total_players} Players")
-        kpi2.metric(label="⭐ Squad General Average", value=f"{squad_avg_overall:.1f} / 10")
-        kpi3.metric(label="📁 Data Source", value="Uploaded JSONs" if uploaded_files else "Default Memory Roster")
-
-        st.markdown("---")
-        st.subheader("📊 Team Summary Table")
-        st.dataframe(df_summary, use_container_width=True, hide_index=True)
-
-        st.markdown("---")
-        st.subheader("🎯 Automated Training Groups")
-        st.markdown("Players automatically segmented by shared areas for improvement:")
-
-        skill_to_players = {}
-        for player, skills in player_weaknesses.items():
-            for skill in skills:
-                if skill not in skill_to_players:
-                    skill_to_players[skill] = []
-                skill_to_players[skill].append(player)
-
-        sorted_groups = sorted(skill_to_players.items(), key=lambda x: len(x[1]), reverse=True)
-
-        col1, col2 = st.columns(2)
-        for idx, (skill, members) in enumerate(sorted_groups):
-            target_col = col1 if idx % 2 == 0 else col2
-            with target_col:
-                with st.expander(f"🛠️ Focus on: {skill} ({len(members)} players)"):
-                    for m in members:
-                        st.markdown(f"- **{m}**")
-
-    with tab_training:
-        st.subheader("🎯 Daily Training Session Planner")
-        st.markdown("Select attending players for today's session to instantly generate technical training priorities.")
-
-        tech_labels = ['Volley', 'Smash', 'Bandeja', 'Serve', 'Defense', 'Chiquita']
-
-        player_names = [f"{p['fname']} {p['lname']}" for p in squad_players]
-        present_players_names = st.multiselect("Select attending players for today's training:", player_names, default=player_names[:4], key="training_present")
-
-        if present_players_names:
-            st.markdown("---")
-            st.markdown(f"### 📋 Session Insights for Group ({len(present_players_names)} players)")
-
-            tech_sums = {label: 0 for label in tech_labels}
-            tech_counts = {label: 0 for label in tech_labels}
-
-            present_players_data = [p for p in squad_players if f"{p['fname']} {p['lname']}" in present_players_names]
-
-            for p in present_players_data:
-                for idx, label in enumerate(tech_labels):
-                    tech_sums[label] += p['c_tech'][idx]
-                    tech_counts[label] += 1
-
-            tech_averages = {label: (tech_sums[label] / tech_counts[label]) if tech_counts[label] > 0 else 0 for label in tech_labels}
-            
-            sorted_skills = sorted(tech_averages.items(), key=lambda x: x[1])
-
-            col_a, col_b = st.columns(2)
-
-            with col_a:
-                st.markdown("#### 📉 Technical Skill Averages")
-                df_group_tech = pd.DataFrame(list(sorted_skills), columns=["Technical Skill", "Group Average (Coach)"])
-                df_group_tech["Group Average (Coach)"] = df_group_tech["Group Average (Coach)"].round(1)
-                st.dataframe(df_group_tech, use_container_width=True, hide_index=True)
-
-            with col_b:
-                st.markdown("#### 🔥 Recommended Training Focus")
-                lowest_skill_1, avg_1 = sorted_skills[0]
-                lowest_skill_2, avg_2 = sorted_skills[1]
-
-                st.error(f"**Primary Focus:** `{lowest_skill_1}` (Group Avg: {avg_1:.1f}/10)")
-                st.warning(f"**Secondary Focus:** `{lowest_skill_2}` (Group Avg: {avg_2:.1f}/10)")
-                st.info("💡 **Coach Tip:** Build today's drill exercises around high-repetition feeds targeting these specific technical gaps.")
-        else:
-            st.warning("Please select at least one player to generate the training session focus.")
-
-    with tab_pairing:
-        st.subheader("🤝 Automatic Match Pairing Generator (Left + Right)")
-        st.markdown("Select available players. The system will separate them into **Left** and **Right** players and pair them strictly as one Left + one Right per team.")
-
-        player_names = [f"{p['fname']} {p['lname']} ({p['side']})" for p in squad_players]
-        match_players_strs = st.multiselect("Select available players for pairing:", player_names, default=player_names[:4], key="pairing_present")
-
-        if match_players_strs:
-            left_pool = []
-            right_pool = []
-
-            for s in match_players_strs:
-                parts = s.split(" (")
-                full_name = parts[0]
-                side = parts[1].replace(")", "")
-                
-                p_data = next((pl for pl in squad_players if f"{pl['fname']} {pl['lname']}" == full_name), None)
-                if p_data:
-                    avg_c = (sum(p_data['c_tech']) + sum(p_data['c_mental'])) / 12
-                    item = {"name": full_name, "score": avg_c}
-                    if side == "Left":
-                        left_pool.append(item)
-                    else:
-                        right_pool.append(item)
-
-            left_pool.sort(key=lambda x: x["score"], reverse=True)
-            right_pool.sort(key=lambda x: x["score"], reverse=True)
-
-            num_pairs = min(len(left_pool), len(right_pool))
-            pairs = []
-
-            for i in range(num_pairs):
-                p_left = left_pool[i]
-                p_right = right_pool[i]
-                team_avg = (p_left["score"] + p_right["score"]) / 2
-                pairs.append((p_left["name"], p_right["name"], team_avg))
-
-            st.markdown("---")
-            st.markdown(f"### 🎾 Valid Teams Generated ({num_pairs} pairs with 1 Left & 1 Right)")
-
-            if pairs:
-                col_t1, col_t2 = st.columns(2)
-                for idx, (pl_left, pl_right, team_score) in enumerate(pairs):
-                    target_col = col_t1 if idx % 2 == 0 else col_t2
-                    with target_col:
-                        st.success(f"**Team {idx + 1} (Combined Avg: {team_score:.1f}/10)**\n\n- ⬅️ **Left:** {pl_left}\n- ➡️ **Right:** {pl_right}")
-
-            unpaired_left = left_pool[num_pairs:]
-            unpaired_right = right_pool[num_pairs:]
-
-            if unpaired_left or unpaired_right:
-                st.warning("⚠️ **Unpaired Players (Imbalance between Left and Right count):**")
-                for u in unpaired_left:
-                    st.markdown(f"- ⬅️ {u['name']} (Left)")
-                for u in unpaired_right:
-                    st.markdown(f"- ➡️ {u['name']} (Right)")
-        else:
-            st.warning("Please select available players to generate balanced Left/Right pairings.")
