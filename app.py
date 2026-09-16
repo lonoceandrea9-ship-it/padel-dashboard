@@ -8,7 +8,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# HTML, CSS e JavaScript completi della tua dashboard incorporati in modo sicuro
+# HTML, CSS e JavaScript completi con la sezione di Confronto Allenatore
 html_code = """<!DOCTYPE html>
 <html lang="it">
 <head>
@@ -95,6 +95,7 @@ html_code = """<!DOCTYPE html>
         .btn-whatsapp { background-color: #25d366; color: #fff; }
         .btn-save-img { background-color: var(--accent-purple); color: #fff; }
         .btn-share-link { background-color: var(--accent-blue); color: #0f172a; }
+        .btn-coach { background-color: #f59e0b; color: #0f172a; }
 
         .charts-grid {
             display: grid;
@@ -103,6 +104,7 @@ html_code = """<!DOCTYPE html>
         }
         .tech-title { color: var(--accent-blue); }
         .mental-title { color: var(--accent-purple); }
+        .coach-title { color: #f59e0b; }
         
         .chart-container {
             position: relative;
@@ -139,7 +141,24 @@ html_code = """<!DOCTYPE html>
             accent-color: var(--accent-blue);
         }
         .control-item.purple input[type="range"] { accent-color: var(--accent-purple); }
+        .control-item.amber input[type="range"] { accent-color: #f59e0b; }
         .control-item .val-badge { font-weight: bold; min-width: 20px; text-align: right; }
+
+        .diff-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 0.85rem;
+        }
+        .diff-table th, .diff-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .diff-table th { color: var(--text-muted); }
+        .badge-pos { color: #22c55e; font-weight: bold; }
+        .badge-neg { color: #ef4444; font-weight: bold; }
+        .badge-eq { color: var(--text-muted); }
 
         .modal-overlay {
             display: none;
@@ -256,9 +275,9 @@ html_code = """<!DOCTYPE html>
             </div>
         </div>
 
-        <!-- CONTROLLI -->
+        <!-- CONTROLLI MIEI VALORI -->
         <div class="card">
-            <h2>Pannello Controllo Valori</h2>
+            <h2>I Miei Valori (Autovalutazione)</h2>
             <div class="controls-grid">
                 <div class="control-group">
                     <h3 class="tech-title" style="margin:0 0 4px 0; font-size:0.95rem;">Tecnica</h3>
@@ -280,9 +299,54 @@ html_code = """<!DOCTYPE html>
                 </div>
             </div>
         </div>
+
+        <!-- NUOVA SEZIONE: CONFRONTO ALLENATORE -->
+        <div class="card">
+            <h2 class="coach-title">📋 Valutazione Allenatore & Confronto</h2>
+            <p style="font-size:0.85rem; color:var(--text-muted); text-align:center; margin-top:0;">Inserisci i voti dati dal tuo allenatore per confrontarli con i tuoi.</p>
+            
+            <div class="controls-grid">
+                <div class="control-group">
+                    <h3 class="coach-title" style="margin:0 0 4px 0; font-size:0.95rem;">Tecnica (Mister)</h3>
+                    <div class="control-item amber"><label>Volea (Mister)</label><input type="range" id="c_volley" min="1" max="10" value="8" oninput="onDataChange()"><span id="c_volley-val" class="val-badge">8</span></div>
+                    <div class="control-item amber"><label>Smash (Mister)</label><input type="range" id="c_smash" min="1" max="10" value="7" oninput="onDataChange()"><span id="c_smash-val" class="val-badge">7</span></div>
+                    <div class="control-item amber"><label>Bandeja (Mister)</label><input type="range" id="c_bandeja" min="1" max="10" value="8" oninput="onDataChange()"><span id="c_bandeja-val" class="val-badge">8</span></div>
+                    <div class="control-item amber"><label>Servizio (Mister)</label><input type="range" id="c_serve" min="1" max="10" value="7" oninput="onDataChange()"><span id="c_serve-val" class="val-badge">7</span></div>
+                    <div class="control-item amber"><label>Difesa (Mister)</label><input type="range" id="c_defense" min="1" max="10" value="9" oninput="onDataChange()"><span id="c_defense-val" class="val-badge">9</span></div>
+                    <div class="control-item amber"><label>Chiquita (Mister)</label><input type="range" id="c_chiquita" min="1" max="10" value="6" oninput="onDataChange()"><span id="c_chiquita-val" class="val-badge">6</span></div>
+                </div>
+                <div class="control-group">
+                    <h3 class="coach-title" style="margin:0 0 4px 0; font-size:0.95rem;">Tattica & Mental (Mister)</h3>
+                    <div class="control-item amber"><label>Intesa (Mister)</label><input type="range" id="c_chemistry" min="1" max="10" value="9" oninput="onDataChange()"><span id="c_chemistry-val" class="val-badge">9</span></div>
+                    <div class="control-item amber"><label>Errori (Mister)</label><input type="range" id="c_errorManagement" min="1" max="10" value="7" oninput="onDataChange()"><span id="c_errorManagement-val" class="val-badge">7</span></div>
+                    <div class="control-item amber"><label>Posizione (Mister)</label><input type="range" id="c_positioning" min="1" max="10" value="8" oninput="onDataChange()"><span id="c_positioning-val" class="val-badge">8</span></div>
+                    <div class="control-item amber"><label>Focus (Mister)</label><input type="range" id="c_focus" min="1" max="10" value="8" oninput="onDataChange()"><span id="c_focus-val" class="val-badge">8</span></div>
+                    <div class="control-item amber"><label>Resistenza (Mister)</label><input type="range" id="c_stamina" min="1" max="10" value="9" oninput="onDataChange()"><span id="c_stamina-val" class="val-badge">9</span></div>
+                    <div class="control-item amber"><label>Intensità (Mister)</label><input type="range" id="c_intensity" min="1" max="10" value="7" oninput="onDataChange()"><span id="c_intensity-val" class="val-badge">7</span></div>
+                </div>
+            </div>
+
+            <!-- Tabella delle Differenze -->
+            <h3 style="font-size:0.95rem; margin-top:20px; text-align:center; color:var(--text-main);">📊 Tabella Differenze (Tu vs Allenatore)</h3>
+            <div style="overflow-x:auto;">
+                <table class="diff-table">
+                    <thead>
+                        <tr>
+                            <th>Abilità</th>
+                            <th>Tuo Voto</th>
+                            <th>Voto Mister</th>
+                            <th>Delta (Diff.)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="diffTableBody">
+                        <!-- Popolato dinamicamente da JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
-    <!-- MODALE ANTEPRIMA IMMAGINE / LINK -->
+    <!-- MODALE -->
     <div class="modal-overlay" id="mainModal">
         <div class="modal">
             <h3 id="modalTitle" style="margin-top:0">Scheda Generata</h3>
@@ -392,6 +456,38 @@ html_code = """<!DOCTYPE html>
             }
         }
 
+        function updateDiffTable() {
+            const tbody = document.getElementById('diffTableBody');
+            tbody.innerHTML = '';
+            
+            const allKeys = [...techKeys, ...mentalKeys];
+            const allLabels = [...techLabels, ...mentalLabels];
+
+            allKeys.forEach((key, index) => {
+                const myVal = parseInt(document.getElementById(key).value);
+                const coachVal = parseInt(document.getElementById('c_' + key).value);
+                const diff = myVal - coachVal;
+                
+                let diffHtml = '';
+                if (diff > 0) {
+                    diffHtml = `<span class="badge-pos">+${diff} (Tu ˃ Mister)</span>`;
+                } else if (diff < 0) {
+                    diffHtml = `<span class="badge-neg">${diff} (Tu ˂ Mister)</span>`;
+                } else {
+                    diffHtml = `<span class="badge-eq">= (Perfetto)</span>`;
+                }
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${allLabels[index]}</td>
+                    <td><b>${myVal}</b></td>
+                    <td><b>${coachVal}</b></td>
+                    <td>${diffHtml}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
         function renderAll() {
             const tVals = techKeys.map(id => parseInt(document.getElementById(id).value));
             const mVals = mentalKeys.map(id => parseInt(document.getElementById(id).value));
@@ -399,8 +495,13 @@ html_code = """<!DOCTYPE html>
             techKeys.forEach((id, i) => document.getElementById(id + '-val').innerText = tVals[i]);
             mentalKeys.forEach((id, i) => document.getElementById(id + '-val').innerText = mVals[i]);
 
+            techKeys.forEach(id => document.getElementById('c_' + id + '-val').innerText = document.getElementById('c_' + id).value);
+            mentalKeys.forEach(id => document.getElementById('c_' + id + '-val').innerText = document.getElementById('c_' + id).value);
+
             drawRadarChart('techCanvas', techLabels, tVals, '#38bdf8', 'rgba(56, 189, 248, 0.3)');
             drawRadarChart('mentalCanvas', mentalLabels, mVals, '#a855f7', 'rgba(168, 85, 247, 0.3)');
+
+            updateDiffTable();
 
             const fname = document.getElementById('firstName').value.trim();
             const lname = document.getElementById('lastName').value.trim();
@@ -418,9 +519,11 @@ html_code = """<!DOCTYPE html>
                 fname: document.getElementById('firstName').value,
                 lname: document.getElementById('lastName').value,
                 tech: techKeys.map(id => document.getElementById(id).value),
-                mental: mentalKeys.map(id => document.getElementById(id).value)
+                mental: mentalKeys.map(id => document.getElementById(id).value),
+                c_tech: techKeys.map(id => document.getElementById('c_' + id).value),
+                c_mental: mentalKeys.map(id => document.getElementById('c_' + id).value)
             };
-            try { localStorage.setItem('padel_dashboard_data', JSON.stringify(data)); } catch(e){}
+            try { localStorage.setItem('padel_dashboard_data_coach', JSON.stringify(data)); } catch(e){}
         }
 
         function generateShareUrl() {
@@ -428,6 +531,8 @@ html_code = """<!DOCTYPE html>
             const lname = document.getElementById('lastName').value;
             const tVals = techKeys.map(id => document.getElementById(id).value).join(',');
             const mVals = mentalKeys.map(id => document.getElementById(id).value).join(',');
+            const cTech = techKeys.map(id => document.getElementById('c_' + id).value).join(',');
+            const cMental = mentalKeys.map(id => document.getElementById('c_' + id).value).join(',');
 
             let baseUrl = window.location.href.split('?')[0];
             if (!baseUrl.startsWith('http')) {
@@ -439,6 +544,8 @@ html_code = """<!DOCTYPE html>
             if (lname) url.searchParams.set('lname', lname);
             url.searchParams.set('tech', tVals);
             url.searchParams.set('mental', mVals);
+            url.searchParams.set('ctech', cTech);
+            url.searchParams.set('cmental', cMental);
             return url.toString();
         }
 
@@ -454,7 +561,7 @@ html_code = """<!DOCTYPE html>
             const avgMental = (mVals.reduce((a,b)=>a+b,0) / mVals.length).toFixed(1);
             
             const shareUrl = generateShareUrl();
-            const text = `🎾 *Scheda Valutazione Padel*\\n👤 *Giocatore:* ${name}\\n\\n⚡ *Media Tecnica:* ${avgTech}/10\\n🧠 *Media Tattica/Mental:* ${avgMental}/10\\n\\nApri la scheda completa qui:\\n${shareUrl}`;
+            const text = `🎾 *Scheda Valutazione & Mister*\\n👤 *Giocatore:* ${name}\\n\\n⚡ *Media Tecnica:* ${avgTech}/10\\n🧠 *Media Tattica/Mental:* ${avgMental}/10\\n\\nApri scheda e confronto qui:\\n${shareUrl}`;
             
             const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
             window.open(waUrl, '_blank');
@@ -485,7 +592,7 @@ html_code = """<!DOCTYPE html>
 
             ctx.font = '14px -apple-system, sans-serif';
             ctx.fillStyle = '#94a3b8';
-            ctx.fillText('Valutazione Prestazionale Personalizzata', 400, 80);
+            ctx.fillText('Confronto Autovalutazione vs Allenatore', 400, 80);
 
             const techCanvas = document.getElementById('techCanvas');
             ctx.fillStyle = '#1e293b';
@@ -507,46 +614,14 @@ html_code = """<!DOCTYPE html>
             ctx.fillText('Atteggiamento & Tattica', 595, 140);
             ctx.drawImage(mentalCanvas, 420, 150, 350, 300);
 
-            ctx.fillStyle = '#1e293b';
-            ctx.fillRect(20, 480, 760, 190);
-            ctx.strokeRect(20, 480, 760, 190);
-
-            ctx.font = 'bold 14px -apple-system, sans-serif';
-            ctx.textAlign = 'left';
-            
-            ctx.fillStyle = '#38bdf8';
-            ctx.fillText('TECNICA:', 40, 510);
-            techKeys.forEach((id, idx) => {
-                const val = document.getElementById(id).value;
-                const label = techLabels[idx];
-                ctx.fillStyle = '#f8fafc';
-                ctx.font = '13px -apple-system, sans-serif';
-                const col = idx < 3 ? 0 : 1;
-                const row = idx % 3;
-                ctx.fillText(`${label}: ${val}/10`, 40 + col * 170, 535 + row * 24);
-            });
-
-            ctx.fillStyle = '#a855f7';
-            ctx.font = 'bold 14px -apple-system, sans-serif';
-            ctx.fillText('TATTICA & MENTAL:', 430, 510);
-            mentalKeys.forEach((id, idx) => {
-                const val = document.getElementById(id).value;
-                const label = mentalLabels[idx];
-                ctx.fillStyle = '#f8fafc';
-                ctx.font = '13px -apple-system, sans-serif';
-                const col = idx < 3 ? 0 : 1;
-                const row = idx % 3;
-                ctx.fillText(`${label}: ${val}/10`, 430 + col * 170, 535 + row * 24);
-            });
-
             const dataUrl = cCanvas.toDataURL('image/png');
             const link = document.createElement('a');
-            link.download = `Padel_Performance_${fname}_${lname}.png`.replace(/\\s+/g, '_');
+            link.download = `Padel_Confronto_${fname}_${lname}.png`.replace(/\\s+/g, '_');
             link.href = dataUrl;
             
             document.getElementById('modalTitle').innerText = '🖼️ Immagine Generata!';
             document.getElementById('modalContent').innerHTML = `
-                <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0;">Tieni premuto sull'immagine per salvarla nelle tue foto o scaricarla:</p>
+                <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0;">Tieni premuto sull'immagine per salvarla:</p>
                 <img src="${dataUrl}" alt="Scheda Padel">
                 <br>
                 <a href="${dataUrl}" download="${link.download}" style="display:inline-block; padding:10px 16px; background:var(--accent-purple); color:#fff; text-decoration:none; font-weight:bold; border-radius:8px; margin-top:6px;">⬇️ Scarica Immagine</a>
@@ -562,7 +637,7 @@ html_code = """<!DOCTYPE html>
             } else {
                 document.getElementById('modalTitle').innerText = '📋 Copia il tuo link';
                 document.getElementById('modalContent').innerHTML = `
-                    <p style="font-size:0.85rem; color:var(--text-muted)">Seleziona e copia il link qui sotto:</p>
+                    <p style="font-size:0.85rem; color:var(--text-muted)">Seleziona e copia il link:</p>
                     <input type="text" value="${shareUrl}" readonly onclick="this.select()">
                 `;
                 document.getElementById('mainModal').style.display = 'flex';
@@ -594,15 +669,25 @@ html_code = """<!DOCTYPE html>
                     const m = params.get('mental').split(',');
                     mentalKeys.forEach((id, i) => { if (m[i]) document.getElementById(id).value = m[i]; });
                 }
+                if (params.has('ctech')) {
+                    const ct = params.get('ctech').split(',');
+                    techKeys.forEach((id, i) => { if (ct[i]) document.getElementById('c_' + id).value = ct[i]; });
+                }
+                if (params.has('cmental')) {
+                    const cm = params.get('cmental').split(',');
+                    mentalKeys.forEach((id, i) => { if (cm[i]) document.getElementById('c_' + id).value = cm[i]; });
+                }
             } else {
                 try {
-                    const saved = localStorage.getItem('padel_dashboard_data');
+                    const saved = localStorage.getItem('padel_dashboard_data_coach');
                     if (saved) {
                         const parsed = JSON.parse(saved);
                         if (parsed.fname) document.getElementById('firstName').value = parsed.fname;
                         if (parsed.lname) document.getElementById('lastName').value = parsed.lname;
                         if (parsed.tech) techKeys.forEach((id, i) => { if (parsed.tech[i]) document.getElementById(id).value = parsed.tech[i]; });
                         if (parsed.mental) mentalKeys.forEach((id, i) => { if (parsed.mental[i]) document.getElementById(id).value = parsed.mental[i]; });
+                        if (parsed.c_tech) techKeys.forEach((id, i) => { if (parsed.c_tech[i]) document.getElementById('c_' + id).value = parsed.c_tech[i]; });
+                        if (parsed.c_mental) mentalKeys.forEach((id, i) => { if (parsed.c_mental[i]) document.getElementById('c_' + id).value = parsed.c_mental[i]; });
                     }
                 } catch(e){}
             }
@@ -617,5 +702,5 @@ html_code = """<!DOCTYPE html>
 </html>
 """
 
-# Renderizza l'intera app all'interno di Streamlit con altezza ottimizzata e scroll abilitato
-components.html(html_code, height=1150, scrolling=True)
+# Renderizza l'app all'interno di Streamlit
+components.html(html_code, height=1400, scrolling=True)
