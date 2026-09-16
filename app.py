@@ -8,7 +8,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# HTML, CSS e JavaScript completi con la sezione di Confronto Allenatore
+# HTML, CSS e JavaScript completi con l'analisi dei miglioramenti
 html_code = """<!DOCTYPE html>
 <html lang="it">
 <head>
@@ -95,7 +95,6 @@ html_code = """<!DOCTYPE html>
         .btn-whatsapp { background-color: #25d366; color: #fff; }
         .btn-save-img { background-color: var(--accent-purple); color: #fff; }
         .btn-share-link { background-color: var(--accent-blue); color: #0f172a; }
-        .btn-coach { background-color: #f59e0b; color: #0f172a; }
 
         .charts-grid {
             display: grid;
@@ -159,6 +158,31 @@ html_code = """<!DOCTYPE html>
         .badge-pos { color: #22c55e; font-weight: bold; }
         .badge-neg { color: #ef4444; font-weight: bold; }
         .badge-eq { color: var(--text-muted); }
+
+        .insights-box {
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: 10px;
+            padding: 14px;
+            margin-top: 16px;
+        }
+        .insights-box h3 {
+            color: #f59e0b;
+            margin-top: 0;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .insights-list {
+            margin: 0;
+            padding-left: 20px;
+            font-size: 0.85rem;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
 
         .modal-overlay {
             display: none;
@@ -300,10 +324,10 @@ html_code = """<!DOCTYPE html>
             </div>
         </div>
 
-        <!-- NUOVA SEZIONE: CONFRONTO ALLENATORE -->
+        <!-- SEZIONE CONFRONTO ALLENATORE & ANALISI -->
         <div class="card">
             <h2 class="coach-title">📋 Valutazione Allenatore & Confronto</h2>
-            <p style="font-size:0.85rem; color:var(--text-muted); text-align:center; margin-top:0;">Inserisci i voti dati dal tuo allenatore per confrontarli con i tuoi.</p>
+            <p style="font-size:0.85rem; color:var(--text-muted); text-align:center; margin-top:0;">Inserisci i voti dati dal tuo allenatore per analizzare i margini di crescita.</p>
             
             <div class="controls-grid">
                 <div class="control-group">
@@ -342,6 +366,14 @@ html_code = """<!DOCTYPE html>
                         <!-- Popolato dinamicamente da JS -->
                     </tbody>
                 </table>
+            </div>
+
+            <!-- RIASSUNTO MARGINI DI MIGLIORAMENTO -->
+            <div class="insights-box">
+                <h3>🎯 Focus sui Margini di Miglioramento (Feedback Mister)</h3>
+                <ul class="insights-list" id="insightsList">
+                    <!-- Popolato dinamicamente da JS -->
+                </ul>
             </div>
         </div>
     </div>
@@ -456,23 +488,28 @@ html_code = """<!DOCTYPE html>
             }
         }
 
-        function updateDiffTable() {
+        function updateAnalysisAndTable() {
             const tbody = document.getElementById('diffTableBody');
+            const insightsList = document.getElementById('insightsList');
             tbody.innerHTML = '';
+            insightsList.innerHTML = '';
             
             const allKeys = [...techKeys, ...mentalKeys];
             const allLabels = [...techLabels, ...mentalLabels];
 
+            let gaps = [];
+
             allKeys.forEach((key, index) => {
                 const myVal = parseInt(document.getElementById(key).value);
                 const coachVal = parseInt(document.getElementById('c_' + key).value);
-                const diff = myVal - coachVal;
+                const diff = myVal - coachVal; // Positivo = ti valuti più alto del mister; Negativo = il mister ti vede più basso
                 
                 let diffHtml = '';
                 if (diff > 0) {
                     diffHtml = `<span class="badge-pos">+${diff} (Tu ˃ Mister)</span>`;
                 } else if (diff < 0) {
                     diffHtml = `<span class="badge-neg">${diff} (Tu ˂ Mister)</span>`;
+                    gaps.push({ label: allLabels[index], myVal, coachVal, diff });
                 } else {
                     diffHtml = `<span class="badge-eq">= (Perfetto)</span>`;
                 }
@@ -486,6 +523,21 @@ html_code = """<!DOCTYPE html>
                 `;
                 tbody.appendChild(row);
             });
+
+            // Generazione dinamica dei suggerimenti basata sui gap negativi (dove il mister vede margini di lavoro)
+            if (gaps.length === 0) {
+                const li = document.createElement('li');
+                li.innerHTML = `<b>Ottimo lavoro!</b> Non ci sono aree in cui l'allenatore ti valuta al di sotto delle tue aspettative. Continua così!`;
+                insightsList.appendChild(li);
+            } else {
+                // Ordina per differenza maggiore (i gap più ampi)
+                gaps.sort((a, b) => a.diff - b.diff);
+                gaps.forEach(item => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<b>${item.label} (Tu ${item.myVal} vs Mister ${item.coachVal}):</b> L'allenatore individua un margine di crescita importante. È consigliabile dedicare sessioni di allenamento mirate su questo aspetto per colmare la distanza.`;
+                    insightsList.appendChild(li);
+                });
+            }
         }
 
         function renderAll() {
@@ -501,7 +553,7 @@ html_code = """<!DOCTYPE html>
             drawRadarChart('techCanvas', techLabels, tVals, '#38bdf8', 'rgba(56, 189, 248, 0.3)');
             drawRadarChart('mentalCanvas', mentalLabels, mVals, '#a855f7', 'rgba(168, 85, 247, 0.3)');
 
-            updateDiffTable();
+            updateAnalysisAndTable();
 
             const fname = document.getElementById('firstName').value.trim();
             const lname = document.getElementById('lastName').value.trim();
@@ -687,7 +739,7 @@ html_code = """<!DOCTYPE html>
                         if (parsed.tech) techKeys.forEach((id, i) => { if (parsed.tech[i]) document.getElementById(id).value = parsed.tech[i]; });
                         if (parsed.mental) mentalKeys.forEach((id, i) => { if (parsed.mental[i]) document.getElementById(id).value = parsed.mental[i]; });
                         if (parsed.c_tech) techKeys.forEach((id, i) => { if (parsed.c_tech[i]) document.getElementById('c_' + id).value = parsed.c_tech[i]; });
-                        if (parsed.c_mental) mentalKeys.forEach((id, i) => { if (parsed.c_mental[i]) document.getElementById('c_' + id).value = parsed.c_mental[i]; });
+                        if (parsed.c_mental) techKeys.forEach((id, i) => { if (parsed.c_mental[i]) document.getElementById('c_' + id).value = parsed.c_mental[i]; });
                     }
                 } catch(e){}
             }
