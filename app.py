@@ -38,7 +38,7 @@ squad_players = [
 ]
 
 # Sidebar for navigation and security
-st.sidebar.title("🎾 Padel Hub - Access")
+st.sidebar.title("🎾 Padel Hub")
 modalita = st.sidebar.radio(
     "Select Area:",
     ["👤 Player Area", "📋 Coach Area"]
@@ -52,7 +52,7 @@ if modalita == "📋 Coach Area":
     
     if not st.session_state.authenticated_coach:
         pwd_input = st.sidebar.text_input("Enter Coach Password", type="password")
-        if st.sidebar.button("Log In"):
+        if st.sidebar.button("Log In", use_container_width=True):
             if pwd_input == COACH_PASSWORD:
                 st.session_state.authenticated_coach = True
                 st.rerun()
@@ -60,17 +60,16 @@ if modalita == "📋 Coach Area":
                 st.sidebar.error("Incorrect password!")
     else:
         st.sidebar.success("✅ Access Granted (Coach)")
-        if st.sidebar.button("🔒 Log Out"):
+        if st.sidebar.button("🔒 Log Out", use_container_width=True):
             st.session_state.authenticated_coach = False
             st.rerun()
 
 # ACCESS CONTROL: If Coach area is selected but not authenticated
 if modalita == "📋 Coach Area" and not st.session_state.authenticated_coach:
     st.title("🔒 Restricted Area for Coach")
-    st.warning("Please enter the correct password in the sidebar on the left to view the team overview and training groups.")
+    st.info("Please enter the correct password in the sidebar on the left to unlock management tools.")
 
 elif modalita == "👤 Player Area":
-    # Subtabs for Player Area (My Evaluation & Player Directory)
     tab_compila, tab_directory = st.tabs(["✏️ My Evaluation", "👥 Player Directory"])
     
     with tab_compila:
@@ -841,20 +840,21 @@ elif modalita == "👤 Player Area":
             st.info(f"📊 **Overall Self-Evaluation Average:** {round(avg_my, 1)} / 10  |  📊 **Overall Coach Average:** {round(avg_coach, 1)} / 10")
 
 elif modalita == "📋 Coach Area" and st.session_state.authenticated_coach:
-    st.title("📋 Padel Coach - Management & Analysis")
-    st.markdown("Centralized overview of player evaluations, group creation, and daily training session planning.")
+    st.title("📋 Padel Coach - Management & Analysis Hub")
+    st.markdown("Centralized overview of squad performance, automatic group segmentation, and targeted training planning.")
 
-    # Creazione dei Tab all'interno dell'Area Coach
-    tab_overview, tab_training = st.tabs(["📊 Team Summary & Groups", "🎯 Training Session Planner"])
+    # Creazione di sezioni e tab graficamente più ordinate e user-friendly
+    tab_overview, tab_training = st.tabs(["📊 Team Overview & Groups", "🎯 Training Session Planner"])
 
     with tab_overview:
         tech_labels = ['Volley', 'Smash', 'Bandeja', 'Serve', 'Defense', 'Chiquita']
         mental_labels = ['Chemistry', 'Errors', 'Positioning', 'Focus', 'Stamina', 'Intensity']
         all_labels = tech_labels + mental_labels
 
-        st.sidebar.header("📁 Upload Player Data")
+        st.sidebar.markdown("---")
+        st.sidebar.header("📁 Data Management")
         uploaded_files = st.sidebar.file_uploader(
-            "Upload JSON files exported by players", 
+            "Upload player JSON files", 
             type=["json"], 
             accept_multiple_files=True
         )
@@ -877,8 +877,10 @@ elif modalita == "📋 Coach Area" and st.session_state.authenticated_coach:
                     st.sidebar.error(f"Error in file {file.name}: {e}")
         else:
             players_data = squad_players
-            st.sidebar.info("💡 You are viewing the complete squad loaded in memory. Players can send you JSON files to update data.")
 
+        # KPI Cards superiori per colpo d'occhio immediato
+        total_players = len(players_data)
+        
         summary_rows = []
         player_weaknesses = {}
 
@@ -908,12 +910,21 @@ elif modalita == "📋 Coach Area" and st.session_state.authenticated_coach:
             player_weaknesses[full_name] = worst_skills
 
         df_summary = pd.DataFrame(summary_rows)
+        squad_avg_overall = df_summary["Overall Average"].mean()
 
+        # Visualizzazione KPI Pulite
+        kpi1, kpi2, kpi3 = st.columns(3)
+        kpi1.metric(label="👥 Active Roster", value=f"{total_players} Players")
+        kpi2.metric(label="⭐ Squad General Average", value=f"{squad_avg_overall:.1f} / 10")
+        kpi3.metric(label="📁 Data Source", value="Uploaded JSONs" if uploaded_files else "Default Memory Roster")
+
+        st.markdown("---")
         st.subheader("📊 Team Summary Table")
-        st.dataframe(df_summary, use_container_width=True)
+        st.dataframe(df_summary, use_container_width=True, hide_index=True)
 
-        st.subheader("🎯 Recommended Training Groups for Targeted Sessions")
-        st.markdown("The app has automatically grouped players sharing the same areas for improvement:")
+        st.markdown("---")
+        st.subheader("🎯 Automated Training Groups")
+        st.markdown("Players automatically segmented by shared areas for improvement:")
 
         skill_to_players = {}
         for player, skills in player_weaknesses.items():
@@ -928,11 +939,13 @@ elif modalita == "📋 Coach Area" and st.session_state.authenticated_coach:
         for idx, (skill, members) in enumerate(sorted_groups):
             target_col = col1 if idx % 2 == 0 else col2
             with target_col:
-                st.info(f"**🛠️ Focus on: {skill}**\n\nPlayers:\n" + "".join([f"\n* **{m}**" for m in members]))
+                with st.expander(f"🛠️ Focus on: {skill} ({len(members)} players)"):
+                    for m in members:
+                        st.markdown(f"- **{m}**")
 
     with tab_training:
         st.subheader("🎯 Daily Training Session Planner")
-        st.markdown("Select the players attending today's training session. The app will aggregate their technical weaknesses and suggest training focal points.")
+        st.markdown("Select attending players for today's session to instantly generate technical training priorities.")
 
         tech_labels = ['Volley', 'Smash', 'Bandeja', 'Serve', 'Defense', 'Chiquita']
 
@@ -941,7 +954,7 @@ elif modalita == "📋 Coach Area" and st.session_state.authenticated_coach:
 
         if present_players_names:
             st.markdown("---")
-            st.markdown(f"### 📋 Analysis for Today's Group ({len(present_players_names)} players)")
+            st.markdown(f"### 📋 Session Insights for Group ({len(present_players_names)} players)")
 
             tech_sums = {label: 0 for label in tech_labels}
             tech_counts = {label: 0 for label in tech_labels}
@@ -960,7 +973,7 @@ elif modalita == "📋 Coach Area" and st.session_state.authenticated_coach:
             col_a, col_b = st.columns(2)
 
             with col_a:
-                st.markdown("#### 📉 Technical Skill Averages (Today's Group)")
+                st.markdown("#### 📉 Technical Skill Averages")
                 df_group_tech = pd.DataFrame(list(sorted_skills), columns=["Technical Skill", "Group Average (Coach)"])
                 df_group_tech["Group Average (Coach)"] = df_group_tech["Group Average (Coach)"].round(1)
                 st.dataframe(df_group_tech, use_container_width=True, hide_index=True)
