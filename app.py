@@ -21,7 +21,6 @@
             background-color: var(--bg-primary);
             color: var(--text-main);
             margin: 0;
-            padding: 12px;
             -webkit-tap-highlight-color: transparent;
         }
         header { text-align: center; margin-bottom: 16px; }
