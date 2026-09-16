@@ -1,4 +1,4 @@
-html_content = """<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -550,7 +550,7 @@ html_content = """<!DOCTYPE html>
             link.download = `Padel_Performance_${fname}_${lname}.png`.replace(/\s+/g, '_');
             link.href = dataUrl;
             
-            // Mostra Modale con Immagine per salvataggio facile su mobile (tieni premuto per salvare in foto)
+            // Mostra Modale con Immagine per salvataggio facile su mobile
             document.getElementById('modalTitle').innerText = '🖼️ Immagine Generata!';
             document.getElementById('modalContent').innerHTML = `
                 <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0;">Tieni premuto sull'immagine per salvarla nelle tue foto o scaricarla:</p>
@@ -622,9 +622,3 @@ html_content = """<!DOCTYPE html>
     </script>
 </body>
 </html>
-"""
-
-with open('padel_dashboard.html', 'w', encoding='utf-8') as f:
-    f.write(html_content)
-
-print("HTML file created successfully.")
