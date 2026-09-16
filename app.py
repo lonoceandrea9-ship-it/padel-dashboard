@@ -70,8 +70,8 @@ if modalita == "📋 Coach Area" and not st.session_state.authenticated_coach:
     st.warning("Please enter the correct password in the sidebar on the left to view the team overview and training groups.")
 
 elif modalita == "👤 Player Area":
-    # Subtabs including the Training Session planner
-    tab_compila, tab_directory, tab_training = st.tabs(["✏️ My Evaluation", "👥 Player Directory", "🎯 Training Session"])
+    # Subtabs for Player Area (My Evaluation & Player Directory)
+    tab_compila, tab_directory = st.tabs(["✏️ My Evaluation", "👥 Player Directory"])
     
     with tab_compila:
         html_code = """<!DOCTYPE html>
@@ -840,6 +840,96 @@ elif modalita == "👤 Player Area":
             
             st.info(f"📊 **Overall Self-Evaluation Average:** {round(avg_my, 1)} / 10  |  📊 **Overall Coach Average:** {round(avg_coach, 1)} / 10")
 
+elif modalita == "📋 Coach Area" and st.session_state.authenticated_coach:
+    st.title("📋 Padel Coach - Management & Analysis")
+    st.markdown("Centralized overview of player evaluations, group creation, and daily training session planning.")
+
+    # Creazione dei Tab all'interno dell'Area Coach
+    tab_overview, tab_training = st.tabs(["📊 Team Summary & Groups", "🎯 Training Session Planner"])
+
+    with tab_overview:
+        tech_labels = ['Volley', 'Smash', 'Bandeja', 'Serve', 'Defense', 'Chiquita']
+        mental_labels = ['Chemistry', 'Errors', 'Positioning', 'Focus', 'Stamina', 'Intensity']
+        all_labels = tech_labels + mental_labels
+
+        st.sidebar.header("📁 Upload Player Data")
+        uploaded_files = st.sidebar.file_uploader(
+            "Upload JSON files exported by players", 
+            type=["json"], 
+            accept_multiple_files=True
+        )
+
+        players_data = []
+
+        if uploaded_files:
+            for file in uploaded_files:
+                try:
+                    data = json.load(file)
+                    players_data.append({
+                        "fname": data.get("fname", "Name"),
+                        "lname": data.get("lname", "Lastname"),
+                        "tech": [int(x) for x in data.get("tech", [5]*6)],
+                        "mental": [int(x) for x in data.get("mental", [5]*6)],
+                        "c_tech": [int(x) for x in data.get("c_tech", [5]*6)],
+                        "c_mental": [int(x) for x in data.get("c_mental", [5]*6)]
+                    })
+                except Exception as e:
+                    st.sidebar.error(f"Error in file {file.name}: {e}")
+        else:
+            players_data = squad_players
+            st.sidebar.info("💡 You are viewing the complete squad loaded in memory. Players can send you JSON files to update data.")
+
+        summary_rows = []
+        player_weaknesses = {}
+
+        for p in players_data:
+            full_name = f"{p['fname']} {p['lname']}"
+            ct_vals = p['c_tech']
+            cm_vals = p['c_mental']
+            
+            avg_tech_coach = sum(ct_vals) / len(ct_vals)
+            avg_mental_coach = sum(cm_vals) / len(cm_vals)
+            
+            summary_rows.append({
+                "Player": full_name,
+                "Tech Average (Coach)": round(avg_tech_coach, 1),
+                "Mental Average (Coach)": round(avg_mental_coach, 1),
+                "Overall Average": round((avg_tech_coach + avg_mental_coach) / 2, 1)
+            })
+            
+            all_coach_scores = ct_vals + cm_vals
+            combined_skills = list(zip(all_labels, all_coach_scores))
+            combined_skills.sort(key=lambda x: x[1])
+            
+            worst_skills = [skill[0] for skill in combined_skills if skill[1] <= 6]
+            if not worst_skills:
+                worst_skills = [combined_skills[0][0]]
+                
+            player_weaknesses[full_name] = worst_skills
+
+        df_summary = pd.DataFrame(summary_rows)
+
+        st.subheader("📊 Team Summary Table")
+        st.dataframe(df_summary, use_container_width=True)
+
+        st.subheader("🎯 Recommended Training Groups for Targeted Sessions")
+        st.markdown("The app has automatically grouped players sharing the same areas for improvement:")
+
+        skill_to_players = {}
+        for player, skills in player_weaknesses.items():
+            for skill in skills:
+                if skill not in skill_to_players:
+                    skill_to_players[skill] = []
+                skill_to_players[skill].append(player)
+
+        sorted_groups = sorted(skill_to_players.items(), key=lambda x: len(x[1]), reverse=True)
+
+        col1, col2 = st.columns(2)
+        for idx, (skill, members) in enumerate(sorted_groups):
+            target_col = col1 if idx % 2 == 0 else col2
+            with target_col:
+                st.info(f"**🛠️ Focus on: {skill}**\n\nPlayers:\n" + "".join([f"\n* **{m}**" for m in members]))
+
     with tab_training:
         st.subheader("🎯 Daily Training Session Planner")
         st.markdown("Select the players attending today's training session. The app will aggregate their technical weaknesses and suggest training focal points.")
@@ -880,95 +970,8 @@ elif modalita == "👤 Player Area":
                 lowest_skill_1, avg_1 = sorted_skills[0]
                 lowest_skill_2, avg_2 = sorted_skills[1]
 
-                # Correzione: stringhe dirette senza st.markdown interno a st.error / st.warning
                 st.error(f"**Primary Focus:** `{lowest_skill_1}` (Group Avg: {avg_1:.1f}/10)")
                 st.warning(f"**Secondary Focus:** `{lowest_skill_2}` (Group Avg: {avg_2:.1f}/10)")
                 st.info("💡 **Coach Tip:** Build today's drill exercises around high-repetition feeds targeting these specific technical gaps.")
         else:
             st.warning("Please select at least one player to generate the training session focus.")
-
-elif modalita == "📋 Coach Area" and st.session_state.authenticated_coach:
-    st.title("📋 Padel Coach - Group Management & Analysis")
-    st.markdown("Centralized overview of player evaluations and automatic generation of targeted training groups.")
-
-    tech_labels = ['Volley', 'Smash', 'Bandeja', 'Serve', 'Defense', 'Chiquita']
-    mental_labels = ['Chemistry', 'Errors', 'Positioning', 'Focus', 'Stamina', 'Intensity']
-    all_labels = tech_labels + mental_labels
-
-    st.sidebar.header("📁 Upload Player Data")
-    uploaded_files = st.sidebar.file_uploader(
-        "Upload JSON files exported by players", 
-        type=["json"], 
-        accept_multiple_files=True
-    )
-
-    players_data = []
-
-    if uploaded_files:
-        for file in uploaded_files:
-            try:
-                data = json.load(file)
-                players_data.append({
-                    "fname": data.get("fname", "Name"),
-                    "lname": data.get("lname", "Lastname"),
-                    "tech": [int(x) for x in data.get("tech", [5]*6)],
-                    "mental": [int(x) for x in data.get("mental", [5]*6)],
-                    "c_tech": [int(x) for x in data.get("c_tech", [5]*6)],
-                    "c_mental": [int(x) for x in data.get("c_mental", [5]*6)]
-                })
-            except Exception as e:
-                st.sidebar.error(f"Error in file {file.name}: {e}")
-    else:
-        players_data = squad_players
-        st.sidebar.info("💡 You are viewing the complete squad loaded in memory. Players can send you JSON files to update data.")
-
-    summary_rows = []
-    player_weaknesses = {}
-
-    for p in players_data:
-        full_name = f"{p['fname']} {p['lname']}"
-        ct_vals = p['c_tech']
-        cm_vals = p['c_mental']
-        
-        avg_tech_coach = sum(ct_vals) / len(ct_vals)
-        avg_mental_coach = sum(cm_vals) / len(cm_vals)
-        
-        summary_rows.append({
-            "Player": full_name,
-            "Tech Average (Coach)": round(avg_tech_coach, 1),
-            "Mental Average (Coach)": round(avg_mental_coach, 1),
-            "Overall Average": round((avg_tech_coach + avg_mental_coach) / 2, 1)
-        })
-        
-        all_coach_scores = ct_vals + cm_vals
-        combined_skills = list(zip(all_labels, all_coach_scores))
-        combined_skills.sort(key=lambda x: x[1])
-        
-        worst_skills = [skill[0] for skill in combined_skills if skill[1] <= 6]
-        if not worst_skills:
-            worst_skills = [combined_skills[0][0]]
-            
-        player_weaknesses[full_name] = worst_skills
-
-    df_summary = pd.DataFrame(summary_rows)
-
-    st.subheader("📊 Team Summary Table")
-    st.dataframe(df_summary, use_container_width=True)
-
-    st.subheader("🎯 Recommended Training Groups for Targeted Sessions")
-    st.markdown("The app has automatically grouped players sharing the same areas for improvement:")
-
-    skill_to_players = {}
-    for player, skills in player_weaknesses.items():
-        for skill in skills:
-            if skill not in skill_to_players:
-                skill_to_players[skill] = []
-            skill_to_players[skill].append(player)
-
-    sorted_groups = sorted(skill_to_players.items(), key=lambda x: len(x[1]), reverse=True)
-
-    col1, col2 = st.columns(2)
-    for idx, (skill, members) in enumerate(sorted_groups):
-        target_col = col1 if idx % 2 == 0 else col2
-        with target_col:
-            st.info(f"**🛠️ Focus on: {skill}**\n\nPlayers:\n" + "".join([f"\n* **{m}**" for m in members]))
