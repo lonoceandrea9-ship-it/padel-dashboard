@@ -1,178 +1,133 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Stile Playtomic</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0fdf4',
-                            500: '#10b981', // Verde sportivo principale (stile Playtomic)
-                            600: '#059669',
-                            700: '#047857',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- Google Fonts: Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+import streamlit as st
+
+# Configurazione della pagina
+st.set_page_config(
+    page_title="Dashboard - Stile Playtomic",
+    page_icon="🎾",
+    layout="wide"
+)
+
+# Applicazione di stili CSS personalizzati per replicare il design pulito e arrotondato (stile Playtomic)
+st.markdown("""
     <style>
-        body { font-family: 'Inter', sans-serif; }
+    /* Import Google Fonts - Inter */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    html, body, [class*="css"] {
+        font-family: 'Inter', sans-serif;
+        background-color: #f9fafb;
+    }
+
+    /* Stile delle card KPI e contenitori */
+    .playtomic-card {
+        background-color: #ffffff;
+        border: 1px solid #f3f4f6;
+        border-radius: 1.5rem;
+        padding: 1.5rem;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        transition: all 0.2s ease-in-out;
+    }
+    
+    .playtomic-card:hover {
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
     </style>
-</head>
-<body class="bg-gray-50 text-gray-900 antialiased min-h-screen flex">
+""", unsafe_allow_html=True)
 
-    <!-- SIDEBAR DI NAVIGAZIONE -->
-    <aside class="w-64 bg-white border-r border-gray-100 hidden md:flex flex-col justify-between p-6">
-        <div>
-            <!-- Logo -->
-            <div class="flex items-center gap-3 mb-10">
-                <div class="w-10 h-10 rounded-2xl bg-brand-500 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-brand-500/30">
-                    P
-                </div>
-                <span class="text-xl font-bold tracking-tight">SportApp</span>
+# SIDEBAR DI NAVIGAZIONE
+with st.sidebar:
+    st.markdown("### 🎾 SportApp")
+    st.write("---")
+    
+    # Utilizziamo testo semplice senza emoji nel codice per evitare errori di sintassi
+    selected_menu = st.radio(
+        "Menu",
+        ["Dashboard", "Prenotazioni", "Community & Match", "Analytics & Storico"]
+    )
+    
+    st.write("---")
+    st.markdown("**Andrea**")
+    st.caption("Pro Member")
+
+# HEADER PRINCIPALE
+col_title, col_btn = st.columns([3, 1])
+with col_title:
+    st.title("Bentornato, Andrea!")
+    st.caption("Ecco una panoramica delle attività e delle metriche di oggi.")
+with col_btn:
+    st.markdown("<br>", unsafe_allow_html=True)
+    if st.button("+ Nuova Prenotazione", type="primary", use_container_width=True):
+        st.toast("Apertura modale prenotazione...")
+
+st.write("")
+
+# SEZIONE KPI CARDS
+col1, col2, col3, col4 = st.columns(4)
+
+with col1:
+    st.markdown("""
+        <div class="playtomic-card">
+            <p style="color: #9ca3af; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Match Totali</p>
+            <div style="display: flex; align-items: baseline; justify-content: space-between; margin-top: 0.5rem;">
+                <h3 style="font-size: 1.875rem; font-weight: 700; margin: 0;">128</h3>
+                <span style="background-color: #ecfdf5; color: #059669; font-size: 0.75rem; font-weight: 600; padding: 0.25rem 0.5rem; border-radius: 9999px;">+12%</span>
             </div>
-
-            <!-- Menu Links -->
-            <nav class="space-y-1">
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-brand-600 bg-brand-50 rounded-2xl transition-all">
-                    📊 Dashboard
-                </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-2xl transition-all">
-                    📅 Prenotazioni
-                </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-2xl transition-all">
-                    👥 Community & Match
-                </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-2xl transition-all">
-                    📈 Analytics & Storico
-                </a>
-            </nav>
         </div>
+    """, unsafe_allow_html=True)
 
-        <!-- Profilo utente in basso -->
-        <div class="pt-4 border-t border-gray-100 flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
-                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" alt="Avatar" class="w-full h-full object-cover">
-            </div>
-            <div>
-                <h4 class="text-sm font-semibold">Andrea</h4>
-                <p class="text-xs text-gray-500">Pro Member</p>
+with col2:
+    st.markdown("""
+        <div class="playtomic-card">
+            <p style="color: #9ca3af; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Ore di Gioco</p>
+            <div style="display: flex; align-items: baseline; justify-content: space-between; margin-top: 0.5rem;">
+                <h3 style="font-size: 1.875rem; font-weight: 700; margin: 0;">96.5</h3>
+                <span style="background-color: #ecfdf5; color: #059669; font-size: 0.75rem; font-weight: 600; padding: 0.25rem 0.5rem; border-radius: 9999px;">+8%</span>
             </div>
         </div>
-    </aside>
+    """, unsafe_allow_html=True)
 
-    <!-- CONTENUTO PRINCIPALE -->
-    <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
-        
-        <!-- Header superiore -->
-        <header class="bg-white border-b border-gray-100 px-8 py-4 flex items-center justify-between sticky top-0 z-10">
-            <div>
-                <h1 class="text-xl font-bold tracking-tight">Bentornato, Andrea! 👋</h1>
-                <p class="text-xs text-gray-500">Ecco una panoramica delle attività e delle metriche di oggi.</p>
+with col3:
+    st.markdown("""
+        <div class="playtomic-card">
+            <p style="color: #9ca3af; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Tasso Vittorie</p>
+            <div style="display: flex; align-items: baseline; justify-content: space-between; margin-top: 0.5rem;">
+                <h3 style="font-size: 1.875rem; font-weight: 700; margin: 0;">64%</h3>
+                <span style="background-color: #fff1f2; color: #e11d48; font-size: 0.75rem; font-weight: 600; padding: 0.25rem 0.5rem; border-radius: 9999px;">-2%</span>
             </div>
-            <div class="flex items-center gap-4">
-                <button class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold rounded-2xl shadow-md shadow-brand-500/20 transition-all">
-                    + Nuova Prenotazione
-                </button>
-            </div>
-        </header>
-
-        <!-- Area dei contenuti -->
-        <div class="p-8 max-w-7xl w-full mx-auto space-y-8">
-
-            <!-- SEZIONE KPI CARDS (Stile Playtomic / Dashboard moderna) -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <!-- Card 1 -->
-                <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all">
-                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Match Totali</p>
-                    <div class="flex items-baseline justify-between mt-2">
-                        <h3 class="text-3xl font-bold">128</h3>
-                        <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">+12%</span>
-                    </div>
-                </div>
-                <!-- Card 2 -->
-                <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all">
-                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Ore di Gioco</p>
-                    <div class="flex items-baseline justify-between mt-2">
-                        <h3 class="text-3xl font-bold">96.5</h3>
-                        <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">+8%</span>
-                    </div>
-                </div>
-                <!-- Card 3 -->
-                <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all">
-                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Tasso Vittorie</p>
-                    <div class="flex items-baseline justify-between mt-2">
-                        <h3 class="text-3xl font-bold">64%</h3>
-                        <span class="text-xs font-semibold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full">-2%</span>
-                    </div>
-                </div>
-                <!-- Card 4 -->
-                <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all">
-                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Credito Disponibile</p>
-                    <div class="flex items-baseline justify-between mt-2">
-                        <h3 class="text-3xl font-bold">€ 45.00</h3>
-                        <span class="text-xs font-semibold text-brand-600 bg-brand-50 px-2.5 py-1 rounded-full">Attivo</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SEZIONE CENTRALE: Tabella Attività / Match Recenti -->
-            <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
-                <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-lg font-bold">Prossimi Match & Prenotazioni</h3>
-                    <a href="#" class="text-sm font-semibold text-brand-600 hover:underline">Vedi tutti</a>
-                </div>
-                
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="border-b border-gray-100 text-xs font-semibold text-gray-400 uppercase">
-                                <th class="pb-4">Campo / Attività</th>
-                                <th class="pb-4">Data & Ora</th>
-                                <th class="pb-4">Partecipanti</th>
-                                <th class="pb-4">Stato</th>
-                                <th class="pb-4 text-right">Azione</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-50 text-sm">
-                            <tr class="hover:bg-gray-50/50 transition-all">
-                                <td class="py-4 font-semibold">Campo Padel 01 (Indoor)</td>
-                                <td class="py-4 text-gray-500">Oggi, 18:00 - 19:30</td>
-                                <td class="py-4 text-gray-500">4 / 4 giocatori</td>
-                                <td class="py-4">
-                                    <span class="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-semibold">Confermato</span>
-                                </td>
-                                <td class="py-4 text-right">
-                                    <button class="text-gray-400 hover:text-gray-900 font-medium">Dettagli</button>
-                                </td>
-                            </tr>
-                            <tr class="hover:bg-gray-50/50 transition-all">
-                                <td class="py-4 font-semibold">Campo Padel 03 (Panoramic)</td>
-                                <td class="py-4 text-gray-500">Dom, 10:00 - 11:30</td>
-                                <td class="py-4 text-gray-500">2 / 4 giocatori</td>
-                                <td class="py-4">
-                                    <span class="px-3 py-1 bg-amber-50 text-amber-600 rounded-full text-xs font-semibold">In attesa</span>
-                                </td>
-                                <td class="py-4 text-right">
-                                    <button class="text-gray-400 hover:text-gray-900 font-medium">Invita</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
         </div>
-    </main>
+    """, unsafe_allow_html=True)
 
-</body>
-</html>
+with col4:
+    st.markdown("""
+        <div class="playtomic-card">
+            <p style="color: #9ca3af; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Credito Disponibile</p>
+            <div style="display: flex; align-items: baseline; justify-content: space-between; margin-top: 0.5rem;">
+                <h3 style="font-size: 1.875rem; font-weight: 700; margin: 0;">45,00 €</h3>
+                <span style="background-color: #f0fdf4; color: #10b981; font-size: 0.75rem; font-weight: 600; padding: 0.25rem 0.5rem; border-radius: 9999px;">Attivo</span>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+
+st.write("")
+
+# TABELLA ATTIVITA / MATCH RECENTI
+st.markdown("""
+    <div class="playtomic-card">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+            <h3 style="font-size: 1.125rem; font-weight: 700; margin: 0;">Prossimi Match & Prenotazioni</h3>
+        </div>
+    """, unsafe_allow_html=True)
+
+# Dati di esempio per la tabella
+import pandas as pd
+data = {
+    "Campo / Attività": ["Campo Padel 01 (Indoor)", "Campo Padel 03 (Panoramic)"],
+    "Data & Ora": ["Oggi, 18:00 - 19:30", "Dom, 10:00 - 11:30"],
+    "Partecipanti": ["4 / 4 giocatori", "2 / 4 giocatori"],
+    "Stato": ["Confermato", "In attesa"]
+}
+df = pd.DataFrame(data)
+
+st.dataframe(df, use_container_width=True, hide_index=True)
+
+st.markdown("</div>", unsafe_allow_html=True)
