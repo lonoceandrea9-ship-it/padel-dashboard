@@ -14,27 +14,27 @@ st.set_page_config(
 if "authenticated_coach" not in st.session_state:
     st.session_state.authenticated_coach = False
 
-# Complete roster of players (with default values for immediate exploration)
+# Complete roster of players with side information ("Left" or "Right")
 squad_players = [
-    {"fname": "Álvaro", "lname": "Gomez", "tech": [7, 7, 7, 6, 8, 6], "mental": [8, 7, 7, 7, 8, 7], "c_tech": [6, 6, 6, 5, 7, 5], "c_mental": [7, 6, 6, 6, 7, 6]},
-    {"fname": "Yannik", "lname": "Langeslag", "tech": [8, 6, 7, 7, 7, 5], "mental": [7, 6, 8, 6, 7, 6], "c_tech": [7, 5, 6, 6, 6, 4], "c_mental": [6, 5, 7, 5, 6, 5]},
-    {"fname": "Josu", "lname": "Usabiaga", "tech": [6, 8, 7, 7, 6, 7], "mental": [6, 8, 6, 8, 7, 7], "c_tech": [5, 7, 6, 6, 5, 6], "c_mental": [5, 7, 5, 7, 6, 6]},
-    {"fname": "Benjamin", "lname": "Thyrell", "tech": [7, 7, 8, 6, 7, 6], "mental": [8, 7, 7, 7, 8, 7], "c_tech": [6, 6, 7, 5, 6, 5], "c_mental": [7, 6, 6, 6, 7, 6]},
-    {"fname": "Alexander", "lname": "Wennstam", "tech": [8, 8, 7, 7, 8, 6], "mental": [7, 7, 8, 8, 7, 7], "c_tech": [7, 7, 6, 6, 7, 5], "c_mental": [6, 6, 7, 7, 6, 6]},
-    {"fname": "Andrea", "lname": "Lonoce", "tech": [8, 7, 8, 7, 9, 6], "mental": [9, 7, 8, 8, 9, 7], "c_tech": [8, 7, 8, 7, 9, 6], "c_mental": [9, 7, 8, 8, 9, 7]},
-    {"fname": "Mikkel", "lname": "Hoff", "tech": [7, 6, 7, 6, 7, 5], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4], "c_mental": [6, 5, 6, 6, 6, 5]},
-    {"fname": "Pedro", "lname": "Rios", "tech": [8, 8, 8, 7, 8, 7], "mental": [8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6], "c_mental": [7, 7, 7, 7, 7, 7]},
-    {"fname": "Hector", "lname": "Guerrero", "tech": [7, 7, 7, 7, 7, 6], "mental": [7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 6, 6, 5], "c_mental": [6, 6, 6, 6, 6, 6]},
-    {"fname": "Gonzalo", "lname": "Diez de Onate", "tech": [8, 7, 8, 7, 8, 6], "mental": [8, 7, 8, 8, 8, 7], "c_tech": [7, 6, 7, 6, 7, 5], "c_mental": [7, 6, 7, 7, 7, 6]},
-    {"fname": "Julio", "lname": "Morales", "tech": [7, 6, 7, 6, 7, 5], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4], "c_mental": [6, 5, 6, 6, 6, 5]},
-    {"fname": "Lars", "lname": "Mikkelsen", "tech": [7, 7, 7, 6, 8, 6], "mental": [8, 7, 7, 7, 8, 7], "c_tech": [6, 6, 6, 5, 7, 5], "c_mental": [7, 6, 6, 6, 7, 6]},
-    {"fname": "Joahn", "lname": "Lohman", "tech": [7, 6, 7, 6, 7, 5], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4], "c_mental": [6, 5, 6, 6, 6, 5]},
-    {"fname": "Nacho", "lname": "Saracho", "tech": [8, 8, 8, 7, 8, 7], "mental": [8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6], "c_mental": [7, 7, 7, 7, 7, 7]},
-    {"fname": "Peter", "lname": "Gustafsson", "tech": [7, 7, 7, 6, 7, 6], "mental": [7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5], "c_mental": [6, 6, 6, 6, 6, 6]},
-    {"fname": "Juanjo", "lname": "Lopez Benitez", "tech": [8, 8, 8, 7, 8, 7], "mental": [8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6], "c_mental": [7, 7, 7, 7, 7, 7]},
-    {"fname": "Sascha", "lname": "Van De Bilt", "tech": [7, 7, 7, 6, 7, 6], "mental": [7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5], "c_mental": [6, 6, 6, 6, 6, 6]},
-    {"fname": "Fernando", "lname": "Oribe", "tech": [8, 7, 8, 7, 8, 6], "mental": [8, 7, 8, 8, 8, 7], "c_tech": [7, 6, 7, 6, 7, 5], "c_mental": [7, 6, 7, 7, 7, 6]},
-    {"fname": "Doug", "lname": "Ramsay", "tech": [7, 6, 7, 6, 7, 5], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4], "c_mental": [6, 5, 6, 6, 6, 5]}
+    {"fname": "Álvaro", "lname": "Gomez", "side": "Left", "tech": [7, 7, 7, 6, 8, 6], "mental": [8, 7, 7, 7, 8, 7], "c_tech": [6, 6, 6, 5, 7, 5], "c_mental": [7, 6, 6, 6, 7, 6]},
+    {"fname": "Yannik", "lname": "Langeslag", "side": "Left", "tech": [8, 6, 7, 7, 7, 5], "mental": [7, 6, 8, 6, 7, 6], "c_tech": [7, 5, 6, 6, 6, 4], "c_mental": [6, 5, 7, 5, 6, 5]},
+    {"fname": "Josu", "lname": "Usabiaga", "side": "Right", "tech": [6, 8, 7, 7, 6, 7], "mental": [6, 8, 6, 8, 7, 7], "c_tech": [5, 7, 6, 6, 5, 6], "c_mental": [5, 7, 5, 7, 6, 6]},
+    {"fname": "Benjamin", "lname": "Thyrell", "side": "Left", "tech": [7, 7, 8, 6, 7, 6], "mental": [8, 7, 7, 7, 8, 7], "c_tech": [6, 6, 7, 5, 6, 5], "c_mental": [7, 6, 6, 6, 7, 6]},
+    {"fname": "Alexander", "lname": "Wennstam", "side": "Left", "tech": [8, 8, 7, 7, 8, 6], "mental": [7, 7, 8, 8, 7, 7], "c_tech": [7, 7, 6, 6, 7, 5], "c_mental": [6, 6, 7, 7, 6, 6]},
+    {"fname": "Andrea", "lname": "Lonoce", "side": "Right", "tech": [8, 7, 8, 7, 9, 6], "mental": [9, 7, 8, 8, 9, 7], "c_tech": [8, 7, 8, 7, 9, 6], "c_mental": [9, 7, 8, 8, 9, 7]},
+    {"fname": "Mikkel", "lname": "Hoff", "side": "Right", "tech": [7, 6, 7, 6, 7, 5], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4], "c_mental": [6, 5, 6, 6, 6, 5]},
+    {"fname": "Pedro", "lname": "Rios", "side": "Right", "tech": [8, 8, 8, 7, 8, 7], "mental": [8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6], "c_mental": [7, 7, 7, 7, 7, 7]},
+    {"fname": "Hector", "lname": "Guerrero", "side": "Right", "tech": [7, 7, 7, 7, 7, 6], "mental": [7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 6, 6, 5], "c_mental": [6, 6, 6, 6, 6, 6]},
+    {"fname": "Gonzalo", "lname": "Diez de Onate", "side": "Left", "tech": [8, 7, 8, 7, 8, 6], "mental": [8, 7, 8, 8, 8, 7], "c_tech": [7, 6, 7, 6, 7, 5], "c_mental": [7, 6, 7, 7, 7, 6]},
+    {"fname": "Julio", "lname": "Morales", "side": "Right", "tech": [7, 6, 7, 6, 7, 5], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4], "c_mental": [6, 5, 6, 6, 6, 5]},
+    {"fname": "Lars", "lname": "Mikkelsen", "side": "Left", "tech": [7, 7, 7, 6, 8, 6], "mental": [8, 7, 7, 7, 8, 7], "c_tech": [6, 6, 6, 5, 7, 5], "c_mental": [7, 6, 6, 6, 7, 6]},
+    {"fname": "Joahn", "lname": "Lohman", "side": "Left", "tech": [7, 6, 7, 6, 7, 5], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4], "c_mental": [6, 5, 6, 6, 6, 5]},
+    {"fname": "Nacho", "lname": "Saracho", "side": "Right", "tech": [8, 8, 8, 7, 8, 7], "mental": [8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6], "c_mental": [7, 7, 7, 7, 7, 7]},
+    {"fname": "Peter", "lname": "Gustafsson", "side": "Left", "tech": [7, 7, 7, 6, 7, 6], "mental": [7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5], "c_mental": [6, 6, 6, 6, 6, 6]},
+    {"fname": "Juanjo", "lname": "Lopez Benitez", "side": "Left", "tech": [8, 8, 8, 7, 8, 7], "mental": [8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6], "c_mental": [7, 7, 7, 7, 7, 7]},
+    {"fname": "Sascha", "lname": "Van De Bilt", "side": "Right", "tech": [7, 7, 7, 6, 7, 6], "mental": [7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5], "c_mental": [6, 6, 6, 6, 6, 6]},
+    {"fname": "Fernando", "lname": "Oribe", "side": "Right", "tech": [8, 7, 8, 7, 8, 6], "mental": [8, 7, 8, 8, 8, 7], "c_tech": [7, 6, 7, 6, 7, 5], "c_mental": [7, 6, 7, 7, 7, 6]},
+    {"fname": "Doug", "lname": "Ramsay", "side": "Left", "tech": [7, 6, 7, 6, 7, 5], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4], "c_mental": [6, 5, 6, 6, 6, 5]}
 ]
 
 # Sidebar for navigation and security
@@ -801,16 +801,17 @@ elif modalita == "👤 Player Area":
 
     with tab_directory:
         st.subheader("👥 Team Player Directory")
-        st.markdown("Select a player from the list to quickly review their profile and ratings.")
+        st.markdown("Select a player from the list to quickly review their profile, side, and ratings.")
         
-        player_names = [f"{p['fname']} {p['lname']}" for p in squad_players]
-        selected_player_name = st.selectbox("Search or select a player:", player_names)
+        player_names = [f"{p['fname']} {p['lname']} ({p['side']})" for p in squad_players]
+        selected_player_str = st.selectbox("Search or select a player:", player_names)
         
+        selected_player_name = selected_player_str.split(" (")[0]
         selected_player = next((p for p in squad_players if f"{p['fname']} {p['lname']}" == selected_player_name), None)
         
         if selected_player:
             st.markdown(f"---")
-            st.markdown(f"### Player Card: **{selected_player['fname']} {selected_player['lname']}**")
+            st.markdown(f"### Player Card: **{selected_player['fname']} {selected_player['lname']}** — *Side: {selected_player['side']}*")
             
             tech_labels = ['Volley', 'Smash', 'Bandeja', 'Serve', 'Defense', 'Chiquita']
             mental_labels = ['Chemistry', 'Errors', 'Positioning', 'Focus', 'Stamina', 'Intensity']
@@ -841,10 +842,13 @@ elif modalita == "👤 Player Area":
 
 elif modalita == "📋 Coach Area" and st.session_state.authenticated_coach:
     st.title("📋 Padel Coach - Management & Analysis Hub")
-    st.markdown("Centralized overview of squad performance, automatic group segmentation, and targeted training planning.")
+    st.markdown("Centralized overview of squad performance, automatic group segmentation, training planning, and strict Left-Right pairings.")
 
-    # Creazione di sezioni e tab graficamente più ordinate e user-friendly
-    tab_overview, tab_training = st.tabs(["📊 Team Overview & Groups", "🎯 Training Session Planner"])
+    tab_overview, tab_training, tab_pairing = st.tabs([
+        "📊 Team Overview & Groups", 
+        "🎯 Training Session Planner", 
+        "🤝 Automatic Pairing Generator"
+    ])
 
     with tab_overview:
         tech_labels = ['Volley', 'Smash', 'Bandeja', 'Serve', 'Defense', 'Chiquita']
@@ -868,6 +872,7 @@ elif modalita == "📋 Coach Area" and st.session_state.authenticated_coach:
                     players_data.append({
                         "fname": data.get("fname", "Name"),
                         "lname": data.get("lname", "Lastname"),
+                        "side": data.get("side", "Right"),
                         "tech": [int(x) for x in data.get("tech", [5]*6)],
                         "mental": [int(x) for x in data.get("mental", [5]*6)],
                         "c_tech": [int(x) for x in data.get("c_tech", [5]*6)],
@@ -878,7 +883,6 @@ elif modalita == "📋 Coach Area" and st.session_state.authenticated_coach:
         else:
             players_data = squad_players
 
-        # KPI Cards superiori per colpo d'occhio immediato
         total_players = len(players_data)
         
         summary_rows = []
@@ -894,8 +898,9 @@ elif modalita == "📋 Coach Area" and st.session_state.authenticated_coach:
             
             summary_rows.append({
                 "Player": full_name,
-                "Tech Average (Coach)": round(avg_tech_coach, 1),
-                "Mental Average (Coach)": round(avg_mental_coach, 1),
+                "Side": p['side'],
+                "Tech Average": round(avg_tech_coach, 1),
+                "Mental Average": round(avg_mental_coach, 1),
                 "Overall Average": round((avg_tech_coach + avg_mental_coach) / 2, 1)
             })
             
@@ -912,7 +917,6 @@ elif modalita == "📋 Coach Area" and st.session_state.authenticated_coach:
         df_summary = pd.DataFrame(summary_rows)
         squad_avg_overall = df_summary["Overall Average"].mean()
 
-        # Visualizzazione KPI Pulite
         kpi1, kpi2, kpi3 = st.columns(3)
         kpi1.metric(label="👥 Active Roster", value=f"{total_players} Players")
         kpi2.metric(label="⭐ Squad General Average", value=f"{squad_avg_overall:.1f} / 10")
@@ -950,7 +954,7 @@ elif modalita == "📋 Coach Area" and st.session_state.authenticated_coach:
         tech_labels = ['Volley', 'Smash', 'Bandeja', 'Serve', 'Defense', 'Chiquita']
 
         player_names = [f"{p['fname']} {p['lname']}" for p in squad_players]
-        present_players_names = st.multiselect("Select attending players for today:", player_names, default=player_names[:4])
+        present_players_names = st.multiselect("Select attending players for today's training:", player_names, default=player_names[:4], key="training_present")
 
         if present_players_names:
             st.markdown("---")
@@ -988,3 +992,65 @@ elif modalita == "📋 Coach Area" and st.session_state.authenticated_coach:
                 st.info("💡 **Coach Tip:** Build today's drill exercises around high-repetition feeds targeting these specific technical gaps.")
         else:
             st.warning("Please select at least one player to generate the training session focus.")
+
+    with tab_pairing:
+        st.subheader("🤝 Automatic Match Pairing Generator (Left + Right)")
+        st.markdown("Select available players. The system will separate them into **Left** and **Right** players and pair them strictly as one Left + one Right per team.")
+
+        player_names = [f"{p['fname']} {p['lname']} ({p['side']})" for p in squad_players]
+        match_players_strs = st.multiselect("Select available players for pairing:", player_names, default=player_names[:4], key="pairing_present")
+
+        if match_players_strs:
+            left_pool = []
+            right_pool = []
+
+            for s in match_players_strs:
+                # Estraggo nome, cognome e lato dalla stringa
+                parts = s.split(" (")
+                full_name = parts[0]
+                side = parts[1].replace(")", "")
+                
+                p_data = next((pl for pl in squad_players if f"{pl['fname']} {pl['lname']}" == full_name), None)
+                if p_data:
+                    avg_c = (sum(p_data['c_tech']) + sum(p_data['c_mental'])) / 12
+                    item = {"name": full_name, "score": avg_c}
+                    if side == "Left":
+                        left_pool.append(item)
+                    else:
+                        right_pool.append(item)
+
+            # Ordiniamo entrambi i pool per punteggio decrescente
+            left_pool.sort(key=lambda x: x["score"], reverse=True)
+            right_pool.sort(key=lambda x: x["score"], reverse=True)
+
+            num_pairs = min(len(left_pool), len(right_pool))
+            pairs = []
+
+            for i in range(num_pairs):
+                p_left = left_pool[i]
+                p_right = right_pool[i]
+                team_avg = (p_left["score"] + p_right["score"]) / 2
+                pairs.append((p_left["name"], p_right["name"], team_avg))
+
+            st.markdown("---")
+            st.markdown(f"### 🎾 Valid Teams Generated ({num_pairs} pairs with 1 Left & 1 Right)")
+
+            if pairs:
+                col_t1, col_t2 = st.columns(2)
+                for idx, (pl_left, pl_right, team_score) in enumerate(pairs):
+                    target_col = col_t1 if idx % 2 == 0 else col_t2
+                    with target_col:
+                        st.success(f"**Team {idx + 1} (Combined Avg: {team_score:.1f}/10)**\n\n- ⬅️ **Left:** {pl_left}\n- ➡️ **Right:** {pl_right}")
+
+            # Giocatori rimasti fuori per squilibrio numerico tra Left e Right
+            unpaired_left = left_pool[num_pairs:]
+            unpaired_right = right_pool[num_pairs:]
+
+            if unpaired_left or unpaired_right:
+                st.warning("⚠️ **Unpaired Players (Imbalance between Left and Right count):**")
+                for u in unpaired_left:
+                    st.markdown(f"- ⬅️ {u['name']} (Left)")
+                for u in unpaired_right:
+                    st.markdown(f"- ➡️ {u['name']} (Right)")
+        else:
+            st.warning("Please select available players to generate balanced Left/Right pairings.")
