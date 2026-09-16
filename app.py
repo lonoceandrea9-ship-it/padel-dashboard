@@ -70,11 +70,10 @@ if modalita == "📋 Coach Area" and not st.session_state.authenticated_coach:
     st.warning("Please enter the correct password in the sidebar on the left to view the team overview and training groups.")
 
 elif modalita == "👤 Player Area":
-    # Streamlit native subtabs for personal evaluation and team directory
-    tab_compila, tab_directory = st.tabs(["✏️ My Evaluation", "👥 Player Directory"])
+    # Subtabs including the new Training Session planner
+    tab_compila, tab_directory, tab_training = st.tabs(["✏️ My Evaluation", "👥 Player Directory", "🎯 Training Session"])
     
     with tab_compila:
-        # Full HTML, CSS and JavaScript for Player Dashboard (in English)
         html_code = """<!DOCTYPE html>
         <html lang="en">
         <head>
@@ -840,6 +839,56 @@ elif modalita == "👤 Player Area":
             avg_coach = (sum(selected_player['c_tech']) + sum(selected_player['c_mental'])) / 12
             
             st.info(f"📊 **Overall Self-Evaluation Average:** {round(avg_my, 1)} / 10  |  📊 **Overall Coach Average:** {round(avg_coach, 1)} / 10")
+
+    with tab_training:
+        st.subheader("🎯 Daily Training Session Planner")
+        st.markdown("Select the players attending today's training session. The app will aggregate their technical weaknesses and suggest training focal points.")
+
+        tech_labels = ['Volley', 'Smash', 'Bandeja', 'Serve', 'Defense', 'Chiquita']
+
+        # Multi-select for present players
+        player_names = [f"{p['fname']} {p['lname']}" for p in squad_players]
+        present_players_names = st.multiselect("Select attending players for today:", player_names, default=player_names[:4])
+
+        if present_players_names:
+            st.markdown("---")
+            st.markdown(f"### 📋 Analysis for Today's Group ({len(present_players_names)} players)")
+
+            # Gather technical scores (coach ratings) for present players
+            tech_sums = {label: 0 for label in tech_labels}
+            tech_counts = {label: 0 for label in tech_labels}
+
+            present_players_data = [p for p in squad_players if f"{p['fname']} {p['lname']}" in present_players_names]
+
+            for p in present_players_data:
+                for idx, label in enumerate(tech_labels):
+                    tech_sums[label] += p['c_tech'][idx]
+                    tech_counts[label] += 1
+
+            # Calculate average coach score per technical skill for the present group
+            tech_averages = {label: (tech_sums[label] / tech_counts[label]) if tech_counts[label] > 0 else 0 for label in tech_labels}
+            
+            # Sort skills by lowest average score to determine top priorities
+            sorted_skills = sorted(tech_averages.items(), key=lambda x: x[1])
+
+            col_a, col_b = st.columns(2)
+
+            with col_a:
+                st.markdown("#### 📉 Technical Skill Averages (Today's Group)")
+                df_group_tech = pd.DataFrame(list(sorted_skills), columns=["Technical Skill", "Group Average (Coach)"])
+                df_group_tech["Group Average (Coach)"] = df_group_tech["Group Average (Coach)"].round(1)
+                st.dataframe(df_group_tech, use_container_width=True, hide_index=True)
+
+            with col_b:
+                st.markdown("#### 🔥 Recommended Training Focus")
+                lowest_skill_1, avg_1 = sorted_skills[0]
+                lowest_skill_2, avg_2 = sorted_skills[1]
+
+                st.error(st.markdown(f"**Primary Focus:** `{lowest_skill_1}` (Group Avg: {avg_1:.1f}/10)"))
+                st.warning(st.markdown(f"**Secondary Focus:** `{lowest_skill_2}` (Group Avg: {avg_2:.1f}/10)"))
+                st.info("💡 **Coach Tip:** Build today's drill exercises around high-repetition feeds targeting these specific technical gaps.")
+        else:
+            st.warning("Please select at least one player to generate the training session focus.")
 
 elif modalita == "📋 Coach Area" and st.session_state.authenticated_coach:
     # COACH AREA (UNLOCKED ONLY WITH PASSWORD)
