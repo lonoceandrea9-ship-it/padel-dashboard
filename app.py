@@ -43,85 +43,85 @@ squad_players = [
     {"fname": "Doug", "lname": "Ramsay", "side": "Left", "tech": [7, 6, 7, 6, 7, 5], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4], "c_mental": [6, 5, 6, 6, 6, 5]}
 ]
 
-# --- SCHERMATA INIZIALE (HOME SELECTION) ---
+# --- HOME SELECTION SCREEN ---
 if st.session_state.nav_mode == "Home":
-    st.title("🎾 Benvenuto nel Padel Performance Hub")
-    st.markdown("Seleziona la tua area di accesso per continuare:")
+    st.title("🎾 Welcome to Padel Performance Hub")
+    st.markdown("Select your access area to continue:")
     
     col_home1, col_home2 = st.columns(2)
     
     with col_home1:
-        st.markdown("### 👤 Area Giocatore")
-        st.markdown("Accedi alla tua scheda personale protetta da password per visualizzare e aggiornare le tue valutazioni.")
-        if st.button("Accedi come Giocatore", use_container_width=True, type="primary"):
+        st.markdown("### 👤 Player Area")
+        st.markdown("Access your password-protected personal profile to view and update your evaluations.")
+        if st.button("Log in as Player", use_container_width=True, type="primary"):
             st.session_state.nav_mode = "Player_Login"
             st.rerun()
             
     with col_home2:
-        st.markdown("### 📋 Area Allenatore")
-        st.markdown("Accesso riservato allo staff tecnico per la gestione dei dati, la pianificazione degli allenamenti e l'accoppiamento dei team.")
-        if st.button("Accedi come Allenatore", use_container_width=True):
+        st.markdown("### 📋 Coach Area")
+        st.markdown("Restricted access for coaching staff to manage data, plan training sessions, and generate team pairings.")
+        if st.button("Log in as Coach", use_container_width=True):
             st.session_state.nav_mode = "Coach_Login"
             st.rerun()
 
-# --- LOGIN GIOCATORE ---
+# --- PLAYER LOGIN ---
 elif st.session_state.nav_mode == "Player_Login":
-    st.title("🔐 Accesso Area Giocatore")
-    st.markdown("Seleziona il tuo nome e inserisci la tua password (la password corrisponde al tuo **nome di battesimo**).")
+    st.title("🔐 Player Area Access")
+    st.markdown("Select your name and enter your password (your password is your **first name**).")
     
     player_options = [f"{p['fname']} {p['lname']} ({p['side']})" for p in squad_players]
-    selected_player_str = st.selectbox("Seleziona il tuo profilo:", player_options)
+    selected_player_str = st.selectbox("Select your profile:", player_options)
     
     selected_fname = selected_player_str.split(" ")[0]
     
-    player_pwd_input = st.text_input("Password (Inserisci il tuo nome di battesimo)", type="password")
+    player_pwd_input = st.text_input("Password (Enter your first name)", type="password")
     
     col_pl1, col_pl2 = st.columns(2)
     with col_pl1:
-        if st.button("Entra nella mia scheda", type="primary", use_container_width=True):
+        if st.button("Enter My Profile", type="primary", use_container_width=True):
             if player_pwd_input.strip().lower() == selected_fname.lower():
                 st.session_state.authenticated_player = selected_fname
                 st.session_state.nav_mode = "Player_Dashboard"
                 st.rerun()
             else:
-                st.error("❌ Password errata! Ricorda che la password è il tuo nome di battesimo.")
+                st.error("❌ Incorrect password! Remember that your password is your first name.")
     with col_pl2:
-        if st.button("⬅️ Torna alla Home", use_container_width=True):
+        if st.button("⬅️ Back to Home", use_container_width=True):
             st.session_state.nav_mode = "Home"
             st.rerun()
 
-# --- LOGIN ALLENATORE ---
+# --- COACH LOGIN ---
 elif st.session_state.nav_mode == "Coach_Login":
-    st.title("🔒 Autenticazione Area Allenatore")
-    st.markdown("Inserisci la password di sicurezza per accedere alle funzioni di gestione.")
+    st.title("🔒 Coach Area Authentication")
+    st.markdown("Enter the security password to access management tools.")
     
     COACH_PASSWORD = "padelcoach2026"
     
-    pwd_input = st.text_input("Password Allenatore", type="password")
+    pwd_input = st.text_input("Coach Password", type="password")
     
     col_btn1, col_btn2 = st.columns(2)
     with col_btn1:
-        if st.button("Verifica Password", type="primary", use_container_width=True):
+        if st.button("Verify Password", type="primary", use_container_width=True):
             if pwd_input == COACH_PASSWORD:
                 st.session_state.authenticated_coach = True
                 st.session_state.nav_mode = "Coach"
                 st.rerun()
             else:
-                st.error("❌ Password errata! Riprova.")
+                st.error("❌ Incorrect password! Please try again.")
     with col_btn2:
-        if st.button("⬅️ Torna alla Home", use_container_width=True):
+        if st.button("⬅️ Back to Home", use_container_width=True):
             st.session_state.nav_mode = "Home"
             st.rerun()
 
-# --- AREA RISERVATA SINGOLO GIOCATORE ---
+# --- INDIVIDUAL PLAYER DASHBOARD ---
 elif st.session_state.nav_mode == "Player_Dashboard":
     current_player = next((p for p in squad_players if p['fname'] == st.session_state.authenticated_player), None)
     
     col_top1, col_top2 = st.columns([6, 1])
     with col_top1:
-        st.title(f"👤 Scheda Personale: {current_player['fname']} {current_player['lname']} ({current_player['side']})")
+        st.title(f"👤 Personal Card: {current_player['fname']} {current_player['lname']} ({current_player['side']})")
     with col_top2:
-        if st.button("🚪 Esci"):
+        if st.button("🚪 Log Out"):
             st.session_state.authenticated_player = None
             st.session_state.nav_mode = "Home"
             st.rerun()
@@ -775,9 +775,9 @@ elif st.session_state.nav_mode == "Player_Dashboard":
     """
     components.html(html_code, height=1350, scrolling=True)
 
-# --- AREA ALLENATORE (PROTETTA) ---
+# --- PROTECTED COACH AREA ---
 elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coach:
-    if st.button("🏠 Torna alla Home"):
+    if st.button("🏠 Back to Home"):
         st.session_state.nav_mode = "Home"
         st.rerun()
 
