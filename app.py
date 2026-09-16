@@ -1,68 +1,55 @@
-import React, { useState } from 'react';
-import PlayerListTab from './PlayerListTab';
-import PlayerDetailView from './PlayerDetailView';
+import streamlit as st
 
-export default function PlayerArea({ players }) {
-  // Gestisce il tab attivo ('overview' o 'directory')
-  const [activeTab, setActiveTab] = useState('overview');
-  // Memorizza l'ID o l'oggetto del giocatore selezionato per la scheda dettaglio
-  const [selectedPlayer, setSelectedPlayer] = useState(null);
+# Esempio di dati dei giocatori (puoi sostituirli con i tuoi dati reali)
+players = [
+    {"id": 1, "name": "Andrea", "role": "Capitano / Drive", "overall": 85, "condition": "Ottima"},
+    {"id": 2, "name": "Carlos", "role": "Revés", "overall": 88, "condition": "Buona"},
+    {"id": 3, "name": "Javier", "role": "Drive", "overall": 82, "condition": "Buona"}
+]
 
-  return (
-    <div className="player-area-container">
-      {/* --- BARRA DEI SUBTAB --- */}
-      <div className="flex border-b border-gray-200 mb-4">
-        <button
-          className={`py-2 px-4 font-medium text-sm border-b-2 ${
-            activeTab === 'overview'
-              ? 'border-blue-500 text-blue-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
-          }`}
-          onClick={() => {
-            setActiveTab('overview');
-            setSelectedPlayer(null); // Torna alla vista generale se si cambia tab
-          }}
-        >
-          Panoramica
-        </button>
+st.title("Gestione Squadra Padel")
+
+# Inizializza lo stato per tenere traccia del giocatore selezionato
+if "selected_player_id" not in st.session_state:
+    st.session_state.selected_player_id = None
+
+# --- CREAZIONE DEI SUBTAB ---
+tab_overview, tab_list = st.tabs(["Panoramica", "Lista Giocatori"])
+
+with tab_overview:
+    st.header("Panoramica Area Giocatore")
+    st.write("Contenuti generali dell'area...")
+
+with tab_list:
+    st.header("Directory Giocatori")
+    
+    # Se un giocatore è stato selezionato, mostra la scheda di dettaglio
+    if st.session_state.selected_player_id is not None:
+        # Trova il giocatore selezionato
+        player = next((p for p in players if p["id"] == st.session_state.selected_player_id), None)
         
-        <button
-          className={`py-2 px-4 font-medium text-sm border-b-2 ${
-            activeTab === 'directory' || selectedPlayer
-              ? 'border-blue-500 text-blue-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
-          }`}
-          onClick={() => {
-            setActiveTab('directory');
-            setSelectedPlayer(null);
-          }}
-        >
-          Lista Giocatori
-        </button>
-      </div>
-
-      {/* --- CONTENUTO DEI TAB --- */}
-      {activeTab === 'overview' && !selectedPlayer && (
-        <div className="p-4">
-          <h2 className="text-xl font-bold">Panoramica Area Giocatore</h2>
-          <p className="text-gray-600">Contenuti generali dell'area...</p>
-        </div>
-      )}
-
-      {(activeTab === 'directory' || selectedPlayer) && !selectedPlayer && (
-        <PlayerListTab 
-          players={players} 
-          onSelectPlayer={(player) => setSelectedPlayer(player)} 
-        />
-      )}
-
-      {/* --- SCHEDA DETTAGLIO SINGOLO GIOCATORE --- */}
-      {selectedPlayer && (
-        <PlayerDetailView 
-          player={selectedPlayer} 
-          onBack={() => setSelectedPlayer(null)} 
-        />
-      )}
-    </div>
-  );
-}
+        if player:
+            if st.button("← Torna alla lista"):
+                st.session_state.selected_player_id = None
+                st.rerun()
+                
+            st.markdown(f"## Scheda Dettaglio: {player['name']}")
+            st.write(f"**Ruolo:** {player['role']}")
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric(label="Valore Generale", value=player["overall"])
+            with col2:
+                st.metric(label="Condizione", value=player["condition"])
+    else:
+        # Mostra la tabella/elenco dei giocatori con un pulsante per ciascuno
+        for player in players:
+            cols = st.columns([3, 2, 2])
+            with cols[0]:
+                st.write(f"**{player['name']}**")
+            with cols[1]:
+                st.write(player['role'])
+            with cols[2]:
+                if st.button("Visualizza Scheda", key=f"btn_{player['id']}"):
+                    st.session_state.selected_player_id = player["id"]
+                    st.rerun()
