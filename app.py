@@ -3,18 +3,18 @@ import streamlit.components.v1 as components
 import pandas as pd
 import json
 
-# Configurazione della pagina Streamlit
+# Streamlit page configuration
 st.set_page_config(
     page_title="Padel Performance Hub",
     page_icon="🎾",
     layout="wide"
 )
 
-# Inizializzazione dello stato di autenticazione
+# Initialize authentication state
 if "authenticated_coach" not in st.session_state:
     st.session_state.authenticated_coach = False
 
-# Lista completa dei giocatori della squadra (con dati di default per permettere l'esplorazione immediata)
+# Complete roster of players (with default values for immediate exploration)
 squad_players = [
     {"fname": "Álvaro", "lname": "Gomez", "tech": [7, 7, 7, 6, 8, 6], "mental": [8, 7, 7, 7, 8, 7], "c_tech": [6, 6, 6, 5, 7, 5], "c_mental": [7, 6, 6, 6, 7, 6]},
     {"fname": "Yannik", "lname": "Langeslag", "tech": [8, 6, 7, 7, 7, 5], "mental": [7, 6, 8, 6, 7, 6], "c_tech": [7, 5, 6, 6, 6, 4], "c_mental": [6, 5, 7, 5, 6, 5]},
@@ -37,46 +37,46 @@ squad_players = [
     {"fname": "Doug", "lname": "Ramsay", "tech": [7, 6, 7, 6, 7, 5], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4], "c_mental": [6, 5, 6, 6, 6, 5]}
 ]
 
-# Sidebar per la navigazione e sicurezza
-st.sidebar.title("🎾 Padel Hub - Accesso")
+# Sidebar for navigation and security
+st.sidebar.title("🎾 Padel Hub - Access")
 modalita = st.sidebar.radio(
-    "Seleziona Area:",
-    ["👤 Area Giocatore", "📋 Area Allenatore (Coach)"]
+    "Select Area:",
+    ["👤 Player Area", "📋 Coach Area"]
 )
 
-if modalita == "📋 Area Allenatore (Coach)":
+if modalita == "📋 Coach Area":
     st.sidebar.markdown("---")
-    st.sidebar.subheader("🔒 Area Riservata Mister")
+    st.sidebar.subheader("🔒 Coach Restricted Area")
     
     COACH_PASSWORD = "padelcoach2026" 
     
     if not st.session_state.authenticated_coach:
-        pwd_input = st.sidebar.text_input("Inserisci Password Allenatore", type="password")
-        if st.sidebar.button("Accedi"):
+        pwd_input = st.sidebar.text_input("Enter Coach Password", type="password")
+        if st.sidebar.button("Log In"):
             if pwd_input == COACH_PASSWORD:
                 st.session_state.authenticated_coach = True
                 st.rerun()
             else:
-                st.sidebar.error("Password errata!")
+                st.sidebar.error("Incorrect password!")
     else:
-        st.sidebar.success("✅ Accesso Autorizzato (Mister)")
-        if st.sidebar.button("🔒 Logout"):
+        st.sidebar.success("✅ Access Granted (Coach)")
+        if st.sidebar.button("🔒 Log Out"):
             st.session_state.authenticated_coach = False
             st.rerun()
 
-# CONTROLLO ACCESSO: Se si seleziona Coach ma non è autenticato
-if modalita == "📋 Area Allenatore (Coach)" and not st.session_state.authenticated_coach:
-    st.title("🔒 Area Riservata all'Allenatore")
-    st.warning("Inserisci la password corretta nella barra laterale a sinistra per visualizzare la panoramica e i gruppi di lavoro della squadra.")
+# ACCESS CONTROL: If Coach area is selected but not authenticated
+if modalita == "📋 Coach Area" and not st.session_state.authenticated_coach:
+    st.title("🔒 Restricted Area for Coach")
+    st.warning("Please enter the correct password in the sidebar on the left to view the team overview and training groups.")
 
-elif modalita == "👤 Area Giocatore":
-    # Subtab nativi Streamlit per dividere la compilazione personale e la directory della squadra
-    tab_compila, tab_directory = st.tabs(["✏️ La Mia Scheda", "👥 Lista Giocatori (Directory)"])
+elif modalita == "👤 Player Area":
+    # Streamlit native subtabs for personal evaluation and team directory
+    tab_compila, tab_directory = st.tabs(["✏️ My Evaluation", "👥 Player Directory"])
     
     with tab_compila:
-        # HTML, CSS e JavaScript completi per la Dashboard Giocatore
+        # Full HTML, CSS and JavaScript for Player Dashboard (in English)
         html_code = """<!DOCTYPE html>
-        <html lang="it">
+        <html lang="en">
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -319,108 +319,108 @@ elif modalita == "👤 Area Giocatore":
 
             <header>
                 <h1 id="playerTitle">Padel Performance Dashboard</h1>
-                <p>Valutazione da 1 a 10 • Auto-salvato sul dispositivo</p>
+                <p>Ratings from 1 to 10 • Auto-saved on device</p>
             </header>
 
             <div class="main-container">
-                <!-- PROFILO GIOCATORE & AZIONI -->
+                <!-- PLAYER PROFILE & ACTIONS -->
                 <div class="card">
-                    <h2>Profilo Giocatore & Condivisione</h2>
+                    <h2>Player Profile & Sharing</h2>
                     <div class="profile-grid">
                         <div class="input-group">
-                            <label for="firstName">Nome</label>
-                            <input type="text" id="firstName" placeholder="Nome" oninput="onDataChange()">
+                            <label for="firstName">First Name</label>
+                            <input type="text" id="firstName" placeholder="First Name" oninput="onDataChange()">
                         </div>
                         <div class="input-group">
-                            <label for="lastName">Cognome</label>
-                            <input type="text" id="lastName" placeholder="Cognome" oninput="onDataChange()">
+                            <label for="lastName">Last Name</label>
+                            <input type="text" id="lastName" placeholder="Last Name" oninput="onDataChange()">
                         </div>
                     </div>
                     
                     <div class="actions-grid">
                         <button class="btn btn-whatsapp" onclick="shareOnWhatsApp()">💬 WhatsApp</button>
-                        <button class="btn btn-save-img" onclick="saveResultAsImage()">💾 Salva PNG</button>
-                        <button class="btn btn-share-link" onclick="shareOrCopyLink()">🔗 Copia Link</button>
-                        <button class="btn btn-export" onclick="exportJsonFile()">📥 Esporta JSON (per il Mister)</button>
+                        <button class="btn btn-save-img" onclick="saveResultAsImage()">💾 Save PNG</button>
+                        <button class="btn btn-share-link" onclick="shareOrCopyLink()">🔗 Copy Link</button>
+                        <button class="btn btn-export" onclick="exportJsonFile()">📥 Export JSON (for Coach)</button>
                     </div>
                 </div>
 
-                <!-- GRAFICI CANVAS NATIVI -->
+                <!-- NATIVE CANVAS CHARTS -->
                 <div class="charts-grid">
                     <div class="card">
-                        <h2 class="tech-title">Abilità Tecniche</h2>
+                        <h2 class="tech-title">Technical Skills</h2>
                         <div class="chart-container">
                             <canvas id="techCanvas"></canvas>
                         </div>
                     </div>
                     <div class="card">
-                        <h2 class="mental-title">Atteggiamento & Tattica</h2>
+                        <h2 class="mental-title">Attitude & Tactics</h2>
                         <div class="chart-container">
                             <canvas id="mentalCanvas"></canvas>
                         </div>
                     </div>
                 </div>
 
-                <!-- CONTROLLI MIEI VALORI -->
+                <!-- SELF-EVALUATION CONTROLS -->
                 <div class="card">
-                    <h2>I Miei Valori (Autovalutazione)</h2>
+                    <h2>My Ratings (Self-Evaluation)</h2>
                     <div class="controls-grid">
                         <div class="control-group">
-                            <h3 class="tech-title" style="margin:0 0 4px 0; font-size:0.95rem;">Tecnica</h3>
-                            <div class="control-item"><label>Volea</label><input type="range" id="volley" min="1" max="10" value="8" oninput="onDataChange()"><span id="volley-val" class="val-badge">8</span></div>
+                            <h3 class="tech-title" style="margin:0 0 4px 0; font-size:0.95rem;">Technique</h3>
+                            <div class="control-item"><label>Volley</label><input type="range" id="volley" min="1" max="10" value="8" oninput="onDataChange()"><span id="volley-val" class="val-badge">8</span></div>
                             <div class="control-item"><label>Smash</label><input type="range" id="smash" min="1" max="10" value="7" oninput="onDataChange()"><span id="smash-val" class="val-badge">7</span></div>
                             <div class="control-item"><label>Bandeja</label><input type="range" id="bandeja" min="1" max="10" value="8" oninput="onDataChange()"><span id="bandeja-val" class="val-badge">8</span></div>
-                            <div class="control-item"><label>Servizio</label><input type="range" id="serve" min="1" max="10" value="7" oninput="onDataChange()"><span id="serve-val" class="val-badge">7</span></div>
-                            <div class="control-item"><label>Difesa da Fondo</label><input type="range" id="defense" min="1" max="10" value="9" oninput="onDataChange()"><span id="defense-val" class="val-badge">9</span></div>
+                            <div class="control-item"><label>Serve</label><input type="range" id="serve" min="1" max="10" value="7" oninput="onDataChange()"><span id="serve-val" class="val-badge">7</span></div>
+                            <div class="control-item"><label>Defense</label><input type="range" id="defense" min="1" max="10" value="9" oninput="onDataChange()"><span id="defense-val" class="val-badge">9</span></div>
                             <div class="control-item"><label>Chiquita</label><input type="range" id="chiquita" min="1" max="10" value="6" oninput="onDataChange()"><span id="chiquita-val" class="val-badge">6</span></div>
                         </div>
                         <div class="control-group">
-                            <h3 class="mental-title" style="margin:0 0 4px 0; font-size:0.95rem;">Tattica & Mental</h3>
-                            <div class="control-item purple"><label>Intesa di Coppia</label><input type="range" id="chemistry" min="1" max="10" value="9" oninput="onDataChange()"><span id="chemistry-val" class="val-badge">9</span></div>
-                            <div class="control-item purple"><label>Gestione Errore</label><input type="range" id="errorManagement" min="1" max="10" value="7" oninput="onDataChange()"><span id="errorManagement-val" class="val-badge">7</span></div>
-                            <div class="control-item purple"><label>Posizionamento</label><input type="range" id="positioning" min="1" max="10" value="8" oninput="onDataChange()"><span id="positioning-val" class="val-badge">8</span></div>
-                            <div class="control-item purple"><label>Concentrazione</label><input type="range" id="focus" min="1" max="10" value="8" oninput="onDataChange()"><span id="focus-val" class="val-badge">8</span></div>
-                            <div class="control-item purple"><label>Resistenza</label><input type="range" id="stamina" min="1" max="10" value="9" oninput="onDataChange()"><span id="stamina-val" class="val-badge">9</span></div>
-                            <div class="control-item purple"><label>Intensità</label><input type="range" id="intensity" min="1" max="10" value="7" oninput="onDataChange()"><span id="intensity-val" class="val-badge">7</span></div>
+                            <h3 class="mental-title" style="margin:0 0 4px 0; font-size:0.95rem;">Tactics & Mental</h3>
+                            <div class="control-item purple"><label>Pair Chemistry</label><input type="range" id="chemistry" min="1" max="10" value="9" oninput="onDataChange()"><span id="chemistry-val" class="val-badge">9</span></div>
+                            <div class="control-item purple"><label>Error Management</label><input type="range" id="errorManagement" min="1" max="10" value="7" oninput="onDataChange()"><span id="errorManagement-val" class="val-badge">7</span></div>
+                            <div class="control-item purple"><label>Positioning</label><input type="range" id="positioning" min="1" max="10" value="8" oninput="onDataChange()"><span id="positioning-val" class="val-badge">8</span></div>
+                            <div class="control-item purple"><label>Focus</label><input type="range" id="focus" min="1" max="10" value="8" oninput="onDataChange()"><span id="focus-val" class="val-badge">8</span></div>
+                            <div class="control-item purple"><label>Stamina</label><input type="range" id="stamina" min="1" max="10" value="9" oninput="onDataChange()"><span id="stamina-val" class="val-badge">9</span></div>
+                            <div class="control-item purple"><label>Intensity</label><input type="range" id="intensity" min="1" max="10" value="7" oninput="onDataChange()"><span id="intensity-val" class="val-badge">7</span></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- SEZIONE CONFRONTO ALLENATORE & ANALISI -->
+                <!-- COACH EVALUATION & ANALYSIS SECTION -->
                 <div class="card">
-                    <h2 class="coach-title">📋 Valutazione Allenatore & Confronto</h2>
-                    <p style="font-size:0.85rem; color:var(--text-muted); text-align:center; margin-top:0;">Inserisci i voti dati dal tuo allenatore per analizzare i margini di crescita.</p>
+                    <h2 class="coach-title">📋 Coach Evaluation & Comparison</h2>
+                    <p style="font-size:0.85rem; color:var(--text-muted); text-align:center; margin-top:0;">Enter the ratings given by your coach to analyze areas for improvement.</p>
                     
                     <div class="controls-grid">
                         <div class="control-group">
-                            <h3 class="coach-title" style="margin:0 0 4px 0; font-size:0.95rem;">Tecnica (Mister)</h3>
-                            <div class="control-item amber"><label>Volea (Mister)</label><input type="range" id="c_volley" min="1" max="10" value="8" oninput="onDataChange()"><span id="c_volley-val" class="val-badge">8</span></div>
-                            <div class="control-item amber"><label>Smash (Mister)</label><input type="range" id="c_smash" min="1" max="10" value="7" oninput="onDataChange()"><span id="c_smash-val" class="val-badge">7</span></div>
-                            <div class="control-item amber"><label>Bandeja (Mister)</label><input type="range" id="c_bandeja" min="1" max="10" value="8" oninput="onDataChange()"><span id="c_bandeja-val" class="val-badge">8</span></div>
-                            <div class="control-item amber"><label>Servizio (Mister)</label><input type="range" id="c_serve" min="1" max="10" value="7" oninput="onDataChange()"><span id="c_serve-val" class="val-badge">7</span></div>
-                            <div class="control-item amber"><label>Difesa (Mister)</label><input type="range" id="c_defense" min="1" max="10" value="9" oninput="onDataChange()"><span id="c_defense-val" class="val-badge">9</span></div>
-                            <div class="control-item amber"><label>Chiquita (Mister)</label><input type="range" id="c_chiquita" min="1" max="10" value="6" oninput="onDataChange()"><span id="c_chiquita-val" class="val-badge">6</span></div>
+                            <h3 class="coach-title" style="margin:0 0 4px 0; font-size:0.95rem;">Technique (Coach)</h3>
+                            <div class="control-item amber"><label>Volley (Coach)</label><input type="range" id="c_volley" min="1" max="10" value="8" oninput="onDataChange()"><span id="c_volley-val" class="val-badge">8</span></div>
+                            <div class="control-item amber"><label>Smash (Coach)</label><input type="range" id="c_smash" min="1" max="10" value="7" oninput="onDataChange()"><span id="c_smash-val" class="val-badge">7</span></div>
+                            <div class="control-item amber"><label>Bandeja (Coach)</label><input type="range" id="c_bandeja" min="1" max="10" value="8" oninput="onDataChange()"><span id="c_bandeja-val" class="val-badge">8</span></div>
+                            <div class="control-item amber"><label>Serve (Coach)</label><input type="range" id="c_serve" min="1" max="10" value="7" oninput="onDataChange()"><span id="c_serve-val" class="val-badge">7</span></div>
+                            <div class="control-item amber"><label>Defense (Coach)</label><input type="range" id="c_defense" min="1" max="10" value="9" oninput="onDataChange()"><span id="c_defense-val" class="val-badge">9</span></div>
+                            <div class="control-item amber"><label>Chiquita (Coach)</label><input type="range" id="c_chiquita" min="1" max="10" value="6" oninput="onDataChange()"><span id="c_chiquita-val" class="val-badge">6</span></div>
                         </div>
                         <div class="control-group">
-                            <h3 class="coach-title" style="margin:0 0 4px 0; font-size:0.95rem;">Tattica & Mental (Mister)</h3>
-                            <div class="control-item amber"><label>Intesa (Mister)</label><input type="range" id="c_chemistry" min="1" max="10" value="9" oninput="onDataChange()"><span id="c_chemistry-val" class="val-badge">9</span></div>
-                            <div class="control-item amber"><label>Errori (Mister)</label><input type="range" id="c_errorManagement" min="1" max="10" value="7" oninput="onDataChange()"><span id="c_errorManagement-val" class="val-badge">7</span></div>
-                            <div class="control-item amber"><label>Posizione (Mister)</label><input type="range" id="c_positioning" min="1" max="10" value="8" oninput="onDataChange()"><span id="c_positioning-val" class="val-badge">8</span></div>
-                            <div class="control-item amber"><label>Focus (Mister)</label><input type="range" id="c_focus" min="1" max="10" value="8" oninput="onDataChange()"><span id="c_focus-val" class="val-badge">8</span></div>
-                            <div class="control-item amber"><label>Resistenza (Mister)</label><input type="range" id="c_stamina" min="1" max="10" value="9" oninput="onDataChange()"><span id="c_stamina-val" class="val-badge">9</span></div>
-                            <div class="control-item amber"><label>Intensità (Mister)</label><input type="range" id="c_intensity" min="1" max="10" value="7" oninput="onDataChange()"><span id="c_intensity-val" class="val-badge">7</span></div>
+                            <h3 class="coach-title" style="margin:0 0 4px 0; font-size:0.95rem;">Tactics & Mental (Coach)</h3>
+                            <div class="control-item amber"><label>Chemistry (Coach)</label><input type="range" id="c_chemistry" min="1" max="10" value="9" oninput="onDataChange()"><span id="c_chemistry-val" class="val-badge">9</span></div>
+                            <div class="control-item amber"><label>Errors (Coach)</label><input type="range" id="c_errorManagement" min="1" max="10" value="7" oninput="onDataChange()"><span id="c_errorManagement-val" class="val-badge">7</span></div>
+                            <div class="control-item amber"><label>Positioning (Coach)</label><input type="range" id="c_positioning" min="1" max="10" value="8" oninput="onDataChange()"><span id="c_positioning-val" class="val-badge">8</span></div>
+                            <div class="control-item amber"><label>Focus (Coach)</label><input type="range" id="c_focus" min="1" max="10" value="8" oninput="onDataChange()"><span id="c_focus-val" class="val-badge">8</span></div>
+                            <div class="control-item amber"><label>Stamina (Coach)</label><input type="range" id="c_stamina" min="1" max="10" value="9" oninput="onDataChange()"><span id="c_stamina-val" class="val-badge">9</span></div>
+                            <div class="control-item amber"><label>Intensity (Coach)</label><input type="range" id="c_intensity" min="1" max="10" value="7" oninput="onDataChange()"><span id="c_intensity-val" class="val-badge">7</span></div>
                         </div>
                     </div>
 
-                    <!-- Tabella delle Differenze -->
-                    <h3 style="font-size:0.95rem; margin-top:20px; text-align:center; color:var(--text-main);">📊 Tabella Differenze (Tu vs Allenatore)</h3>
+                    <!-- Differences Table -->
+                    <h3 style="font-size:0.95rem; margin-top:20px; text-align:center; color:var(--text-main);">📊 Differences Table (You vs Coach)</h3>
                     <div style="overflow-x:auto;">
                         <table class="diff-table">
                             <thead>
                                 <tr>
-                                    <th>Abilità</th>
-                                    <th>Tuo Voto</th>
-                                    <th>Voto Mister</th>
+                                    <th>Skill</th>
+                                    <th>Your Rating</th>
+                                    <th>Coach Rating</th>
                                     <th>Delta (Diff.)</th>
                                 </tr>
                             </thead>
@@ -428,32 +428,32 @@ elif modalita == "👤 Area Giocatore":
                         </table>
                     </div>
 
-                    <!-- RIASSUNTO MARGINI DI MIGLIORAMENTO -->
+                    <!-- IMPROVEMENT INSIGHTS SUMMARY -->
                     <div class="insights-box">
-                        <h3>🎯 Focus sui Margini di Miglioramento (Feedback Mister)</h3>
+                        <h3>🎯 Focus on Areas for Improvement (Coach Feedback)</h3>
                         <ul class="insights-list" id="insightsList"></ul>
                     </div>
                 </div>
             </div>
 
-            <!-- MODALE -->
+            <!-- MODAL -->
             <div class="modal-overlay" id="mainModal">
                 <div class="modal">
-                    <h3 id="modalTitle" style="margin-top:0">Scheda Generata</h3>
+                    <h3 id="modalTitle" style="margin-top:0">Generated Card</h3>
                     <div id="modalContent"></div>
-                    <button class="modal-btn" onclick="closeModal()">Chiudi</button>
+                    <button class="modal-btn" onclick="closeModal()">Close</button>
                 </div>
             </div>
 
             <!-- TOAST NOTIFICATION -->
-            <div class="toast" id="toastMsg">✓ Azione completata!</div>
+            <div class="toast" id="toastMsg">✓ Action completed!</div>
 
             <script>
                 const techKeys = ['volley', 'smash', 'bandeja', 'serve', 'defense', 'chiquita'];
-                const techLabels = ['Volea', 'Smash', 'Bandeja', 'Servizio', 'Difesa', 'Chiquita'];
+                const techLabels = ['Volley', 'Smash', 'Bandeja', 'Serve', 'Defense', 'Chiquita'];
                 
                 const mentalKeys = ['chemistry', 'errorManagement', 'positioning', 'focus', 'stamina', 'intensity'];
-                const mentalLabels = ['Intesa', 'Errori', 'Posizione', 'Focus', 'Resistenza', 'Intensità'];
+                const mentalLabels = ['Chemistry', 'Errors', 'Positioning', 'Focus', 'Stamina', 'Intensity'];
 
                 function drawRadarChart(canvasId, labels, dataValues, lineColor, fillColor) {
                     const canvas = document.getElementById(canvasId);
@@ -564,12 +564,12 @@ elif modalita == "👤 Area Giocatore":
                         
                         let diffHtml = '';
                         if (diff > 0) {
-                            diffHtml = `<span class="badge-pos">+${diff} (Tu ˃ Mister)</span>`;
+                            diffHtml = `<span class="badge-pos">+${diff} (You > Coach)</span>`;
                         } else if (diff < 0) {
-                            diffHtml = `<span class="badge-neg">${diff} (Tu ˂ Mister)</span>`;
+                            diffHtml = `<span class="badge-neg">${diff} (You < Coach)</span>`;
                             gaps.push({ label: allLabels[index], myVal, coachVal, diff });
                         } else {
-                            diffHtml = `<span class="badge-eq">= (Perfetto)</span>`;
+                            diffHtml = `<span class="badge-eq">= (Perfect)</span>`;
                         }
 
                         const row = document.createElement('tr');
@@ -584,13 +584,13 @@ elif modalita == "👤 Area Giocatore":
 
                     if (gaps.length === 0) {
                         const li = document.createElement('li');
-                        li.innerHTML = `<b>Ottimo lavoro!</b> Non ci sono aree in cui l'allenatore ti valuta al di sotto delle tue aspettative.`;
+                        li.innerHTML = `<b>Great job!</b> There are no areas where the coach rates you below your expectations.`;
                         insightsList.appendChild(li);
                     } else {
                         gaps.sort((a, b) => a.diff - b.diff);
                         gaps.forEach(item => {
                             const li = document.createElement('li');
-                            li.innerHTML = `<b>${item.label} (Tu ${item.myVal} vs Mister ${item.coachVal}):</b> L'allenatore individua un margine di crescita importante su cui lavorare.`;
+                            li.innerHTML = `<b>${item.label} (You ${item.myVal} vs Coach ${item.coachVal}):</b> The coach identifies an important growth margin to work on.`;
                             insightsList.appendChild(li);
                         });
                     }
@@ -636,7 +636,7 @@ elif modalita == "👤 Area Giocatore":
 
                 function exportJsonFile() {
                     const data = {
-                        fname: document.getElementById('firstName').value.trim() || 'Giocatore',
+                        fname: document.getElementById('firstName').value.trim() || 'Player',
                         lname: document.getElementById('lastName').value.trim() || '',
                         tech: techKeys.map(id => parseInt(document.getElementById(id).value)),
                         mental: mentalKeys.map(id => parseInt(document.getElementById(id).value)),
@@ -676,14 +676,14 @@ elif modalita == "👤 Area Giocatore":
                 function shareOnWhatsApp() {
                     const fname = document.getElementById('firstName').value.trim();
                     const lname = document.getElementById('lastName').value.trim();
-                    const name = `${fname} ${lname}`.trim() || 'Giocatore';
+                    const name = `${fname} ${lname}`.trim() || 'Player';
                     const shareUrl = generateShareUrl();
-                    const text = `🎾 *Scheda Padel*\\n👤 *Giocatore:* ${name}\\n\\nApri scheda e confronto qui:\\n${shareUrl}`;
+                    const text = `🎾 *Padel Card*\\n👤 *Player:* ${name}\\n\\nOpen card and comparison here:\\n${shareUrl}`;
                     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
                 }
 
                 function saveResultAsImage() {
-                    const fname = document.getElementById('firstName').value.trim() || 'Giocatore';
+                    const fname = document.getElementById('firstName').value.trim() || 'Player';
                     const lname = document.getElementById('lastName').value.trim() || '';
                     const fullName = `${fname} ${lname}`.trim();
 
@@ -700,11 +700,11 @@ elif modalita == "👤 Area Giocatore":
                     ctx.font = 'bold 24px -apple-system, sans-serif';
                     ctx.fillStyle = '#38bdf8';
                     ctx.textAlign = 'center';
-                    ctx.fillText(fullName ? `${fullName} - Scheda Padel` : 'Padel Performance Dashboard', 400, 55);
+                    ctx.fillText(fullName ? `${fullName} - Padel Card` : 'Padel Performance Dashboard', 400, 55);
 
                     ctx.font = '14px -apple-system, sans-serif';
                     ctx.fillStyle = '#94a3b8';
-                    ctx.fillText('Confronto Autovalutazione vs Allenatore', 400, 80);
+                    ctx.fillText('Self-Evaluation vs Coach Comparison', 400, 80);
 
                     const techCanvas = document.getElementById('techCanvas');
                     ctx.fillStyle = '#1e293b';
@@ -718,15 +718,15 @@ elif modalita == "👤 Area Giocatore":
 
                     const dataUrl = cCanvas.toDataURL('image/png');
                     const link = document.createElement('a');
-                    link.download = `Padel_Confronto_${fname}_${lname}.png`.replace(/\\s+/g, '_');
+                    link.download = `Padel_Comparison_${fname}_${lname}.png`.replace(/\\s+/g, '_');
                     link.href = dataUrl;
                     
-                    document.getElementById('modalTitle').innerText = '🖼️ Immagine Generata!';
+                    document.getElementById('modalTitle').innerText = '🖼️ Image Generated!';
                     document.getElementById('modalContent').innerHTML = `
-                        <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0;">Tieni premuto sull'immagine per salvarla:</p>
-                        <img src="${dataUrl}" alt="Scheda Padel">
+                        <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0;">Press and hold on the image to save it:</p>
+                        <img src="${dataUrl}" alt="Padel Card">
                         <br>
-                        <a href="${dataUrl}" download="${link.download}" style="display:inline-block; padding:10px 16px; background:var(--accent-purple); color:#fff; text-decoration:none; font-weight:bold; border-radius:8px; margin-top:6px;">⬇️ Scarica Immagine</a>
+                        <a href="${dataUrl}" download="${link.download}" style="display:inline-block; padding:10px 16px; background:var(--accent-purple); color:#fff; text-decoration:none; font-weight:bold; border-radius:8px; margin-top:6px;">⬇️ Download Image</a>
                     `;
                     document.getElementById('mainModal').style.display = 'flex';
                 }
@@ -736,9 +736,9 @@ elif modalita == "👤 Area Giocatore":
                     if (navigator.clipboard && window.isSecureContext) {
                         navigator.clipboard.writeText(shareUrl).then(showToast);
                     } else {
-                        document.getElementById('modalTitle').innerText = '📋 Copia il tuo link';
+                        document.getElementById('modalTitle').innerText = '📋 Copy your link';
                         document.getElementById('modalContent').innerHTML = `
-                            <p style="font-size:0.85rem; color:var(--text-muted)">Seleziona e copia il link:</p>
+                            <p style="font-size:0.85rem; color:var(--text-muted)">Select and copy the link:</p>
                             <input type="text" value="${shareUrl}" readonly onclick="this.select()">
                         `;
                         document.getElementById('mainModal').style.display = 'flex';
@@ -802,60 +802,57 @@ elif modalita == "👤 Area Giocatore":
         components.html(html_code, height=1400, scrolling=True)
 
     with tab_directory:
-        st.subheader("👥 Directory Giocatori della Squadra")
-        st.markdown("Seleziona un giocatore dalla lista per consultare rapidamente la sua scheda e i suoi punteggi.")
+        st.subheader("👥 Team Player Directory")
+        st.markdown("Select a player from the list to quickly review their profile and ratings.")
         
-        # Creiamo unaselectbox o dei pulsanti rapidi per ogni giocatore
         player_names = [f"{p['fname']} {p['lname']}" for p in squad_players]
-        selected_player_name = st.selectbox("Cerca o seleziona un giocatore:", player_names)
+        selected_player_name = st.selectbox("Search or select a player:", player_names)
         
-        # Troviamo il giocatore selezionato
         selected_player = next((p for p in squad_players if f"{p['fname']} {p['lname']}" == selected_player_name), None)
         
         if selected_player:
             st.markdown(f"---")
-            st.markdown(f"### Scheda di: **{selected_player['fname']} {selected_player['lname']}**")
+            st.markdown(f"### Player Card: **{selected_player['fname']} {selected_player['lname']}**")
             
-            tech_labels = ['Volea', 'Smash', 'Bandeja', 'Servizio', 'Difesa', 'Chiquita']
-            mental_labels = ['Intesa', 'Errori', 'Posizione', 'Focus', 'Resistenza', 'Intensità']
+            tech_labels = ['Volley', 'Smash', 'Bandeja', 'Serve', 'Defense', 'Chiquita']
+            mental_labels = ['Chemistry', 'Errors', 'Positioning', 'Focus', 'Stamina', 'Intensity']
             
             col1, col2 = st.columns(2)
             with col1:
-                st.markdown("#### ⚡ Valutazioni Tecniche")
+                st.markdown("#### ⚡ Technical Skills")
                 df_tech = pd.DataFrame({
-                    "Abilità": tech_labels,
-                    "Autovalutazione": selected_player['tech'],
-                    "Valutazione Mister": selected_player['c_tech']
+                    "Skill": tech_labels,
+                    "Self-Evaluation": selected_player['tech'],
+                    "Coach Rating": selected_player['c_tech']
                 })
                 st.dataframe(df_tech, use_container_width=True, hide_index=True)
                 
             with col2:
-                st.markdown("#### 🧠 Valutazioni Mentali / Tattiche")
+                st.markdown("#### 🧠 Mental / Tactical Skills")
                 df_mental = pd.DataFrame({
-                    "Abilità": mental_labels,
-                    "Autovalutazione": selected_player['mental'],
-                    "Valutazione Mister": selected_player['c_mental']
+                    "Skill": mental_labels,
+                    "Self-Evaluation": selected_player['mental'],
+                    "Coach Rating": selected_player['c_mental']
                 })
                 st.dataframe(df_mental, use_container_width=True, hide_index=True)
                 
-            # Medie generali
             avg_my = (sum(selected_player['tech']) + sum(selected_player['mental'])) / 12
             avg_coach = (sum(selected_player['c_tech']) + sum(selected_player['c_mental'])) / 12
             
-            st.info(f"📊 **Media Generale Autovalutazione:** {round(avg_my, 1)} / 10  |  📊 **Media Generale Mister:** {round(avg_coach, 1)} / 10")
+            st.info(f"📊 **Overall Self-Evaluation Average:** {round(avg_my, 1)} / 10  |  📊 **Overall Coach Average:** {round(avg_coach, 1)} / 10")
 
-elif modalita == "📋 Area Allenatore (Coach)" and st.session_state.authenticated_coach:
-    # VISTA ALLENATORE (SBLOCCATA SOLO CON PASSWORD)
-    st.title("📋 Padel Coach - Gestione Gruppi & Analisi")
-    st.markdown("Panoramica centralizzata delle valutazioni dei giocatori e creazione automatica di gruppi di lavoro mirati.")
+elif modalita == "📋 Coach Area" and st.session_state.authenticated_coach:
+    # COACH AREA (UNLOCKED ONLY WITH PASSWORD)
+    st.title("📋 Padel Coach - Group Management & Analysis")
+    st.markdown("Centralized overview of player evaluations and automatic generation of targeted training groups.")
 
-    tech_labels = ['Volea', 'Smash', 'Bandeja', 'Servizio', 'Difesa', 'Chiquita']
-    mental_labels = ['Intesa', 'Errori', 'Posizione', 'Focus', 'Resistenza', 'Intensità']
+    tech_labels = ['Volley', 'Smash', 'Bandeja', 'Serve', 'Defense', 'Chiquita']
+    mental_labels = ['Chemistry', 'Errors', 'Positioning', 'Focus', 'Stamina', 'Intensity']
     all_labels = tech_labels + mental_labels
 
-    st.sidebar.header("📁 Carica Dati Giocatori")
+    st.sidebar.header("📁 Upload Player Data")
     uploaded_files = st.sidebar.file_uploader(
-        "Carica i file JSON esportati dai giocatori", 
+        "Upload JSON files exported by players", 
         type=["json"], 
         accept_multiple_files=True
     )
@@ -867,18 +864,18 @@ elif modalita == "📋 Area Allenatore (Coach)" and st.session_state.authenticat
             try:
                 data = json.load(file)
                 players_data.append({
-                    "fname": data.get("fname", "Nome"),
-                    "lname": data.get("lname", "Cognome"),
+                    "fname": data.get("fname", "Name"),
+                    "lname": data.get("lname", "Lastname"),
                     "tech": [int(x) for x in data.get("tech", [5]*6)],
                     "mental": [int(x) for x in data.get("mental", [5]*6)],
                     "c_tech": [int(x) for x in data.get("c_tech", [5]*6)],
                     "c_mental": [int(x) for x in data.get("c_mental", [5]*6)]
                 })
             except Exception as e:
-                st.sidebar.error(f"Errore nel file {file.name}: {e}")
+                st.sidebar.error(f"Error in file {file.name}: {e}")
     else:
         players_data = squad_players
-        st.sidebar.info("💡 Stai visualizzando la squadra completa caricata in memoria. I giocatori possono inviarti i file JSON per aggiornare i dati.")
+        st.sidebar.info("💡 You are viewing the complete squad loaded in memory. Players can send you JSON files to update data.")
 
     summary_rows = []
     player_weaknesses = {}
@@ -892,10 +889,10 @@ elif modalita == "📋 Area Allenatore (Coach)" and st.session_state.authenticat
         avg_mental_coach = sum(cm_vals) / len(cm_vals)
         
         summary_rows.append({
-            "Giocatore": full_name,
-            "Media Tech (Mister)": round(avg_tech_coach, 1),
-            "Media Mental (Mister)": round(avg_mental_coach, 1),
-            "Media Generale": round((avg_tech_coach + avg_mental_coach) / 2, 1)
+            "Player": full_name,
+            "Tech Average (Coach)": round(avg_tech_coach, 1),
+            "Mental Average (Coach)": round(avg_mental_coach, 1),
+            "Overall Average": round((avg_tech_coach + avg_mental_coach) / 2, 1)
         })
         
         all_coach_scores = ct_vals + cm_vals
@@ -910,11 +907,11 @@ elif modalita == "📋 Area Allenatore (Coach)" and st.session_state.authenticat
 
     df_summary = pd.DataFrame(summary_rows)
 
-    st.subheader("📊 Tabella Riassuntiva Squadra")
+    st.subheader("📊 Team Summary Table")
     st.dataframe(df_summary, use_container_width=True)
 
-    st.subheader("🎯 Gruppi di Lavoro Consigliati per Sessione Mirata")
-    st.markdown("L'app ha raggruppato automaticamente i giocatori che condividono le stesse carenze:")
+    st.subheader("🎯 Recommended Training Groups for Targeted Sessions")
+    st.markdown("The app has automatically grouped players sharing the same areas for improvement:")
 
     skill_to_players = {}
     for player, skills in player_weaknesses.items():
@@ -929,4 +926,4 @@ elif modalita == "📋 Area Allenatore (Coach)" and st.session_state.authenticat
     for idx, (skill, members) in enumerate(sorted_groups):
         target_col = col1 if idx % 2 == 0 else col2
         with target_col:
-            st.info(f"**🛠️ Focus su: {skill}**\n\nGiocatori:\n" + "".join([f"\n* **{m}**" for m in members]))
+            st.info(f"**🛠️ Focus on: {skill}**\n\nPlayers:\n" + "".join([f"\n* **{m}**" for m in members]))
