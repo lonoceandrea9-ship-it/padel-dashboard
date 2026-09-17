@@ -164,6 +164,7 @@ translations = {
         "exit_coach": "Esci da Area Allenatore",
         "coach_tab_squad": "Gestione Squadra & Presenze",
         "coach_tab_evals": "Gestione Voti Coach",
+        "coach_tab_training": "Allenamenti & Focus",
         "coach_tab_matches": "Gestione Partite",
         "coach_tab_comments": "Tutti i Commenti",
         "coach_tab_pairing": "Pairing Coppie Automatico",
@@ -181,6 +182,11 @@ translations = {
         "tech_skills_coach": "Competenze Tecniche (Coach)",
         "mental_skills_coach": "Competenze Mentali (Coach)",
         "save_coach_eval": "Salva Voti, Profilo e Nota Coach",
+        "training_title": "Pianificazione Allenamento & Focus Consigliato",
+        "training_desc": "Seleziona i giocatori che parteciperanno alla sessione di oggi. L'app analizzerà i loro voti del coach per evidenziare le aree in cui il gruppo è complessivamente più debole.",
+        "select_attendees": "Seleziona i partecipanti alla sessione di oggi:",
+        "training_priorities": "🎯 Aree Prioritarie di Allenamento Consigliate per il Gruppo",
+        "training_no_attendees": "Seleziona almeno un giocatore per visualizzare il focus di allenamento.",
         "match_mgmt": "Registrazione Partite",
         "match_mgmt_desc": "Seleziona i giocatori per ciascuna squadra (ciascun team richiede 1 giocatore di Sinistra e 1 di Destra).",
         "match_date": "Data Partita",
@@ -263,6 +269,7 @@ translations = {
         "exit_coach": "Exit Coach Area",
         "coach_tab_squad": "Squad Management & Attendance",
         "coach_tab_evals": "Coach Grades Management",
+        "coach_tab_training": "Training & Focus",
         "coach_tab_matches": "Match Management",
         "coach_tab_comments": "All Comments",
         "coach_tab_pairing": "Automatic Pair Pairing",
@@ -280,6 +287,11 @@ translations = {
         "tech_skills_coach": "Technical Skills (Coach)",
         "mental_skills_coach": "Mental Skills (Coach)",
         "save_coach_eval": "Save Grades, Profile and Coach Note",
+        "training_title": "Training Planning & Recommended Focus",
+        "training_desc": "Select the players attending today's session. The app will analyze their coach grades to highlight the areas where the group is weakest overall.",
+        "select_attendees": "Select attendees for today's session:",
+        "training_priorities": "🎯 Recommended Training Priorities for the Group",
+        "training_no_attendees": "Please select at least one player to view the training focus.",
         "match_mgmt": "Match Registration",
         "match_mgmt_desc": "Select players for each team (each team requires 1 Left player and 1 Right player).",
         "match_date": "Match Date",
@@ -362,6 +374,7 @@ translations = {
         "exit_coach": "Salir del Área de Entrenador",
         "coach_tab_squad": "Gestión de Plantilla y Asistencia",
         "coach_tab_evals": "Gestión de Notas del Entrenador",
+        "coach_tab_training": "Entrenamiento y Enfoque",
         "coach_tab_matches": "Gestión de Partidos",
         "coach_tab_comments": "Todos los Comentarios",
         "coach_tab_pairing": "Emparejamiento Automático de Parejas",
@@ -379,6 +392,11 @@ translations = {
         "tech_skills_coach": "Habilidades Técnicas (Entrenador)",
         "mental_skills_coach": "Habilidades Mentales (Entrenador)",
         "save_coach_eval": "Guardar Notas, Perfil y Nota del Entrenador",
+        "training_title": "Planificación de Entrenamiento y Enfoque Recomendado",
+        "training_desc": "Selecciona los jugadores que asistirán a la sesión de hoy. La aplicación analizará sus notas del entrenador para destacar las áreas en las que el grupo es más débil en general.",
+        "select_attendees": "Selecciona los asistentes a la sesión de hoy:",
+        "training_priorities": "🎯 Prioridades de Entrenamiento Recomendadas para el Grupo",
+        "training_no_attendees": "Selecciona al menos un jugador para ver el enfoque de entrenamiento.",
         "match_mgmt": "Registro de Partidos",
         "match_mgmt_desc": "Selecciona los jugadores para cada equipo (cada equipo requiere 1 jugador de Izquierda y 1 de Derecha).",
         "match_date": "Fecha del Partido",
@@ -461,6 +479,7 @@ translations = {
         "exit_coach": "Logga ut från Tränarområde",
         "coach_tab_squad": "Trupphantering & Närvaro",
         "coach_tab_evals": "Coachbetygshantering",
+        "coach_tab_training": "Träning & Fokus",
         "coach_tab_matches": "Matchhantering",
         "coach_tab_comments": "Alla Kommentarer",
         "coach_tab_pairing": "Automatiskt Parval",
@@ -478,6 +497,11 @@ translations = {
         "tech_skills_coach": "Tekniska Färdigheter (Coach)",
         "mental_skills_coach": "Mentala Färdigheter (Coach)",
         "save_coach_eval": "Spara Betyg, Profil och Coachanteckning",
+        "training_title": "Träningsplanering & Rekommenderat Fokus",
+        "training_desc": "Välj de spelare som deltar i dagens pass. Appen analyserar deras coachbetyg för att lyfta fram de områden där gruppen är svagast totalt.",
+        "select_attendees": "Välj deltagare till dagens pass:",
+        "training_priorities": "🎯 Rekommenderade Träningsprioriteringar för Gruppen",
+        "training_no_attendees": "Välj minst en spelare för att visa träningsfokus.",
         "match_mgmt": "Matchregistrering",
         "match_mgmt_desc": "Välj spelare för varje lag (varje lag kräver 1 Vänsterspelare och 1 Högerspelare).",
         "match_date": "Matchdatum",
@@ -560,6 +584,7 @@ translations = {
         "exit_coach": "Verlaat Coachgebied",
         "coach_tab_squad": "Selectiebeheer & Aanwezigheid",
         "coach_tab_evals": "Coach Cijfers Beheer",
+        "coach_tab_training": "Training & Focus",
         "coach_tab_matches": "Wedstrijdbeheer",
         "coach_tab_comments": "Alle Opmerkingen",
         "coach_tab_pairing": "Automatische Koppelindeling",
@@ -577,6 +602,11 @@ translations = {
         "tech_skills_coach": "Technische Vaardigheden (Coach)",
         "mental_skills_coach": "Mentale Vaardigheden (Coach)",
         "save_coach_eval": "Cijfers, Profiel en Coachnotitie Opslaan",
+        "training_title": "Trainingsplanning & Aanbevolen Focus",
+        "training_desc": "Selecteer de spelers die deelnemen aan de sessie van vandaag. De app analyseert hun coachcijfers om te markeren waar de groep over het algemeen het zwakst is.",
+        "select_attendees": "Selecteer de aanwezigen voor de sessie van vandaag:",
+        "training_priorities": "🎯 Aanbevolen Trainingsprioriteiten voor de Groep",
+        "training_no_attendees": "Selecteer ten minste één speler om de trainingsfocus te bekijken.",
         "match_mgmt": "Wedstrijdregistratie",
         "match_mgmt_desc": "Selecteer spelers voor elk team (elk team vereist 1 Linkerspeler en 1 Rechterspeler).",
         "match_date": "Wedstrijddatum",
@@ -659,6 +689,7 @@ translations = {
         "exit_coach": "Log ud fra Trænerområde",
         "coach_tab_squad": "Trupstyring & Fremmøde",
         "coach_tab_evals": "Trænerkarakterer Håndtering",
+        "coach_tab_training": "Træning & Fokus",
         "coach_tab_matches": "Kampstyring",
         "coach_tab_comments": "Alle Kommentarer",
         "coach_tab_pairing": "Automatisk Makkerparring",
@@ -676,6 +707,11 @@ translations = {
         "tech_skills_coach": "Tekniske Færdigheder (Træner)",
         "mental_skills_coach": "Mentale Færdigheder (Træner)",
         "save_coach_eval": "Gem Karakterer, Profil og Trænernote",
+        "training_title": "Træningsplanlægning & Anbefalet Fokus",
+        "training_desc": "Vælg de spillere, der deltager i dagens session. Appen analyserer deres trænerkarakterer for at fremhæve de områder, hvor gruppen er svagest generelt.",
+        "select_attendees": "Vælg deltagere til dagens session:",
+        "training_priorities": "🎯 Anbefalede Træningsprioriteter for Gruppen",
+        "training_no_attendees": "Vælg venligst mindst én spiller for at se træningsfokus.",
         "match_mgmt": "Kampregistrering",
         "match_mgmt_desc": "Vælg spillere til hvert hold (hvert hold kræver 1 Venstrespiller og 1 Højrespiller).",
         "match_date": "Kampdato",
@@ -1141,9 +1177,10 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         st.session_state.nav_mode = "Home"
         st.rerun()
         
-    coach_tab1, coach_tab_evals, coach_tab2, coach_tab3, coach_tab_pairing = st.tabs([
+    coach_tab1, coach_tab_evals, coach_tab_training, coach_tab2, coach_tab3, coach_tab_pairing = st.tabs([
         f"👥 {lang_dict['coach_tab_squad']}", 
         f"✏️ {lang_dict['coach_tab_evals']}",
+        f"🎾 {lang_dict['coach_tab_training']}",
         f"📅 {lang_dict['coach_tab_matches']}", 
         f"💬 {lang_dict['coach_tab_comments']}",
         f"🤖 {lang_dict['coach_tab_pairing']}"
@@ -1274,6 +1311,68 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     p_obj['play_style'] = selected_style
                     p_obj['coach_note'] = new_coach_note
                     st.success(f"✅ {selected_player_name} updated successfully!")
+
+    with coach_tab_training:
+        st.subheader(f"🎾 {lang_dict['training_title']}")
+        st.markdown(lang_dict['training_desc'])
+        
+        all_player_names = [f"{p['fname']} {p['lname']}" for p in squad_players]
+        selected_attendees_names = st.multiselect(
+            lang_dict['select_attendees'],
+            options=all_player_names,
+            default=all_player_names
+        )
+        
+        if selected_attendees_names:
+            attending_players = [p for p in squad_players if f"{p['fname']} {p['lname']}" in selected_attendees_names]
+            
+            # Calcolo delle medie del gruppo per ogni skill (coach grades)
+            skill_averages = {}
+            for idx, skill in enumerate(ALL_SKILLS):
+                vals = []
+                for p in attending_players:
+                    p_vals = p['c_tech'] + p['c_mental']
+                    vals.append(p_vals[idx])
+                skill_averages[skill] = sum(vals) / len(vals) if vals else 0.0
+                
+            # Ordiniamo le skill dalla media più bassa alla più alta
+            sorted_skills = sorted(skill_averages.items(), key=lambda x: x[1])
+            
+            st.markdown("---")
+            st.markdown(f"### {lang_dict['training_priorities']}")
+            st.markdown("Basato sui voti del coach dei giocatori presenti, ecco le competenze con la media più bassa (da allenare con priorità):")
+            
+            # Mostriamo le prime 3 priorità in evidenza con metriche o card
+            top_priorities = sorted_skills[:3]
+            
+            col_p1, col_p2, col_p3 = st.columns(3)
+            with col_p1:
+                if len(top_priorities) > 0:
+                    st.metric(label="🔥 1° Priorità (Criticità)", value=top_priorities[0][0], delta=f"Media gruppo: {round(top_priorities[0][1], 1)}/10", delta_color="inverse")
+            with col_p2:
+                if len(top_priorities) > 1:
+                    st.metric(label="⚡ 2° Priorità", value=top_priorities[1][0], delta=f"Media gruppo: {round(top_priorities[1][1], 1)}/10", delta_color="inverse")
+            with col_p3:
+                if len(top_priorities) > 2:
+                    st.metric(label="💡 3° Priorità", value=top_priorities[2][0], delta=f"Media gruppo: {round(top_priorities[2][1], 1)}/10", delta_color="inverse")
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.markdown("#### 📊 Tabella Completa delle Medie del Gruppo Presente")
+            
+            training_table_data = []
+            for skill, avg_val in sorted_skills:
+                cat_type = "Tecnica" if skill in TECH_SKILLS else "Mentale"
+                training_table_data.append({
+                    "Competenza": skill,
+                    "Categoria": cat_type,
+                    "Media Gruppo Presente": f"{round(avg_val, 2)} / 10"
+                })
+                
+            df_training = pd.DataFrame(training_table_data)
+            st.markdown(df_training.to_html(escape=False, index=False, classes="custom-table"), unsafe_allow_html=True)
+            
+        else:
+            st.info(lang_dict['training_no_attendees'])
 
     with coach_tab2:
         st.subheader(f"📅 {lang_dict['match_mgmt']}")
