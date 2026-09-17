@@ -63,25 +63,52 @@ if "authenticated_player" not in st.session_state:
 
 if "squad_data" not in st.session_state:
     st.session_state.squad_data = [
-        {"fname": "Álvaro", "lname": "Gomez", "side": "Left", "level": 5, "pista": "1-2", "trainings": 1, "participated": 1, "commitment": "100%",
+        {"fname": "Álvaro", "lname": "Gomez", "side": "Left", "trainings": 4, "participated": 4,
          "tech": [7, 7, 6, 7, 6, 6, 7], "mental": [8, 7, 7, 7, 8, 7], 
          "c_tech": [6, 6, 5, 6, 5, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6], "history": [], "partners": {"Yannik Langeslag": 12, "Josu Usabiaga": 8}, "comments": []},
-        {"fname": "Yannik", "lname": "Langeslag", "side": "Left", "level": 5, "pista": "1-2", "trainings": 1, "participated": 1, "commitment": "100%",
+        {"fname": "Yannik", "lname": "Langeslag", "side": "Left", "trainings": 4, "participated": 4,
          "tech": [8, 6, 7, 7, 7, 5, 6], "mental": [7, 6, 8, 6, 7, 6], 
          "c_tech": [7, 5, 6, 6, 6, 4, 5], "c_mental": [6, 5, 7, 5, 6, 5], "history": [], "partners": {"Álvaro Gomez": 12}, "comments": []},
-        {"fname": "Josu", "lname": "Usabiaga", "side": "Right", "level": 5, "pista": "1-2", "trainings": 1, "participated": 1, "commitment": "100%",
+        {"fname": "Josu", "lname": "Usabiaga", "side": "Right", "trainings": 4, "participated": 3,
          "tech": [6, 8, 7, 7, 6, 7, 7], "mental": [6, 8, 6, 8, 7, 7], 
          "c_tech": [5, 7, 6, 6, 5, 6, 6], "c_mental": [5, 7, 5, 7, 6, 6], "history": [], "partners": {"Álvaro Gomez": 8}, "comments": []},
-        {"fname": "Andrea", "lname": "Lonoce", "side": "Right", "level": 3, "pista": "3-5", "trainings": 1, "participated": 1, "commitment": "100%",
+        {"fname": "Benjamin", "lname": "Thyrell", "side": "Left", "trainings": 4, "participated": 4,
+         "tech": [7, 7, 8, 6, 7, 6, 7], "mental": [8, 7, 7, 7, 8, 7], "c_tech": [6, 6, 7, 5, 6, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6], "history": [], "partners": {}, "comments": []},
+        {"fname": "Alexander", "lname": "Wennstam", "side": "Left", "trainings": 4, "participated": 4,
+         "tech": [8, 8, 7, 7, 8, 6, 7], "mental": [7, 7, 8, 8, 7, 7], "c_tech": [7, 7, 6, 6, 7, 5, 6], "c_mental": [6, 6, 7, 7, 6, 6], "history": [], "partners": {}, "comments": []},
+        {"fname": "Andrea", "lname": "Lonoce", "side": "Right", "trainings": 4, "participated": 4,
          "tech": [8, 7, 8, 7, 9, 6, 8], "mental": [9, 7, 8, 8, 9, 7], 
-         "c_tech": [8, 7, 8, 7, 9, 6, 8], "c_mental": [9, 7, 8, 8, 9, 7], "history": [], "partners": {"Alexander Wennstam": 14}, "comments": []}
+         "c_tech": [8, 7, 8, 7, 9, 6, 8], "c_mental": [9, 7, 8, 8, 9, 7], "history": [], "partners": {"Alexander Wennstam": 14}, "comments": []},
+        {"fname": "Mikkel", "lname": "Hoff", "side": "Right", "trainings": 4, "participated": 2,
+         "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5], "history": [], "partners": {}, "comments": []},
+        {"fname": "Pedro", "lname": "Rios", "side": "Right", "trainings": 4, "participated": 3,
+         "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7], "history": [], "partners": {}, "comments": []},
+        {"fname": "Hector", "lname": "Guerrero", "side": "Right", "trainings": 4, "participated": 4,
+         "tech": [7, 7, 7, 7, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 6, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6], "history": [], "partners": {}, "comments": []},
+        {"fname": "Gonzalo", "lname": "Diez de Onate", "side": "Left", "trainings": 4, "participated": 2,
+         "tech": [8, 7, 8, 7, 8, 6, 7], "mental": [8, 7, 8, 8, 8, 7], "c_tech": [7, 6, 7, 6, 7, 5, 6], "c_mental": [7, 6, 7, 7, 7, 6], "history": [], "partners": {}, "comments": []},
+        {"fname": "Julio", "lname": "Morales", "side": "Right", "trainings": 4, "participated": 3,
+         "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5], "history": [], "partners": {}, "comments": []},
+        {"fname": "Lars", "lname": "Mikkelsen", "side": "Left", "trainings": 4, "participated": 1,
+         "tech": [7, 7, 7, 6, 8, 6, 7], "mental": [8, 7, 7, 7, 8, 7], "c_tech": [6, 6, 6, 5, 7, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6], "history": [], "partners": {}, "comments": []},
+        {"fname": "Joahn", "lname": "Lohman", "side": "Left", "trainings": 4, "participated": 1,
+         "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5], "history": [], "partners": {}, "comments": []},
+        {"fname": "Nacho", "lname": "Saracho", "side": "Right", "trainings": 4, "participated": 2,
+         "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7], "history": [], "partners": {}, "comments": []},
+        {"fname": "Peter", "lname": "Gustafsson", "side": "Left", "trainings": 4, "participated": 2,
+         "tech": [7, 7, 7, 6, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6], "history": [], "partners": {}, "comments": []},
+        {"fname": "Juanjo", "lname": "Lopez Benitez", "side": "Left", "trainings": 4, "participated": 2,
+         "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7], "history": [], "partners": {}, "comments": []},
+        {"fname": "Sascha", "lname": "Van De Bilt", "side": "Right", "trainings": 4, "participated": 1,
+         "tech": [7, 7, 7, 6, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6], "history": [], "partners": {}, "comments": []},
+        {"fname": "Fernando", "lname": "Oribe", "side": "Right", "trainings": 4, "participated": 1,
+         "tech": [8, 7, 8, 7, 8, 6, 7], "mental": [8, 7, 8, 8, 8, 7], "c_tech": [7, 6, 7, 6, 7, 5, 6], "c_mental": [7, 6, 7, 7, 7, 6], "history": [], "partners": {}, "comments": []},
+        {"fname": "Doug", "lname": "Ramsay", "side": "Left", "trainings": 4, "participated": 1,
+         "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5], "history": [], "partners": {}, "comments": []}
     ]
     for p in st.session_state.squad_data:
-        if "level" not in p: p["level"] = 3
-        if "pista" not in p: p["pista"] = "3-5"
-        if "trainings" not in p: p["trainings"] = 1
-        if "participated" not in p: p["participated"] = 1
-        if "commitment" not in p: p["commitment"] = "100%"
+        if "trainings" not in p: p["trainings"] = 4
+        if "participated" not in p: p["participated"] = 2
         if len(p["tech"]) != len(TECH_SKILLS): p["tech"] = [7] * len(TECH_SKILLS)
         if len(p["mental"]) != len(MENTAL_SKILLS): p["mental"] = [7] * len(MENTAL_SKILLS)
         if len(p["c_tech"]) != len(TECH_SKILLS): p["c_tech"] = [6] * len(TECH_SKILLS)
@@ -382,7 +409,7 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                     })
                     st.success("Nota inviata!")
             else:
-                st.warning("Il testo non non può essere vuoto.")
+                st.warning("Il testo non può essere vuoto.")
         
         st.markdown("### Ricevuti:")
         for c in current_player.get("comments", []):
@@ -397,32 +424,59 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         st.rerun()
         
     coach_tab1, coach_tab2, coach_tab3 = st.tabs([
-        "👥 Gestione Squadra & Voti", 
+        "👥 Gestione Squadra & Parametri", 
         "📅 Gestione Partite", 
         "💬 Tutti i Commenti"
     ])
     
     with coach_tab1:
-        st.subheader("👥 Elenco Giocatori, Parametri e Gestione Voti")
-        st.markdown("Visualizza la panoramica della rosa e seleziona un giocatore per aggiornarne i voti assegnati dall'allenatore.")
+        st.subheader("👥 Elenco Intero Giocatori, Parametri e Presenze")
+        st.markdown("Modifica direttamente qui sotto i **Trainings** e i **Participated** dei giocatori. La percentuale di **Commitment** verrà calcolata e aggiornata in automatico.")
         
-        # Tabella riassuntiva stile immagine
-        summary_rows = []
+        # Preparazione DataFrame modificabile
+        df_summary_data = []
         for p in squad_players:
-            summary_rows.append({
+            t = p.get("trainings", 4)
+            part = p.get("participated", 2)
+            comm_val = f"{int((part / t) * 100)}%" if t > 0 else "0%"
+            df_summary_data.append({
                 "Nome": p["fname"],
                 "Cognome": p["lname"],
-                "Level 1-5": p.get("level", 3),
-                "Pista": p.get("pista", "3-5"),
-                "Trainings": p.get("trainings", 1),
-                "Participated": p.get("participated", 1),
-                "Commitment": p.get("commitment", "100%"),
-                "Role": p["side"]
+                "Role": p["side"],
+                "Trainings": int(t),
+                "Participated": int(part),
+                "Commitment": comm_val
             })
-        st.table(pd.DataFrame(summary_rows))
         
+        df_editable = pd.DataFrame(df_summary_data)
+        
+        # Tabella editabile in Streamlit
+        edited_df = st.data_editor(
+            df_editable,
+            column_config={
+                "Trainings": st.column_config.NumberColumn("Trainings", min_value=0, max_value=50, step=1),
+                "Participated": st.column_config.NumberColumn("Participated", min_value=0, max_value=50, step=1),
+                "Role": st.column_config.TextColumn("Role (Side)", disabled=True),
+                "Commitment": st.column_config.TextColumn("Commitment", disabled=True)
+            },
+            hide_index=True,
+            use_container_width=True,
+            key="coach_squad_editor"
+        )
+        
+        # Pulsante per salvare le modifiche fatte nella tabella delle presenze
+        if st.button("Salva Modifiche Presenze/Trainings", type="primary"):
+            for idx, row in edited_df.iterrows():
+                squad_players[idx]["trainings"] = int(row["Trainings"])
+                squad_players[idx]["participated"] = int(row["Participated"])
+                t_val = int(row["Trainings"])
+                p_val = int(row["Participated"])
+                squad_players[idx]["commitment"] = f"{int((p_val / t_val) * 100)}%" if t_val > 0 else "0%"
+            st.success("Presenze e Training aggiornati con successo!")
+            st.rerun()
+
         st.markdown("---")
-        st.markdown("### ✏️ Modifica Voti Coach per Singolo Giocatore")
+        st.markdown("### ✏️ Gestione Voti Coach per Singolo Giocatore")
         selected_player_name = st.selectbox("Seleziona giocatore da valutare:", [f"{p['fname']} {p['lname']}" for p in squad_players])
         p_obj = next((p for p in squad_players if f"{p['fname']} {p['lname']}" == selected_player_name), None)
         
