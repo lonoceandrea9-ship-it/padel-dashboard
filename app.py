@@ -428,8 +428,8 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
     ])
     
     with coach_tab1:
-        st.subheader("👥 Elenco Intero Giocatori, Parametri e Presenze")
-        st.markdown("Modifica direttamente qui sotto i **Trainings** e i **Participated** di tutti i 19 giocatori. La percentuale di **Commitment** verrà calcolata automaticamente.")
+        st.subheader("👥 Elenco Intero Giocatori, Ruoli e Presenze")
+        st.markdown("Ora puoi modificare direttamente qui sotto il **Role (Left/Right)**, i **Trainings** e i **Participated** di tutti i 19 giocatori. La percentuale di **Commitment** verrà ricalcolata automaticamente.")
         
         df_summary_data = []
         for p in squad_players:
@@ -450,9 +450,13 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         edited_df = st.data_editor(
             df_editable,
             column_config={
+                "Role": st.column_config.SelectboxColumn(
+                    "Role (Side)",
+                    options=["Left", "Right"],
+                    required=True
+                ),
                 "Trainings": st.column_config.NumberColumn("Trainings", min_value=0, max_value=50, step=1),
                 "Participated": st.column_config.NumberColumn("Participated", min_value=0, max_value=50, step=1),
-                "Role": st.column_config.TextColumn("Role (Side)", disabled=True),
                 "Commitment": st.column_config.TextColumn("Commitment", disabled=True)
             },
             hide_index=True,
@@ -461,14 +465,15 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             key="coach_squad_editor"
         )
         
-        if st.button("Salva Modifiche Presenze/Trainings", type="primary"):
+        if st.button("Salva Modifiche Squadra (Ruoli, Trainings, Presenze)", type="primary"):
             for idx, row in edited_df.iterrows():
+                squad_players[idx]["side"] = row["Role"]
                 squad_players[idx]["trainings"] = int(row["Trainings"])
                 squad_players[idx]["participated"] = int(row["Participated"])
                 t_val = int(row["Trainings"])
                 p_val = int(row["Participated"])
                 squad_players[idx]["commitment"] = f"{int((p_val / t_val) * 100)}%" if t_val > 0 else "0%"
-            st.success("Presenze e Training aggiornati con successo per tutta la squadra!")
+            st.success("Ruoli, presenze e training aggiornati con successo per tutta la squadra!")
             st.rerun()
 
         st.markdown("---")
