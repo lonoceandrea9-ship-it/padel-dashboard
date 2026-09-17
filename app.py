@@ -750,15 +750,15 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         st.markdown("Modifica direttamente qui sotto i dati della squadra. I cambiamenti si salvano in tempo reale e il **Commitment (%)** viene ricalcolato automaticamente.")
         
         with st.form("squad_edit_form"):
-            # --- TITOLI DELLE COLONNE (Commitment centrato) ---
+            # --- TITOLI DELLE COLONNE (Senza asterischi e centrato) ---
             th_cols = st.columns([1.8, 1.2, 1.2, 1.4, 0.9, 0.9, 0.9])
-            with th_cols[0]: st.markdown("**Nome**")
-            with th_cols[1]: st.markdown("**Role**")
-            with th_cols[2]: st.markdown("**Mano**")
-            with th_cols[3]: st.markdown("**Play Style**")
-            with th_cols[4]: st.markdown("**Trainings**")
-            with th_cols[5]: st.markdown("**Participated**")
-            with th_cols[6]: st.markdown("<div style='text-align: center;'>**Commitment (%)**</div>", unsafe_allow_html=True)
+            with th_cols[0]: st.markdown("Nome")
+            with th_cols[1]: st.markdown("Role")
+            with th_cols[2]: st.markdown("Mano")
+            with th_cols[3]: st.markdown("Play Style")
+            with th_cols[4]: st.markdown("Trainings")
+            with th_cols[5]: st.markdown("Participated")
+            with th_cols[6]: st.markdown("<div style='text-align: center;'>Commitment (%)</div>", unsafe_allow_html=True)
             st.markdown("---")
 
             updated_squad = []
