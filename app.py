@@ -47,6 +47,7 @@ translations = {
 # --- LISTA DELLE 13 SKILLS RICHIESTE ---
 TECH_SKILLS = ["Volley", "Bandeja", "Remate", "Smash", "Bajada", "Chiquita", "Lob"]
 MENTAL_SKILLS = ["Attitudine positiva", "Supporto partner", "Gestione errori", "Posizionamento", "Resistenza", "Intensità"]
+ALL_SKILLS = TECH_SKILLS + MENTAL_SKILLS
 
 # --- INIZIALIZZAZIONE STATO ---
 if "language" not in st.session_state:
@@ -61,24 +62,21 @@ if "authenticated_coach" not in st.session_state:
 if "authenticated_player" not in st.session_state:
     st.session_state.authenticated_player = None
 
+# Lista completa e ufficiale di tutti i 19 giocatori
 if "squad_data" not in st.session_state:
     st.session_state.squad_data = [
         {"fname": "Álvaro", "lname": "Gomez", "side": "Left", "trainings": 4, "participated": 4,
-         "tech": [7, 7, 6, 7, 6, 6, 7], "mental": [8, 7, 7, 7, 8, 7], 
-         "c_tech": [6, 6, 5, 6, 5, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6], "history": [], "partners": {"Yannik Langeslag": 12, "Josu Usabiaga": 8}, "comments": []},
+         "tech": [7, 7, 6, 7, 6, 6, 7], "mental": [8, 7, 7, 7, 8, 7], "c_tech": [6, 6, 5, 6, 5, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6], "history": [], "partners": {"Yannik Langeslag": 12, "Josu Usabiaga": 8}, "comments": []},
         {"fname": "Yannik", "lname": "Langeslag", "side": "Left", "trainings": 4, "participated": 4,
-         "tech": [8, 6, 7, 7, 7, 5, 6], "mental": [7, 6, 8, 6, 7, 6], 
-         "c_tech": [7, 5, 6, 6, 6, 4, 5], "c_mental": [6, 5, 7, 5, 6, 5], "history": [], "partners": {"Álvaro Gomez": 12}, "comments": []},
+         "tech": [8, 6, 7, 7, 7, 5, 6], "mental": [7, 6, 8, 6, 7, 6], "c_tech": [7, 5, 6, 6, 6, 4, 5], "c_mental": [6, 5, 7, 5, 6, 5], "history": [], "partners": {"Álvaro Gomez": 12}, "comments": []},
         {"fname": "Josu", "lname": "Usabiaga", "side": "Right", "trainings": 4, "participated": 3,
-         "tech": [6, 8, 7, 7, 6, 7, 7], "mental": [6, 8, 6, 8, 7, 7], 
-         "c_tech": [5, 7, 6, 6, 5, 6, 6], "c_mental": [5, 7, 5, 7, 6, 6], "history": [], "partners": {"Álvaro Gomez": 8}, "comments": []},
+         "tech": [6, 8, 7, 7, 6, 7, 7], "mental": [6, 8, 6, 8, 7, 7], "c_tech": [5, 7, 6, 6, 5, 6, 6], "c_mental": [5, 7, 5, 7, 6, 6], "history": [], "partners": {"Álvaro Gomez": 8}, "comments": []},
         {"fname": "Benjamin", "lname": "Thyrell", "side": "Left", "trainings": 4, "participated": 4,
          "tech": [7, 7, 8, 6, 7, 6, 7], "mental": [8, 7, 7, 7, 8, 7], "c_tech": [6, 6, 7, 5, 6, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6], "history": [], "partners": {}, "comments": []},
         {"fname": "Alexander", "lname": "Wennstam", "side": "Left", "trainings": 4, "participated": 4,
          "tech": [8, 8, 7, 7, 8, 6, 7], "mental": [7, 7, 8, 8, 7, 7], "c_tech": [7, 7, 6, 6, 7, 5, 6], "c_mental": [6, 6, 7, 7, 6, 6], "history": [], "partners": {}, "comments": []},
         {"fname": "Andrea", "lname": "Lonoce", "side": "Right", "trainings": 4, "participated": 4,
-         "tech": [8, 7, 8, 7, 9, 6, 8], "mental": [9, 7, 8, 8, 9, 7], 
-         "c_tech": [8, 7, 8, 7, 9, 6, 8], "c_mental": [9, 7, 8, 8, 9, 7], "history": [], "partners": {"Alexander Wennstam": 14}, "comments": []},
+         "tech": [8, 7, 8, 7, 9, 6, 8], "mental": [9, 7, 8, 8, 9, 7], "c_tech": [8, 7, 8, 7, 9, 6, 8], "c_mental": [9, 7, 8, 8, 9, 7], "history": [], "partners": {"Alexander Wennstam": 14}, "comments": []},
         {"fname": "Mikkel", "lname": "Hoff", "side": "Right", "trainings": 4, "participated": 2,
          "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5], "history": [], "partners": {}, "comments": []},
         {"fname": "Pedro", "lname": "Rios", "side": "Right", "trainings": 4, "participated": 3,
@@ -431,9 +429,8 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
     
     with coach_tab1:
         st.subheader("👥 Elenco Intero Giocatori, Parametri e Presenze")
-        st.markdown("Modifica direttamente qui sotto i **Trainings** e i **Participated** dei giocatori. La percentuale di **Commitment** verrà calcolata e aggiornata in automatico.")
+        st.markdown("Modifica direttamente qui sotto i **Trainings** e i **Participated** dei giocatori. La percentuale di **Commitment** verrà calcolata automaticamente in base alle partecipazioni sui training.")
         
-        # Preparazione DataFrame modificabile
         df_summary_data = []
         for p in squad_players:
             t = p.get("trainings", 4)
@@ -450,7 +447,6 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         
         df_editable = pd.DataFrame(df_summary_data)
         
-        # Tabella editabile in Streamlit
         edited_df = st.data_editor(
             df_editable,
             column_config={
@@ -464,7 +460,6 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             key="coach_squad_editor"
         )
         
-        # Pulsante per salvare le modifiche fatte nella tabella delle presenze
         if st.button("Salva Modifiche Presenze/Trainings", type="primary"):
             for idx, row in edited_df.iterrows():
                 squad_players[idx]["trainings"] = int(row["Trainings"])
@@ -476,7 +471,35 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             st.rerun()
 
         st.markdown("---")
-        st.markdown("### ✏️ Gestione Voti Coach per Singolo Giocatore")
+        st.subheader("🎯 Gruppi di Lavoro e Miglioramento Mirato")
+        st.markdown("Raggruppamento automatico dei giocatori in base alle carenze comuni rilevate nelle valutazioni del coach (valori ≤ 6).")
+        
+        # Logica di raggruppamento in base ai voti del coach (c_tech + c_mental)
+        skill_groups = {skill: [] for skill in ALL_SKILLS}
+        for p in squad_players:
+            p_coach_vals = p['c_tech'] + p['c_mental']
+            for i, skill in enumerate(ALL_SKILLS):
+                # Se il voto del coach è minore o uguale a 6, il giocatore viene inserito nel gruppo di miglioramento per quella skill
+                if p_coach_vals[i] <= 6:
+                    skill_groups[skill].append(f"{p['fname']} {p['lname']} (Voto: {p_coach_vals[i]})")
+                    
+        # Mostriamo solo le skill che hanno giocatori assegnati
+        active_groups = {k: v for k, v in skill_groups.items() if len(v) > 0}
+        
+        if active_groups:
+            cols = st.columns(2)
+            col_idx = 0
+            for skill, members in active_groups.items():
+                with cols[col_idx % 2]:
+                    with st.expander(f"📌 Area di miglioramento: **{skill}** ({len(members)} giocatori)"):
+                        for m in members:
+                            st.markdown(f"- {m}")
+                col_idx += 1
+        else:
+            st.info("Nessuna criticità rilevata (tutti i giocatori hanno voti superiori a 6).")
+
+        st.markdown("---")
+        st.subheader("✏️ Gestione Voti Coach per Singolo Giocatore")
         selected_player_name = st.selectbox("Seleziona giocatore da valutare:", [f"{p['fname']} {p['lname']}" for p in squad_players])
         p_obj = next((p for p in squad_players if f"{p['fname']} {p['lname']}" == selected_player_name), None)
         
