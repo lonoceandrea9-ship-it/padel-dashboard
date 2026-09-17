@@ -169,8 +169,6 @@ translations = {
         "coach_tab_pairing": "Pairing Coppie Automatico",
         "squad_desc": "Modifica direttamente qui sotto i dati della squadra. I cambiamenti si salvano in tempo reale e il Commitment (%) viene ricalcolato automaticamente.",
         "col_name": "Nome", "col_role": "Role", "col_hand": "Mano", "col_style": "Play Style", "col_trainings": "Trainings", "col_participated": "Participated", "col_commitment": "Commitment (%)",
-        "save_squad": "Salva Modifiche Squadra",
-        "squad_saved": "Modifiche salvate con successo!",
         "work_groups": "Gruppi di Lavoro e Miglioramento Mirato",
         "work_groups_desc": "Raggruppamento automatico di tutti i giocatori in base alle carenze comuni rilevate nelle valutazioni del coach (valori ≤ 6).",
         "no_critics": "Nessuna criticità rilevata (tutti i giocatori hanno voti superiori a 6).",
@@ -270,8 +268,6 @@ translations = {
         "coach_tab_pairing": "Automatic Pair Pairing",
         "squad_desc": "Edit squad data directly below. Changes save in real time and Commitment (%) is automatically recalculated.",
         "col_name": "Name", "col_role": "Role", "col_hand": "Hand", "col_style": "Play Style", "col_trainings": "Trainings", "col_participated": "Participated", "col_commitment": "Commitment (%)",
-        "save_squad": "Save Squad Changes",
-        "squad_saved": "Changes successfully saved!",
         "work_groups": "Work Groups & Targeted Improvement",
         "work_groups_desc": "Automatic grouping of all players based on common weaknesses identified in coach evaluations (values ≤ 6).",
         "no_critics": "No critical issues detected (all players have grades above 6).",
@@ -371,8 +367,6 @@ translations = {
         "coach_tab_pairing": "Emparejamiento Automático de Parejas",
         "squad_desc": "Modifica directamente los datos de la plantilla a continuación. Los cambios se guardan en tiempo real y el Compromiso (%) se recalcula automáticamente.",
         "col_name": "Nombre", "col_role": "Rol", "col_hand": "Mano", "col_style": "Estilo", "col_trainings": "Entrenamientos", "col_participated": "Participado", "col_commitment": "Compromiso (%)",
-        "save_squad": "Guardar Cambios de Plantilla",
-        "squad_saved": "¡Cambios guardados con éxito!",
         "work_groups": "Grupos de Trabajo y Mejora Dirigida",
         "work_groups_desc": "Agrupación automática de todos los jugadores basada en carencias comunes detectadas en las evaluaciones del entrenador (valores ≤ 6).",
         "no_critics": "Ninguna criticidad detectada (todos los jugadores tienen notas superiores a 6).",
@@ -472,8 +466,6 @@ translations = {
         "coach_tab_pairing": "Automatiskt Parval",
         "squad_desc": "Redigera truppdata direkt nedanför. Ändringar sparas i realtid och Engagemang (%) räknas om automatiskt.",
         "col_name": "Namn", "col_role": "Roll", "col_hand": "Hand", "col_style": "Spelstil", "col_trainings": "Träningar", "col_participated": "Deltagit", "col_commitment": "Engagemang (%)",
-        "save_squad": "Spara Truppändringar",
-        "squad_saved": "Ändringar sparade!",
         "work_groups": "Arbetsgrupper & Riktad Förbättring",
         "work_groups_desc": "Automatisk gruppering av alla spelare baserat på vanliga svagheter identifierade i coachbedömningar (värden ≤ 6).",
         "no_critics": "Inga kritiska punkter upptäckta (alla spelare har betyg över 6).",
@@ -573,8 +565,6 @@ translations = {
         "coach_tab_pairing": "Automatische Koppelindeling",
         "squad_desc": "Bewerk selectiegegevens direct hieronder. Wijzigingen worden in realtime opgeslagen en Betrokkenheid (%) wordt automatisch herberekend.",
         "col_name": "Naam", "col_role": "Rol", "col_hand": "Hand", "col_style": "Stijl", "col_trainings": "Trainingen", "col_participated": "Deelgenomen", "col_commitment": "Betrokkenheid (%)",
-        "save_squad": "Selectiewijzigingen Opslaan",
-        "squad_saved": "Wijzigingen succesvol opgeslagen!",
         "work_groups": "Werkgroepen & Gerichte Verbetering",
         "work_groups_desc": "Automatische groepering van alle spelers op basis van veelvoorkomende zwakke punten gedetecteerd in coachevaluaties (waarden ≤ 6).",
         "no_critics": "Geen kritieke punten gedetecteerd (alle spelers hebben cijfers boven 6).",
@@ -674,8 +664,6 @@ translations = {
         "coach_tab_pairing": "Automatisk Makkerparring",
         "squad_desc": "Rediger trupdata direkte nedenfor. Ændringer gemmes i realtid og Engagement (%) genberegnes automatisk.",
         "col_name": "Navn", "col_role": "Rolle", "col_hand": "Hånd", "col_style": "Stil", "col_trainings": "Træninger", "col_participated": "Deltaget", "col_commitment": "Engagement (%)",
-        "save_squad": "Gem Truppen",
-        "squad_saved": "Ændringer gemt!",
         "work_groups": "Arbejdsgrupper & Målrettet Forbedring",
         "work_groups_desc": "Automatisk gruppering af alle spillere baseret på almindelige svagheder fundet i trænerevalueringer (værdier ≤ 6).",
         "no_critics": "Ingen kritiske punkter opdaget (alle spillere har karakterer over 6).",
@@ -734,7 +722,7 @@ lang_dict = translations.get(st.session_state.language, translations["Italiano"]
 MENTAL_SKILLS = lang_dict["mental_list"]
 ALL_SKILLS = TECH_SKILLS + MENTAL_SKILLS
 
-# Lista giocatori iniziale (con "Alvaro" corretto senza accento)
+# Lista giocatori iniziale (ordinata alfabeticamente per nome)
 if "squad_data" not in st.session_state:
     st.session_state.squad_data = [
         {"fname": "Alexander", "lname": "Wennstam", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1,
@@ -1168,53 +1156,49 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         st.subheader(f"👥 {lang_dict['coach_tab_squad']}")
         st.markdown(lang_dict['squad_desc'])
         
-        # Ordinamento alfabetico della lista in base al nome (fname) prima di mostrarla nella tabella
+        # Ordinamento alfabetico della lista in base al nome (fname)
         st.session_state.squad_data = sorted(st.session_state.squad_data, key=lambda x: x['fname'])
         squad_players = st.session_state.squad_data
         
-        with st.form("squad_edit_form"):
-            th_cols = st.columns([1.8, 1.2, 1.2, 1.4, 0.9, 0.9, 0.9])
-            with th_cols[0]: st.markdown(lang_dict['col_name'])
-            with th_cols[1]: st.markdown(lang_dict['col_role'])
-            with th_cols[2]: st.markdown(lang_dict['col_hand'])
-            with th_cols[3]: st.markdown(lang_dict['col_style'])
-            with th_cols[4]: st.markdown(lang_dict['col_trainings'])
-            with th_cols[5]: st.markdown(lang_dict['col_participated'])
-            with th_cols[6]: st.markdown(f"<div style='text-align: center;'>{lang_dict['col_commitment']}</div>", unsafe_allow_html=True)
-            st.markdown("---")
+        th_cols = st.columns([1.8, 1.2, 1.2, 1.4, 0.9, 0.9, 0.9])
+        with th_cols[0]: st.markdown(lang_dict['col_name'])
+        with th_cols[1]: st.markdown(lang_dict['col_role'])
+        with th_cols[2]: st.markdown(lang_dict['col_hand'])
+        with th_cols[3]: st.markdown(lang_dict['col_style'])
+        with th_cols[4]: st.markdown(lang_dict['col_trainings'])
+        with th_cols[5]: st.markdown(lang_dict['col_participated'])
+        with th_cols[6]: st.markdown(f"<div style='text-align: center;'>{lang_dict['col_commitment']}</div>", unsafe_allow_html=True)
+        st.markdown("---")
 
-            updated_squad = []
-            for idx, p in enumerate(squad_players):
-                col_n, col_r, col_h, col_s, col_t, col_p, col_c = st.columns([1.8, 1.2, 1.2, 1.4, 0.9, 0.9, 0.9])
-                
-                with col_n:
-                    st.markdown(f"**{p['fname']} {p['lname']}**")
-                with col_r:
-                    new_side = st.selectbox("Role", ["Left", "Right"], index=0 if p["side"]=="Left" else 1, key=f"side_{idx}", label_visibility="collapsed")
-                with col_h:
-                    new_hand = st.selectbox("Mano", ["Destro", "Mancino"], index=0 if p.get("hand","Destro")=="Destro" else 1, key=f"hand_{idx}", label_visibility="collapsed")
-                with col_s:
-                    styles_list = ["offensive", "defensive", "equilibrated", "counterattack"]
-                    curr_st = p.get("play_style", "equilibrated")
-                    idx_st = styles_list.index(curr_st) if curr_st in styles_list else 2
-                    new_st = st.selectbox("Style", styles_list, index=idx_st, key=f"style_{idx}", label_visibility="collapsed")
-                with col_t:
-                    new_tr = st.number_input("Trainings", min_value=0, max_value=50, value=int(p.get("trainings", 1)), key=f"tr_{idx}", label_visibility="collapsed")
-                with col_p:
-                    new_pa = st.number_input("Participated", min_value=0, max_value=50, value=int(p.get("participated", 1)), key=f"pa_{idx}", label_visibility="collapsed")
-                with col_c:
-                    pct_calc = int(round((new_pa / new_tr) * 100)) if new_tr > 0 else 0
-                    st.markdown(f"<div style='padding-top: 8px; font-weight: bold; text-align: center; color: {'#2ecc71' if pct_calc >= 70 else '#e74c3c'};'>{pct_calc}%</div>", unsafe_allow_html=True)
-                
+        for idx, p in enumerate(squad_players):
+            col_n, col_r, col_h, col_s, col_t, col_p, col_c = st.columns([1.8, 1.2, 1.2, 1.4, 0.9, 0.9, 0.9])
+            
+            with col_n:
+                st.markdown(f"**{p['fname']} {p['lname']}**")
+            with col_r:
+                new_side = st.selectbox("Role", ["Left", "Right"], index=0 if p["side"]=="Left" else 1, key=f"side_{idx}", label_visibility="collapsed")
+            with col_h:
+                new_hand = st.selectbox("Mano", ["Destro", "Mancino"], index=0 if p.get("hand","Destro")=="Destro" else 1, key=f"hand_{idx}", label_visibility="collapsed")
+            with col_s:
+                styles_list = ["offensive", "defensive", "equilibrated", "counterattack"]
+                curr_st = p.get("play_style", "equilibrated")
+                idx_st = styles_list.index(curr_st) if curr_st in styles_list else 2
+                new_st = st.selectbox("Style", styles_list, index=idx_st, key=f"style_{idx}", label_visibility="collapsed")
+            with col_t:
+                new_tr = st.number_input("Trainings", min_value=0, max_value=50, value=int(p.get("trainings", 1)), key=f"tr_{idx}", label_visibility="collapsed")
+            with col_p:
+                new_pa = st.number_input("Participated", min_value=0, max_value=50, value=int(p.get("participated", 1)), key=f"pa_{idx}", label_visibility="collapsed")
+            with col_c:
+                pct_calc = int(round((new_pa / new_tr) * 100)) if new_tr > 0 else 0
+                st.markdown(f"<div style='padding-top: 8px; font-weight: bold; text-align: center; color: {'#2ecc71' if pct_calc >= 70 else '#e74c3c'};'>{pct_calc}%</div>", unsafe_allow_html=True)
+            
+            # Salvataggio in tempo reale nello state se ci sono variazioni
+            if p["side"] != new_side or p.get("hand") != new_hand or p.get("play_style") != new_st or p.get("trainings") != new_tr or p.get("participated") != new_pa:
                 p["side"] = new_side
                 p["hand"] = new_hand
                 p["play_style"] = new_st
                 p["trainings"] = new_tr
                 p["participated"] = new_pa
-            
-            st.markdown("---")
-            if st.form_submit_button(lang_dict['save_squad'], type="primary"):
-                st.success(lang_dict['squad_saved'])
                 st.rerun()
 
         st.markdown("---")
