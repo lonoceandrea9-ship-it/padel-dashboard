@@ -750,7 +750,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         st.markdown("Modifica direttamente qui sotto i dati della squadra. I cambiamenti si salvano in tempo reale e il **Commitment (%)** viene ricalcolato automaticamente.")
         
         with st.form("squad_edit_form"):
-            # --- TITOLI DELLE COLONNE ---
+            # --- TITOLI DELLE COLONNE (Commitment centrato) ---
             th_cols = st.columns([1.8, 1.2, 1.2, 1.4, 0.9, 0.9, 0.9])
             with th_cols[0]: st.markdown("**Nome**")
             with th_cols[1]: st.markdown("**Role**")
@@ -758,7 +758,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             with th_cols[3]: st.markdown("**Play Style**")
             with th_cols[4]: st.markdown("**Trainings**")
             with th_cols[5]: st.markdown("**Participated**")
-            with th_cols[6]: st.markdown("**Commitment (%)**")
+            with th_cols[6]: st.markdown("<div style='text-align: center;'>**Commitment (%)**</div>", unsafe_allow_html=True)
             st.markdown("---")
 
             updated_squad = []
@@ -782,7 +782,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     new_pa = st.number_input("Participated", min_value=0, max_value=50, value=int(p.get("participated", 1)), key=f"pa_{idx}", label_visibility="collapsed")
                 with col_c:
                     pct_calc = int(round((new_pa / new_tr) * 100)) if new_tr > 0 else 0
-                    st.markdown(f"<div style='padding-top: 8px; font-weight: bold; color: {'#2ecc71' if pct_calc >= 70 else '#e74c3c'};'>{pct_calc}%</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='padding-top: 8px; font-weight: bold; text-align: center; color: {'#2ecc71' if pct_calc >= 70 else '#e74c3c'};'>{pct_calc}%</div>", unsafe_allow_html=True)
                 
                 p["side"] = new_side
                 p["hand"] = new_hand
