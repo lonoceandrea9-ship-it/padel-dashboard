@@ -421,15 +421,16 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         st.session_state.nav_mode = "Home"
         st.rerun()
         
-    coach_tab1, coach_tab2, coach_tab3 = st.tabs([
+    coach_tab1, coach_tab2, coach_tab3, coach_tab_pairing = st.tabs([
         "👥 Gestione Squadra & Parametri", 
         "📅 Gestione Partite", 
-        "💬 Tutti i Commenti"
+        "💬 Tutti i Commenti",
+        "🤖 Pairing Coppie Automatico"
     ])
     
     with coach_tab1:
         st.subheader("👥 Elenco Intero Giocatori, Ruoli e Presenze")
-        st.markdown("Modifica il **Role (Left/Right)**, i **Trainings** e i **Participated**. La colonna **Commitment (%)** si ricalcolerà e si aggiornerà **in tempo reale** non appena modifichi i valori.")
+        st.markdown("Modifica il **Role (Left/Right)**, i **Trainings** e i **Participated**. La colonna **Commitment (%)** si ricalcola e si aggiorna **in tempo reale** non appena modifichi i valori.")
         
         df_summary_data = []
         for p in squad_players:
@@ -447,7 +448,6 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         
         df_editable = pd.DataFrame(df_summary_data)
         
-        # Tabella interattiva con reattività immediata
         edited_df = st.data_editor(
             df_editable,
             column_config={
@@ -466,15 +466,12 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             key="coach_squad_editor"
         )
         
-        # AGGIORNAMENTO IN TEMPO REALE RIGA PER RIGA:
-        # Se l'utente cambia Trainings o Participated nella tabella, aggiorno subito i dati in sessione
         has_changed = False
         for idx, row in edited_df.iterrows():
             curr_t = int(row["Trainings"])
             curr_p = int(row["Participated"])
             curr_role = row["Role"]
             
-            # Controllo se ci sono differenze rispetto allo stato attuale
             if (curr_t != squad_players[idx]["trainings"] or 
                 curr_p != squad_players[idx]["participated"] or 
                 curr_role != squad_players[idx]["side"]):
@@ -487,7 +484,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 has_changed = True
 
         if has_changed:
-            st.rerun()  # Ricarica immediatamente la pagina per mostrare la percentuale aggiornata al volo
+            st.rerun()
 
         st.markdown("---")
         st.subheader("🎯 Gruppi di Lavoro e Miglioramento Mirato")
@@ -563,4 +560,112 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             if p.get("comments"):
                 st.markdown(f"#### {p['fname']} {p['lname']}")
                 for c in p["comments"]:
-                    st.markdown(f"- *Da {c['from']}*: {c['text']}")
+                    st.markdown(f"- *Da {c['from']}* : {c['text']}")
+
+    with coach_tab_pairing:
+        st.subheader("🤖 Algoritmo Intelligente di Pairing per Coppie")
+        st.markdown("Questo strumento genera le coppie ideali accoppiando **sempre un giocatore di Sinistra (Left) e uno di Destra (Right)**. L'affinità viene calcolata sommando:")
+        st.markdown("- **Peso 1.0**: Valutazione complessiva data dal Coach (media di tecniche e mentali).")
+        st.markdown("- **Peso 0.5**: Volontà / preferenza espressa dai giocatori reciprocatamente nei loro ranking partner.")
+        
+        # Filtriamo i giocatori disponibili (consideriamo chi ha almeno partecipato a 1 allenamento o basandoci sulla presenza)
+        available_players = squad_players.copy()
+        
+        left_players = [p for p in available_players if p["side"] == "Left"]
+        right_players = [p for p in available_players if p["side"] == "Right"]
+        
+        st.markdown(f"**Giocatori di Sinistra disponibili ({len(left_players)}):** " + ", ".join([f"{p['fname']} {p['lname']}" for p in left_players]))
+        st.markdown(f"**Giocatori di Destra disponibili ({len(right_players)}):** " + ", ".join([f"{p['fname']} {p['lname']}" for p in right_players]))
+        
+        if st.button("🚀 Genera Coppie Ottimali", type="primary"):
+            if not left_players or not right_players:
+                st.error("Servono sia giocatori di sinistra che di destra per formare le coppie!")
+            else:
+                # Funzione di utilità per calcolare il punteggio del coach (da 1 a 10)
+                def get_coach_score(player):
+                    all_c = player['c_tech'] + player['c_mental']
+                    return sum(all_c) / len(all_c) if all_c else 5.0
+
+                # Creiamo una matrice di affinità tra tutti i Left e tutti i Right
+                pairs_matrix = []
+                for l_p in left_players:
+                    l_name = f"{l_p['fname']} {l_p['lname']}"
+                    l_coach_val = get_coach_score(l_p)
+                    l_partners = l_p.get("partners", {})
+                    
+                    for r_p in right_players:
+                        r_name = f"{r_p['fname']} {r_p['lname']}"
+                        r_coach_val = get_coach_score(r_p)
+                        r_partners = r_p.get("partners", {})
+                        
+                        # Media del valore del coach per la coppia (Peso 1.0)
+                        coach_affinity = (l_coach_val + r_coach_val) / 2.0
+                        
+                        # Volontà reciproca (Peso 0.5)
+                        # Cerchiamo se l'uno ha votato l'altro nei partner
+                        vol_l_to_r = l_partners.get(r_name, 0)
+                        vol_r_to_l = r_partners.get(l_name, 0)
+                        # Normalizziamo la volontà in scala 1-10 (supponendo max 50 o valori inseriti)
+                        # Se inseriti come match/preferenza, facciamo una media normalizzata o diretta
+                        vol_score = 0.0
+                        count_vol = 0
+                        if vol_l_to_r > 0:
+                            vol_score += min(vol_l_to_r / 5.0, 10.0) # Adattamento scala
+                            count_vol += 1
+                        if vol_r_to_l > 0:
+                            vol_score += min(vol_r_to_l / 5.0, 10.0)
+                            count_vol += 1
+                        
+                        willingness_affinity = (vol_score / count_vol) if count_vol > 0 else 5.0 # Default neutro 5 se non votati
+                        
+                        # Punteggio Totale ponderato: 1.0 * Coach + 0.5 * Volontà
+                        total_score = (1.0 * coach_affinity) + (0.5 * willingness_affinity)
+                        
+                        pairs_matrix.append({
+                            "left": l_name,
+                            "right": r_name,
+                            "score": total_score,
+                            "coach_avg": round(coach_affinity, 2),
+                            "willingness": round(willingness_affinity, 2)
+                        })
+                
+                # Ordinamento per punteggio decrescente
+                pairs_matrix = sorted(pairs_matrix, key=lambda x: x["score"], reverse=True)
+                
+                # Algoritmo greedy per l'assegnazione univoca (senza ripetere i giocatori se possibile)
+                matched_left = set()
+                matched_right = set()
+                final_pairs = []
+                
+                for item in pairs_matrix:
+                    if item["left"] not in matched_left and item["right"] not in matched_right:
+                        final_pairs.append(item)
+                        matched_left.add(item["left"])
+                        matched_right.add(item["right"])
+                
+                # Gestione eventuali giocatori rimasti esclusi se i numeri non sono perfettamente bilanciati
+                unmatched_l = [l for l in left_players if f"{l['fname']} {l['lname']}" not in matched_left]
+                unmatched_r = [r for r in right_players if f"{r['fname']} {r['lname']}" not in matched_right]
+                
+                st.markdown("### 🏆 Risultato Pairing Consigliato:")
+                
+                pair_results_df = []
+                for idx, fp in enumerate(final_pairs):
+                    pair_results_df.append({
+                        "Coppia #": idx + 1,
+                        "Giocatore Sinistra (Left)": fp["left"],
+                        "Giocatore Destra (Right)": fp["right"],
+                        "Score Coach (Peso 1.0)": fp["coach_avg"],
+                        "Volontà Reciproca (Peso 0.5)": fp["willingness"],
+                        "Punteggio Totale": round(fp["score"], 2)
+                    })
+                
+                if pair_results_df:
+                    st.table(pd.DataFrame(pair_results_df))
+                else:
+                    st.info("Nessuna coppia generabile con i filtri attuali.")
+                    
+                if unmatched_l or unmatched_r:
+                    st.warning("⚠️ Giocatori non abbinati in questo turno per sbilanciamento numerico Left/Right:")
+                    un_names = [f"{p['fname']} {p['lname']}" for p in unmatched_l + unmatched_r]
+                    st.markdown("- " + "\n- ".join(un_names))
