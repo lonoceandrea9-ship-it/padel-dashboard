@@ -44,42 +44,10 @@ translations = {
         "comments_tab": "Commenti Compagni",
         "matches_dash": "Gestione Partite (Coach)",
         "all_comments": "Tutti i Commenti (Coach)"
-    },
-    "Inglese": {
-        "welcome": "Welcome to Padel Performance Hub",
-        "select_area": "Select your access area to continue:",
-        "player_area": "Player Area",
-        "player_desc": "Access your personal password-protected card to view and update your ratings.",
-        "player_btn": "Log in as Player",
-        "coach_area": "Coach Area",
-        "coach_desc": "Restricted access for technical staff for data management, planning, and matches.",
-        "coach_btn": "Log in as Coach",
-        "login_player_title": "Player Area Login",
-        "login_player_sub": "Select your name and enter your password (your first name).",
-        "profile_select": "Select your profile:",
-        "pwd_label": "Password (Your first name)",
-        "enter_card": "Enter my card",
-        "back_home": "Back to Home",
-        "wrong_pwd": "Wrong password! Remember the password is your first name.",
-        "coach_login_title": "Coach Area Authentication",
-        "coach_login_sub": "Enter the security password to access management functions.",
-        "coach_pwd_label": "Coach Password",
-        "verify_pwd": "Verify Password",
-        "logout": "Log out",
-        "tech_skills": "Technical Skills",
-        "mental_skills": "Attitude & Tactics (Mental)",
-        "self_eval": "My Ratings (Self-Evaluation)",
-        "coach_eval": "Coach Evaluation & Comparison",
-        "diff_table": "Differences Table (You vs Coach)",
-        "partners_tab": "Partner Ranking",
-        "history_tab": "History & Improvements",
-        "comments_tab": "Teammate Comments",
-        "matches_dash": "Match Management (Coach)",
-        "all_comments": "All Comments (Coach)"
     }
 }
 
-# --- LISTA DELLE SKILLS AGGIORNATE ---
+# --- LISTA DELLE 13 SKILLS RICHIESTE ---
 TECH_SKILLS = ["Volley", "Bandeja", "Remate", "Smash", "Bajada", "Chiquita", "Lob"]
 MENTAL_SKILLS = ["Attitudine positiva", "Supporto partner", "Gestione errori", "Posizionamento", "Resistenza", "Intensità"]
 
@@ -96,7 +64,6 @@ if "authenticated_coach" not in st.session_state:
 if "authenticated_player" not in st.session_state:
     st.session_state.authenticated_player = None
 
-# Inizializzazione dati della squadra con la nuova struttura di 7 tecniche e 6 mentali
 if "squad_data" not in st.session_state:
     st.session_state.squad_data = [
         {"fname": "Álvaro", "lname": "Gomez", "side": "Left", 
@@ -112,16 +79,11 @@ if "squad_data" not in st.session_state:
          "tech": [8, 7, 8, 7, 9, 6, 8], "mental": [9, 7, 8, 8, 9, 7], 
          "c_tech": [8, 7, 8, 7, 9, 6, 8], "c_mental": [9, 7, 8, 8, 9, 7], "history": [], "partners": {"Alexander Wennstam": 14}, "comments": []}
     ]
-    # Assicuriamoci che tutti gli altri giocatori di default abbiano la lunghezza corretta
     for p in st.session_state.squad_data:
-        if len(p["tech"]) != len(TECH_SKILLS):
-            p["tech"] = [7] * len(TECH_SKILLS)
-        if len(p["mental"]) != len(MENTAL_SKILLS):
-            p["mental"] = [7] * len(MENTAL_SKILLS)
-        if len(p["c_tech"]) != len(TECH_SKILLS):
-            p["c_tech"] = [6] * len(TECH_SKILLS)
-        if len(p["c_mental"]) != len(MENTAL_SKILLS):
-            p["c_mental"] = [6] * len(MENTAL_SKILLS)
+        if len(p["tech"]) != len(TECH_SKILLS): p["tech"] = [7] * len(TECH_SKILLS)
+        if len(p["mental"]) != len(MENTAL_SKILLS): p["mental"] = [7] * len(MENTAL_SKILLS)
+        if len(p["c_tech"]) != len(TECH_SKILLS): p["c_tech"] = [6] * len(TECH_SKILLS)
+        if len(p["c_mental"]) != len(MENTAL_SKILLS): p["c_mental"] = [6] * len(MENTAL_SKILLS)
 
 if "match_results" not in st.session_state:
     st.session_state.match_results = []
@@ -129,18 +91,11 @@ if "match_results" not in st.session_state:
 squad_players = st.session_state.squad_data
 lang_dict = translations.get(st.session_state.language, translations["Italiano"])
 
-# --- SIDEBAR (SELETTORE LINGUA) ---
+# --- SIDEBAR ---
 with st.sidebar:
     st.image("https://img.icons8.com/color/96/padel.png", width=64)
     st.title("Padel Hub")
-    selected_lang = st.selectbox(
-        "🌐 Lingua / Language",
-        ["Italiano", "Inglese"],
-        index=0
-    )
-    if selected_lang != st.session_state.language:
-        st.session_state.language = selected_lang
-        st.rerun()
+    selected_lang = st.selectbox("🌐 Lingua / Language", ["Italiano"], index=0)
     
     st.markdown("---")
     if st.session_state.authenticated_coach:
@@ -238,7 +193,6 @@ elif st.session_state.nav_mode == "Player_Dashboard":
             
     st.markdown("---")
     
-    # Tabs della Dashboard Giocatore
     tab_eval, tab_partners, tab_history, tab_comments = st.tabs([
         "📊 Autovalutazione & Coach", 
         f"🏆 {lang_dict['partners_tab']}", 
@@ -248,11 +202,11 @@ elif st.session_state.nav_mode == "Player_Dashboard":
     
     with tab_eval:
         st.subheader("📊 Confronto Diretto: Autovalutazione vs Valutazione Coach")
-        st.markdown("Aggiorna qui sotto i tuoi valori personali. I valori assegnati dal coach sono visibili in sola lettura per un confronto immediato.")
+        st.markdown("Modifica qui sotto i tuoi valori personali. I valori assegnati dal coach sono protetti e visibili in sola consultazione.")
         
         col_self, col_coach_view = st.columns(2)
         
-        # AGGIORNAMENTO AUTOVALUTAZIONE UTENTE
+        # 1. AUTOVALUTAZIONE (Modificabile dall'utente)
         with col_self:
             st.markdown("### 🫵 La tua Autovalutazione")
             st.markdown("*(Modificabile)*")
@@ -275,7 +229,7 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                 st.success("Autovalutazione salvata con successo!")
                 st.rerun()
 
-        # VISUALIZZAZIONE VALUTAZIONE COACH (SOLO LETTURA)
+        # 2. VALUTAZIONE COACH (Sola lettura per il giocatore)
         with col_coach_view:
             st.markdown("### 📋 Valutazione del Coach")
             st.markdown("*(Sola consultazione)*")
@@ -291,14 +245,12 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                 st.slider(f"Coach - {skill}", 1, 10, int(c_val), disabled=True, key=f"c_mental_view_{i}")
 
         st.markdown("---")
-        st.subheader("📈 Grafico a Radar (Confronto visivo)")
+        st.subheader("🕸️ Grafico a Tela di Ragno (Radar Chart)")
         
-        # Preparazione dati per il Radar Chart di Plotly
         all_skills_labels = TECH_SKILLS + MENTAL_SKILLS
         player_full_vals = current_player['tech'] + current_player['mental']
         coach_full_vals = current_player['c_tech'] + current_player['c_mental']
         
-        # Chiudiamo il cerchio del radar ripetendo il primo elemento
         categories = all_skills_labels + [all_skills_labels[0]]
         p_vals_radar = player_full_vals + [player_full_vals[0]]
         c_vals_radar = coach_full_vals + [coach_full_vals[0]]
@@ -326,7 +278,7 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                     range=[0, 10]
                 )),
             showlegend=True,
-            height=500
+            height=550
         )
         st.plotly_chart(fig, use_container_width=True)
 
