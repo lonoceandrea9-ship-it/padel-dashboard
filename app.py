@@ -1,7 +1,7 @@
 import streamlit as st
-import streamlit.components.v1 as components
 import pandas as pd
 import json
+from datetime import datetime
 
 # Streamlit page configuration
 st.set_page_config(
@@ -10,7 +10,206 @@ st.set_page_config(
     layout="wide"
 )
 
-# Initialize navigation state if not present
+# --- TRADUZIONI (LINGUE) ---
+translations = {
+    "Italiano": {
+        "welcome": "Benvenuto nel Padel Performance Hub",
+        "select_area": "Seleziona la tua area di accesso per continuare:",
+        "player_area": "Area Giocatore",
+        "player_desc": "Accedi alla tua scheda personale protetta da password per visualizzare e aggiornare le tue valutazioni.",
+        "player_btn": "Accedi come Giocatore",
+        "coach_area": "Area Allenatore",
+        "coach_desc": "Accesso riservato allo staff tecnico per la gestione dei dati, la pianificazione e le partite.",
+        "coach_btn": "Accedi come Allenatore",
+        "login_player_title": "Accesso Area Giocatore",
+        "login_player_sub": "Seleziona il tuo nome e inserisci la tua password (il tuo nome di battesimo).",
+        "profile_select": "Seleziona il tuo profilo:",
+        "pwd_label": "Password (Il tuo nome di battesimo)",
+        "enter_card": "Entra nella mia scheda",
+        "back_home": "Torna alla Home",
+        "wrong_pwd": "Password errata! Ricorda che la password è il tuo nome di battesimo.",
+        "coach_login_title": "Autenticazione Area Allenatore",
+        "coach_login_sub": "Inserisci la password di sicurezza per accedere alle funzioni di gestione.",
+        "coach_pwd_label": "Password Allenatore",
+        "verify_pwd": "Verifica Password",
+        "logout": "Esci",
+        "tech_skills": "Competenze Tecniche",
+        "mental_skills": "Attitudine e Tattica",
+        "self_eval": "Le mie Valutazioni (Autovalutazione)",
+        "coach_eval": "Valutazione Coach & Confronto",
+        "diff_table": "Tabella Differenze (Tu vs Coach)",
+        "partners_tab": "Ranking Partner",
+        "history_tab": "Storico & Miglioramenti",
+        "comments_tab": "Commenti Compagni",
+        "matches_dash": "Gestione Partite (Coach)",
+        "all_comments": "Tutti i Commenti (Coach)"
+    },
+    "Inglese": {
+        "welcome": "Welcome to Padel Performance Hub",
+        "select_area": "Select your access area to continue:",
+        "player_area": "Player Area",
+        "player_desc": "Access your personal password-protected card to view and update your ratings.",
+        "player_btn": "Log in as Player",
+        "coach_area": "Coach Area",
+        "coach_desc": "Restricted access for technical staff for data management, planning, and matches.",
+        "coach_btn": "Log in as Coach",
+        "login_player_title": "Player Area Login",
+        "login_player_sub": "Select your name and enter your password (your first name).",
+        "profile_select": "Select your profile:",
+        "pwd_label": "Password (Your first name)",
+        "enter_card": "Enter my card",
+        "back_home": "Back to Home",
+        "wrong_pwd": "Wrong password! Remember the password is your first name.",
+        "coach_login_title": "Coach Area Authentication",
+        "coach_login_sub": "Enter the security password to access management functions.",
+        "coach_pwd_label": "Coach Password",
+        "verify_pwd": "Verify Password",
+        "logout": "Log out",
+        "tech_skills": "Technical Skills",
+        "mental_skills": "Attitude & Tactics",
+        "self_eval": "My Ratings (Self-Evaluation)",
+        "coach_eval": "Coach Evaluation & Comparison",
+        "diff_table": "Differences Table (You vs Coach)",
+        "partners_tab": "Partner Ranking",
+        "history_tab": "History & Improvements",
+        "comments_tab": "Teammate Comments",
+        "matches_dash": "Match Management (Coach)",
+        "all_comments": "All Comments (Coach)"
+    },
+    "Spagnolo": {
+        "welcome": "Bienvenido al Padel Performance Hub",
+        "select_area": "Selecciona tu área de acceso para continuar:",
+        "player_area": "Área de Jugador",
+        "player_desc": "Accede a tu ficha personal protegida por contraseña para ver y actualizar tus valoraciones.",
+        "player_btn": "Acceder como Jugador",
+        "coach_area": "Área de Entrenador",
+        "coach_desc": "Acceso restringido al cuerpo técnico para la gestión de datos, planificación y partidos.",
+        "coach_btn": "Acceder como Entrenador",
+        "login_player_title": "Acceso Área de Jugador",
+        "login_player_sub": "Selecciona tu nombre e introduce tu contraseña (tu nombre de pila).",
+        "profile_select": "Selecciona tu perfil:",
+        "pwd_label": "Contraseña (Tu nombre de pila)",
+        "enter_card": "Entrar a mi ficha",
+        "back_home": "Volver al Inicio",
+        "wrong_pwd": "¡Contraseña incorrecta! Recuerda que es tu nombre de pila.",
+        "coach_login_title": "Autenticación Área Entrenador",
+        "coach_login_sub": "Introduce la contraseña de seguridad para acceder a las funciones de gestión.",
+        "coach_pwd_label": "Contraseña Entrenador",
+        "verify_pwd": "Verificar Contraseña",
+        "logout": "Salir",
+        "tech_skills": "Habilidades Técnicas",
+        "mental_skills": "Actitud y Táctica",
+        "self_eval": "Mis Valoraciones (Autoevaluación)",
+        "coach_eval": "Evaluación del Entrenador y Comparativa",
+        "diff_table": "Tabla de Diferencias (Tú vs Entrenador)",
+        "partners_tab": "Ranking de Compañeros",
+        "history_tab": "Historial y Mejoras",
+        "comments_tab": "Comentarios de Compañeros",
+        "matches_dash": "Gestión de Partidos (Entrenador)",
+        "all_comments": "Todos los Comentarios (Entrenador)"
+    },
+    "Danese": {
+        "welcome": "Velkommen til Padel Performance Hub",
+        "select_area": "Vælg dit adgangsområde for at fortsætte:",
+        "player_area": "Spillerområde",
+        "player_desc": "Få adgang til dit personlige kodeordsbeskyttede kort for at se og opdatere dine bedømmelser.",
+        "player_btn": "Log ind som spiller",
+        "coach_area": "Trænerområde",
+        "coach_desc": "Begrænset adgang for trænerstaben til datahåndtering, planlægning og kampe.",
+        "coach_btn": "Log ind som træner",
+        "login_player_title": "Login til Spillerområde",
+        "login_player_sub": "Vælg dit navn og indtast din adgangskode (dit fornavn).",
+        "profile_select": "Vælg din profil:",
+        "pwd_label": "Adgangskode (Dit fornavn)",
+        "enter_card": "Gå til mit kort",
+        "back_home": "Tilbage til start",
+        "wrong_pwd": "Forkert adgangskode! Husk at adgangskoden er dit fornavn.",
+        "coach_login_title": "Godkendelse af Trænerområde",
+        "coach_login_sub": "Indtast sikkerhedsadgangskoden for at få adgang til administrationsfunktioner.",
+        "coach_pwd_label": "Træner-adgangskode",
+        "verify_pwd": "Bekræft adgangskode",
+        "logout": "Log ud",
+        "tech_skills": "Tekniske færdigheder",
+        "mental_skills": "Attitude & Taktik",
+        "self_eval": "Mine bedømmelser (Selvvurdering)",
+        "coach_eval": "Trænerbedømmelse & Sammenligning",
+        "diff_table": "Differenstabel (Du vs Træner)",
+        "partners_tab": "Makker-ranking",
+        "history_tab": "Historik & Forbedringer",
+        "comments_tab": "Kommentarer fra spillere",
+        "matches_dash": "Kampadministration (Træner)",
+        "all_comments": "Alle kommentarer (Træner)"
+    },
+    "Svedese": {
+        "welcome": "Välkommen till Padel Performance Hub",
+        "select_area": "Välj ditt åtkomstområde för att fortsätta:",
+        "player_area": "Spelarområde",
+        "player_desc": "Få tillgång till ditt personliga lösenordsskyddade kort för att visa och uppdatera dina betyg.",
+        "player_btn": "Logga in som spelare",
+        "coach_area": "Tränarområde",
+        "coach_desc": "Begränsad åtkomst för tränarstaben för datahantering, planering och matcher.",
+        "coach_btn": "Logga in som tränare",
+        "login_player_title": "Inloggning Spelarområde",
+        "login_player_sub": "Välj ditt namn och ange ditt lösenord (ditt förnamn).",
+        "profile_select": "Välj din profil:",
+        "pwd_label": "Lösenord (Ditt förnamn)",
+        "enter_card": "Gå till mitt kort",
+        "back_home": "Tillbaka till start",
+        "wrong_pwd": "Fel lösenord! Kom ihåg att lösenordet är ditt förnamn.",
+        "coach_login_title": "Autentisering Tränarområde",
+        "coach_login_sub": "Ange säkerhetslösenordet för att komma åt hanteringsfunktioner.",
+        "coach_pwd_label": "Tränarlösenord",
+        "verify_pwd": "Verifiera lösenord",
+        "logout": "Logga ut",
+        "tech_skills": "Tekniska färdigheter",
+        "mental_skills": "Attityd & Taktik",
+        "self_eval": "Mina betyg (Självutvärdering)",
+        "coach_eval": "Tränarbedömning & Jämförelse",
+        "diff_table": "Differenstabell (Du vs Tränare)",
+        "partners_tab": "Partner-ranking",
+        "history_tab": "Historik & Förbättringar",
+        "comments_tab": "Kommentarer från spelare",
+        "matches_dash": "Matchhantering (Tränare)",
+        "all_comments": "Alla kommentarer (Tränare)"
+    },
+    "Olandese": {
+        "welcome": "Welkom bij de Padel Performance Hub",
+        "select_area": "Selecteer je toegangsgebied om door te gaan:",
+        "player_area": "Spelersgebied",
+        "player_desc": "Toegang tot je persoonlijke met een wachtwoord beveiligde kaart om je beoordelingen te bekijken en bij te werken.",
+        "player_btn": "Inloggen als Speler",
+        "coach_area": "Coachgebied",
+        "coach_desc": "Beperkte toegang voor de technische staf voor gegevensbeheer, planning en wedstrijden.",
+        "coach_btn": "Inloggen als Coach",
+        "login_player_title": "Inloggen Spelersgebied",
+        "login_player_sub": "Selecteer je naam en voer je wachtwoord in (je voornaam).",
+        "profile_select": "Selecteer je profiel:",
+        "pwd_label": "Wachtwoord (Je voornaam)",
+        "enter_card": "Naar mijn kaart",
+        "back_home": "Terug naar Start",
+        "wrong_pwd": "Onjuist wachtwoord! Onthoud dat het wachtwoord je voornaam is.",
+        "coach_login_title": "Authenticatie Coachgebied",
+        "coach_login_sub": "Voer het beveiligingswachtwoord in om toegang te krijgen tot de beheerfuncties.",
+        "coach_pwd_label": "Coachwachtwoord",
+        "verify_pwd": "Wachtwoord verifiëren",
+        "logout": "Uitloggen",
+        "tech_skills": "Technische Vaardigheden",
+        "mental_skills": "Attitude & Tactiek",
+        "self_eval": "Mijn Beoordelingen (Zelfevaluatie)",
+        "coach_eval": "Coach Beoordeling & Vergelijking",
+        "diff_table": "Verschillentabel (Jij vs Coach)",
+        "partners_tab": "Partner Ranking",
+        "history_tab": "Geschiedenis & Verbeteringen",
+        "comments_tab": "Opmerkingen van spelers",
+        "matches_dash": "Wedstrijdbeheer (Coach)",
+        "all_comments": "Alle opmerkingen (Coach)"
+    }
+}
+
+# --- INIZIALIZZAZIONE STATO ---
+if "language" not in st.session_state:
+    st.session_state.language = "Italiano"
+
 if "nav_mode" not in st.session_state:
     st.session_state.nav_mode = "Home"
 
@@ -20,88 +219,119 @@ if "authenticated_coach" not in st.session_state:
 if "authenticated_player" not in st.session_state:
     st.session_state.authenticated_player = None
 
-# Complete roster of players with side information ("Left" or "Right")
-squad_players = [
-    {"fname": "Álvaro", "lname": "Gomez", "side": "Left", "tech": [7, 7, 7, 6, 8, 6], "mental": [8, 7, 7, 7, 8, 7], "c_tech": [6, 6, 6, 5, 7, 5], "c_mental": [7, 6, 6, 6, 7, 6]},
-    {"fname": "Yannik", "lname": "Langeslag", "side": "Left", "tech": [8, 6, 7, 7, 7, 5], "mental": [7, 6, 8, 6, 7, 6], "c_tech": [7, 5, 6, 6, 6, 4], "c_mental": [6, 5, 7, 5, 6, 5]},
-    {"fname": "Josu", "lname": "Usabiaga", "side": "Right", "tech": [6, 8, 7, 7, 6, 7], "mental": [6, 8, 6, 8, 7, 7], "c_tech": [5, 7, 6, 6, 5, 6], "c_mental": [5, 7, 5, 7, 6, 6]},
-    {"fname": "Benjamin", "lname": "Thyrell", "side": "Left", "tech": [7, 7, 8, 6, 7, 6], "mental": [8, 7, 7, 7, 8, 7], "c_tech": [6, 6, 7, 5, 6, 5], "c_mental": [7, 6, 6, 6, 7, 6]},
-    {"fname": "Alexander", "lname": "Wennstam", "side": "Left", "tech": [8, 8, 7, 7, 8, 6], "mental": [7, 7, 8, 8, 7, 7], "c_tech": [7, 7, 6, 6, 7, 5], "c_mental": [6, 6, 7, 7, 6, 6]},
-    {"fname": "Andrea", "lname": "Lonoce", "side": "Right", "tech": [8, 7, 8, 7, 9, 6], "mental": [9, 7, 8, 8, 9, 7], "c_tech": [8, 7, 8, 7, 9, 6], "c_mental": [9, 7, 8, 8, 9, 7]},
-    {"fname": "Mikkel", "lname": "Hoff", "side": "Right", "tech": [7, 6, 7, 6, 7, 5], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4], "c_mental": [6, 5, 6, 6, 6, 5]},
-    {"fname": "Pedro", "lname": "Rios", "side": "Right", "tech": [8, 8, 8, 7, 8, 7], "mental": [8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6], "c_mental": [7, 7, 7, 7, 7, 7]},
-    {"fname": "Hector", "lname": "Guerrero", "side": "Right", "tech": [7, 7, 7, 7, 7, 6], "mental": [7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 6, 6, 5], "c_mental": [6, 6, 6, 6, 6, 6]},
-    {"fname": "Gonzalo", "lname": "Diez de Onate", "side": "Left", "tech": [8, 7, 8, 7, 8, 6], "mental": [8, 7, 8, 8, 8, 7], "c_tech": [7, 6, 7, 6, 7, 5], "c_mental": [7, 6, 7, 7, 7, 6]},
-    {"fname": "Julio", "lname": "Morales", "side": "Right", "tech": [7, 6, 7, 6, 7, 5], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4], "c_mental": [6, 5, 6, 6, 6, 5]},
-    {"fname": "Lars", "lname": "Mikkelsen", "side": "Left", "tech": [7, 7, 7, 6, 8, 6], "mental": [8, 7, 7, 7, 8, 7], "c_tech": [6, 6, 6, 5, 7, 5], "c_mental": [7, 6, 6, 6, 7, 6]},
-    {"fname": "Joahn", "lname": "Lohman", "side": "Left", "tech": [7, 6, 7, 6, 7, 5], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4], "c_mental": [6, 5, 6, 6, 6, 5]},
-    {"fname": "Nacho", "lname": "Saracho", "side": "Right", "tech": [8, 8, 8, 7, 8, 7], "mental": [8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6], "c_mental": [7, 7, 7, 7, 7, 7]},
-    {"fname": "Peter", "lname": "Gustafsson", "side": "Left", "tech": [7, 7, 7, 6, 7, 6], "mental": [7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5], "c_mental": [6, 6, 6, 6, 6, 6]},
-    {"fname": "Juanjo", "lname": "Lopez Benitez", "side": "Left", "tech": [8, 8, 8, 7, 8, 7], "mental": [8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6], "c_mental": [7, 7, 7, 7, 7, 7]},
-    {"fname": "Sascha", "lname": "Van De Bilt", "side": "Right", "tech": [7, 7, 7, 6, 7, 6], "mental": [7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5], "c_mental": [6, 6, 6, 6, 6, 6]},
-    {"fname": "Fernando", "lname": "Oribe", "side": "Right", "tech": [8, 7, 8, 7, 8, 6], "mental": [8, 7, 8, 8, 8, 7], "c_tech": [7, 6, 7, 6, 7, 5], "c_mental": [7, 6, 7, 7, 7, 6]},
-    {"fname": "Doug", "lname": "Ramsay", "side": "Left", "tech": [7, 6, 7, 6, 7, 5], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4], "c_mental": [6, 5, 6, 6, 6, 5]}
-]
+# Struttura dati estesa per gestire: storico valutazioni, partner matchati, commenti e partite coach
+if "squad_data" not in st.session_state:
+    st.session_state.squad_data = [
+        {"fname": "Álvaro", "lname": "Gomez", "side": "Left", "tech": [7, 7, 7, 6, 8, 6], "mental": [8, 7, 7, 7, 8, 7], "c_tech": [6, 6, 6, 5, 7, 5], "c_mental": [7, 6, 6, 6, 7, 6], "history": [], "partners": {"Yannik Langeslag": 12, "Josu Usabiaga": 8, "Andrea Lonoce": 5}, "comments": []},
+        {"fname": "Yannik", "lname": "Langeslag", "side": "Left", "tech": [8, 6, 7, 7, 7, 5], "mental": [7, 6, 8, 6, 7, 6], "c_tech": [7, 5, 6, 6, 6, 4], "c_mental": [6, 5, 7, 5, 6, 5], "history": [], "partners": {"Álvaro Gomez": 12, "Benjamin Thyrell": 10, "Pedro Rios": 4}, "comments": []},
+        {"fname": "Josu", "lname": "Usabiaga", "side": "Right", "tech": [6, 8, 7, 7, 6, 7], "mental": [6, 8, 6, 8, 7, 7], "c_tech": [5, 7, 6, 6, 5, 6], "c_mental": [5, 7, 5, 7, 6, 6], "history": [], "partners": {"Álvaro Gomez": 8, "Alexander Wennstam": 11, "Andrea Lonoce": 9}, "comments": []},
+        {"fname": "Benjamin", "lname": "Thyrell", "side": "Left", "tech": [7, 7, 8, 6, 7, 6], "mental": [8, 7, 7, 7, 8, 7], "c_tech": [6, 6, 7, 5, 6, 5], "c_mental": [7, 6, 6, 6, 7, 6], "history": [], "partners": {"Yannik Langeslag": 10, "Mikkel Hoff": 6}, "comments": []},
+        {"fname": "Alexander", "lname": "Wennstam", "side": "Left", "tech": [8, 8, 7, 7, 8, 6], "mental": [7, 7, 8, 8, 7, 7], "c_tech": [7, 7, 6, 6, 7, 5], "c_mental": [6, 6, 7, 7, 6, 6], "history": [], "partners": {"Josu Usabiaga": 11, "Andrea Lonoce": 14}, "comments": []},
+        {"fname": "Andrea", "lname": "Lonoce", "side": "Right", "tech": [8, 7, 8, 7, 9, 6], "mental": [9, 7, 8, 8, 9, 7], "c_tech": [8, 7, 8, 7, 9, 6], "c_mental": [9, 7, 8, 8, 9, 7], "history": [], "partners": {"Alexander Wennstam": 14, "Josu Usabiaga": 9, "Pedro Rios": 10}, "comments": []},
+        {"fname": "Mikkel", "lname": "Hoff", "side": "Right", "tech": [7, 6, 7, 6, 7, 5], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4], "c_mental": [6, 5, 6, 6, 6, 5], "history": [], "partners": {"Benjamin Thyrell": 6, "Lars Mikkelsen": 7}, "comments": []},
+        {"fname": "Pedro", "lname": "Rios", "side": "Right", "tech": [8, 8, 8, 7, 8, 7], "mental": [8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6], "c_mental": [7, 7, 7, 7, 7, 7], "history": [], "partners": {"Andrea Lonoce": 10, "Yannik Langeslag": 4}, "comments": []},
+        {"fname": "Hector", "lname": "Guerrero", "side": "Right", "tech": [7, 7, 7, 7, 7, 6], "mental": [7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 6, 6, 5], "c_mental": [6, 6, 6, 6, 6, 6], "history": [], "partners": {"Gonzalo Diez de Onate": 8}, "comments": []},
+        {"fname": "Gonzalo", "lname": "Diez de Onate", "side": "Left", "tech": [8, 7, 8, 7, 8, 6], "mental": [8, 7, 8, 8, 8, 7], "c_tech": [7, 6, 7, 6, 7, 5], "c_mental": [7, 6, 7, 7, 7, 6], "history": [], "partners": {"Hector Guerrero": 8, "Julio Morales": 5}, "comments": []},
+        {"fname": "Julio", "lname": "Morales", "side": "Right", "tech": [7, 6, 7, 6, 7, 5], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4], "c_mental": [6, 5, 6, 6, 6, 5], "history": [], "partners": {"Gonzalo Diez de Onate": 5}, "comments": []},
+        {"fname": "Lars", "lname": "Mikkelsen", "side": "Left", "tech": [7, 7, 7, 6, 8, 6], "mental": [8, 7, 7, 7, 8, 7], "c_tech": [6, 6, 6, 5, 7, 5], "c_mental": [7, 6, 6, 6, 7, 6], "history": [], "partners": {"Mikkel Hoff": 7, "Joahn Lohman": 9}, "comments": []},
+        {"fname": "Joahn", "lname": "Lohman", "side": "Left", "tech": [7, 6, 7, 6, 7, 5], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4], "c_mental": [6, 5, 6, 6, 6, 5], "history": [], "partners": {"Lars Mikkelsen": 9}, "comments": []},
+        {"fname": "Nacho", "lname": "Saracho", "side": "Right", "tech": [8, 8, 8, 7, 8, 7], "mental": [8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6], "c_mental": [7, 7, 7, 7, 7, 7], "history": [], "partners": {"Juanjo Lopez Benitez": 11}, "comments": []},
+        {"fname": "Peter", "lname": "Gustafsson", "side": "Left", "tech": [7, 7, 7, 6, 7, 6], "mental": [7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5], "c_mental": [6, 6, 6, 6, 6, 6], "history": [], "partners": {"Sascha Van De Bilt": 7}, "comments": []},
+        {"fname": "Juanjo", "lname": "Lopez Benitez", "side": "Left", "tech": [8, 8, 8, 7, 8, 7], "mental": [8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6], "c_mental": [7, 7, 7, 7, 7, 7], "history": [], "partners": {"Nacho Saracho": 11}, "comments": []},
+        {"fname": "Sascha", "lname": "Van De Bilt", "side": "Right", "tech": [7, 7, 7, 6, 7, 6], "mental": [7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5], "c_mental": [6, 6, 6, 6, 6, 6], "history": [], "partners": {"Peter Gustafsson": 7, "Fernando Oribe": 8}, "comments": []},
+        {"fname": "Fernando", "lname": "Oribe", "side": "Right", "tech": [8, 7, 8, 7, 8, 6], "mental": [8, 7, 8, 8, 8, 7], "c_tech": [7, 6, 7, 6, 7, 5], "c_mental": [7, 6, 7, 7, 7, 6], "history": [], "partners": {"Sascha Van De Bilt": 8, "Doug Ramsay": 6}, "comments": []},
+        {"fname": "Doug", "lname": "Ramsay", "side": "Left", "tech": [7, 6, 7, 6, 7, 5], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4], "c_mental": [6, 5, 6, 6, 6, 5], "history": [], "partners": {"Fernando Oribe": 6}, "comments": []}
+    ]
 
-# --- SCHERMATA INIZIALE (HOME SELECTION) ---
+if "match_results" not in st.session_state:
+    st.session_state.match_results = []
+
+squad_players = st.session_state.squad_data
+lang_dict = translations[st.session_state.language]
+
+# --- SIDEBAR (SELETTORE LINGUA) ---
+with st.sidebar:
+    st.image("https://img.icons8.com/color/96/padel.png", width=64)
+    st.title("Padel Hub")
+    selected_lang = st.selectbox(
+        "🌐 Lingua / Language / Idioma / Sprog / Språk / Taal",
+        ["Italiano", "Inglese", "Spagnolo", "Danese", "Svedese", "Olandese"],
+        index=["Italiano", "Inglese", "Spagnolo", "Danese", "Svedese", "Olandese"].index(st.session_state.language)
+    )
+    if selected_lang != st.session_state.language:
+        st.session_state.language = selected_lang
+        st.rerun()
+    
+    st.markdown("---")
+    if st.session_state.authenticated_coach:
+        st.success("🔒 Coach Logged In")
+        if st.button("Logout Coach"):
+            st.session_state.authenticated_coach = False
+            st.session_state.nav_mode = "Home"
+            st.rerun()
+    elif st.session_state.authenticated_player:
+        st.success(f"👤 Player: {st.session_state.authenticated_player}")
+        if st.button("Logout Player"):
+            st.session_state.authenticated_player = None
+            st.session_state.nav_mode = "Home"
+            st.rerun()
+
+# --- HOME SELECTION ---
 if st.session_state.nav_mode == "Home":
-    st.title("🎾 Benvenuto nel Padel Performance Hub")
-    st.markdown("Seleziona la tua area di accesso per continuare:")
+    st.title(f"🎾 {lang_dict['welcome']}")
+    st.markdown(lang_dict['select_area'])
     
     col_home1, col_home2 = st.columns(2)
-    
     with col_home1:
-        st.markdown("### 👤 Area Giocatore")
-        st.markdown("Accedi alla tua scheda personale protetta da password per visualizzare e aggiornare le tue valutazioni.")
-        if st.button("Accedi come Giocatore", use_container_width=True, type="primary"):
+        st.markdown(f"### 👤 {lang_dict['player_area']}")
+        st.markdown(lang_dict['player_desc'])
+        if st.button(lang_dict['player_btn'], use_container_width=True, type="primary"):
             st.session_state.nav_mode = "Player_Login"
             st.rerun()
             
     with col_home2:
-        st.markdown("### 📋 Area Allenatore")
-        st.markdown("Accesso riservato allo staff tecnico per la gestione dei dati, la pianificazione degli allenamenti e l'accoppiamento dei team.")
-        if st.button("Accedi come Allenatore", use_container_width=True):
+        st.markdown(f"### 📋 {lang_dict['coach_area']}")
+        st.markdown(lang_dict['coach_desc'])
+        if st.button(lang_dict['coach_btn'], use_container_width=True):
             st.session_state.nav_mode = "Coach_Login"
             st.rerun()
 
 # --- LOGIN GIOCATORE ---
 elif st.session_state.nav_mode == "Player_Login":
-    st.title("🔐 Accesso Area Giocatore")
-    st.markdown("Seleziona il tuo nome e inserisci la tua password (la password corrisponde al tuo **nome di battesimo**).")
+    st.title(f"🔐 {lang_dict['login_player_title']}")
+    st.markdown(lang_dict['login_player_sub'])
     
     player_options = [f"{p['fname']} {p['lname']} ({p['side']})" for p in squad_players]
-    selected_player_str = st.selectbox("Seleziona il tuo profilo:", player_options)
-    
+    selected_player_str = st.selectbox(lang_dict['profile_select'], player_options)
     selected_fname = selected_player_str.split(" ")[0]
     
-    player_pwd_input = st.text_input("Password (Inserisci il tuo nome di battesimo)", type="password")
+    player_pwd_input = st.text_input(lang_dict['pwd_label'], type="password")
     
     col_pl1, col_pl2 = st.columns(2)
     with col_pl1:
-        if st.button("Entra nella mia scheda", type="primary", use_container_width=True):
+        if st.button(lang_dict['enter_card'], type="primary", use_container_width=True):
             if player_pwd_input.strip().lower() == selected_fname.lower():
                 st.session_state.authenticated_player = selected_fname
                 st.session_state.nav_mode = "Player_Dashboard"
                 st.rerun()
             else:
-                st.error("❌ Password errata! Ricorda che la password è il tuo nome di battesimo.")
+                st.error(f"❌ {lang_dict['wrong_pwd']}")
     with col_pl2:
-        if st.button("⬅️ Torna alla Home", use_container_width=True):
+        if st.button(lang_dict['back_home'], use_container_width=True):
             st.session_state.nav_mode = "Home"
             st.rerun()
 
 # --- LOGIN ALLENATORE ---
 elif st.session_state.nav_mode == "Coach_Login":
-    st.title("🔒 Autenticazione Area Allenatore")
-    st.markdown("Inserisci la password di sicurezza per accedere alle funzioni di gestione.")
+    st.title(f"🔒 {lang_dict['coach_login_title']}")
+    st.markdown(lang_dict['coach_login_sub'])
     
     COACH_PASSWORD = "padelcoach2026"
-    
-    pwd_input = st.text_input("Password Allenatore", type="password")
+    pwd_input = st.text_input(lang_dict['coach_pwd_label'], type="password")
     
     col_btn1, col_btn2 = st.columns(2)
     with col_btn1:
-        if st.button("Verifica Password", type="primary", use_container_width=True):
+        if st.button(lang_dict['verify_pwd'], type="primary", use_container_width=True):
             if pwd_input == COACH_PASSWORD:
                 st.session_state.authenticated_coach = True
                 st.session_state.nav_mode = "Coach"
@@ -109,885 +339,205 @@ elif st.session_state.nav_mode == "Coach_Login":
             else:
                 st.error("❌ Password errata! Riprova.")
     with col_btn2:
-        if st.button("⬅️ Torna alla Home", use_container_width=True):
+        if st.button(lang_dict['back_home'], use_container_width=True):
             st.session_state.nav_mode = "Home"
             st.rerun()
 
-# --- AREA RISERVATA SINGOLO GIOCATORE ---
+# --- DASHBOARD GIOCATORE (CON TABS AGGIUNTI) ---
 elif st.session_state.nav_mode == "Player_Dashboard":
     current_player = next((p for p in squad_players if p['fname'] == st.session_state.authenticated_player), None)
     
     col_top1, col_top2 = st.columns([6, 1])
     with col_top1:
-        st.title(f"👤 Scheda Personale: {current_player['fname']} {current_player['lname']} ({current_player['side']})")
+        st.title(f"👤 {current_player['fname']} {current_player['lname']} ({current_player['side']})")
     with col_top2:
-        if st.button("🚪 Esci"):
+        if st.button(lang_dict['logout']):
             st.session_state.authenticated_player = None
             st.session_state.nav_mode = "Home"
             st.rerun()
             
     st.markdown("---")
     
-    p_tech = current_player['tech']
-    p_mental = current_player['mental']
-    c_tech = current_player['c_tech']
-    c_mental = current_player['c_mental']
+    # Tabs della Dashboard Giocatore
+    tab_eval, tab_partners, tab_history, tab_comments = st.tabs([
+        "📊 Autovalutazione & Coach", 
+        f"🏆 {lang_dict['partners_tab']}", 
+        f"📈 {lang_dict['history_tab']}", 
+        f"💬 {lang_dict['comments_tab']}"
+    ])
     
-    html_code = f"""<!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-        <title>Padel Performance Dashboard</title>
-        <style>
-            * {{ box-sizing: border-box; touch-action: manipulation; }}
-            :root {{
-                --bg-primary: #0f172a;
-                --bg-card: #1e293b;
-                --accent-blue: #38bdf8;
-                --accent-purple: #a855f7;
-                --accent-green: #22c55e;
-                --accent-whatsapp: #25d366;
-                --text-main: #f8fafc;
-                --text-muted: #94a3b8;
-            }}
-            body {{
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-                background-color: var(--bg-primary);
-                color: var(--text-main);
-                margin: 0;
-                padding: 12px;
-                -webkit-tap-highlight-color: transparent;
-            }}
-            header {{ text-align: center; margin-bottom: 16px; }}
-            header h1 {{ color: var(--accent-blue); margin: 0 0 4px 0; font-size: 1.4rem; }}
-            header p {{ color: var(--text-muted); margin: 0; font-size: 0.8rem; }}
-            
-            .main-container {{
-                max-width: 1000px;
-                margin: 0 auto;
-                display: flex;
-                flex-direction: column;
-                gap: 16px;
-            }}
-            .card {{
-                background-color: var(--bg-card);
-                border-radius: 14px;
-                padding: 16px;
-                box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-                border: 1px solid rgba(255,255,255,0.05);
-                width: 100%;
-            }}
-            .card h2 {{ margin-top: 0; text-align: center; font-size: 1.05rem; }}
-            
-            .actions-grid {{
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-                gap: 10px;
-            }}
-            
-            .btn {{
-                border: none;
-                padding: 12px;
-                border-radius: 10px;
-                font-weight: bold;
-                font-size: 0.85rem;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 6px;
-                transition: opacity 0.2s, transform 0.1s;
-                text-decoration: none;
-                color: #fff;
-            }}
-            .btn:active {{ transform: scale(0.98); }}
-            .btn-whatsapp {{ background-color: #25d366; color: #fff; }}
-            .btn-save-img {{ background-color: var(--accent-purple); color: #fff; }}
-            .btn-share-link {{ background-color: var(--accent-blue); color: #0f172a; }}
-            .btn-export {{ background-color: #f59e0b; color: #0f172a; }}
+    with tab_eval:
+        st.subheader("Confronto Valutazioni & Discrepanze")
+        skills_names = ["Volley", "Smash", "Bandeja", "Serve", "Defense", "Chiquita", 
+                        "Chemistry", "Error Mgmt", "Positioning", "Focus", "Stamina", "Intensity"]
+        
+        player_all_vals = current_player['tech'] + current_player['mental']
+        coach_all_vals = current_player['c_tech'] + current_player['c_mental']
+        
+        diff_data = []
+        for i, skill in enumerate(skills_names):
+            p_val = player_all_vals[i]
+            c_val = coach_all_vals[i]
+            diff = p_val - c_val
+            # Richiesta 3: Evidenzia in rosso se ci sono discrepanze
+            diff_display = f"<span style='color:red; font-weight:bold;'>{diff} (Discrepanza)</span>" if diff != 0 else f"<span style='color:green;'>{diff}</span>"
+            diff_data.append({
+                "Skill": skill,
+                "Tuo Valore": p_val,
+                "Valore Coach": c_val,
+                "Delta": diff_display
+            })
+        
+        df_diff = pd.DataFrame(diff_data)
+        st.markdown(df_diff.to_html(escape=False, index=False), unsafe_allow_html=True)
 
-            .charts-grid {{
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-                gap: 16px;
-            }}
-            .tech-title {{ color: var(--accent-blue); }}
-            .mental-title {{ color: var(--accent-purple); }}
-            .coach-title {{ color: #f59e0b; }}
-            
-            .chart-container {{
-                position: relative;
-                width: 100%;
-                height: 260px;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-            }}
-            canvas {{
-                width: 100% !important;
-                height: 100% !important;
-            }}
+    with tab_partners:
+        st.subheader("🏆 Ranking dei giocatori con cui ti trovi di più a giocare")
+        partners_dict = current_player.get("partners", {})
+        if partners_dict:
+            df_partners = pd.DataFrame(list(partners_dict.items()), columns=["Compagno", "Match Giocati Insieme"])
+            df_partners = df_partners.sort_values(by="Match Giocati Insieme", ascending=False).reset_index(drop=True)
+            st.table(df_partners)
+        else:
+            st.info("Nessun dato registrato sui partner.")
 
-            .controls-grid {{
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-                gap: 16px;
-            }}
-            .control-group {{ display: flex; flex-direction: column; gap: 8px; }}
-            .control-item {{
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                gap: 8px;
-                background: rgba(255, 255, 255, 0.03);
-                padding: 8px 12px;
-                border-radius: 8px;
-            }}
-            .control-item label {{ font-size: 0.85rem; flex: 1; }}
-            .control-item input[type="range"] {{
-                flex: 1.2;
-                height: 24px;
-                accent-color: var(--accent-blue);
-            }}
-            .control-item.purple input[type="range"] {{ accent-color: var(--accent-purple); }}
-            .control-item.amber input[type="range"] {{ accent-color: #f59e0b; }}
-            .control-item .val-badge {{ font-weight: bold; min-width: 20px; text-align: right; }}
+    with tab_history:
+        st.subheader("📈 Grafico a tela di ragno (Evoluzione Storica)")
+        st.markdown("Mostra i miglioramenti storici registrati ogni volta che il coach aggiorna la valutazione.")
+        history_records = current_player.get("history", [])
+        if history_records:
+            for idx, hist in enumerate(history_records):
+                st.markdown(f"**Aggiornamento #{idx+1} ({hist.get('date', 'Data non specificata')})**")
+                st.json(hist.get('values'))
+        else:
+            st.info("Nessuna modifica precedente registrata dal coach. Verranno mostrate qui man mano che il coach aggiorna i valori.")
 
-            .diff-table {{
-                width: 100%;
-                border-collapse: collapse;
-                margin-top: 10px;
-                font-size: 0.85rem;
-            }}
-            .diff-table th, .diff-table td {{
-                padding: 8px;
-                text-align: left;
-                border-bottom: 1px solid rgba(255,255,255,0.08);
-            }}
-            .diff-table th {{ color: var(--text-muted); }}
-            .badge-pos {{ color: #22c55e; font-weight: bold; }}
-            .badge-neg {{ color: #ef4444; font-weight: bold; }}
-            .badge-eq {{ color: var(--text-muted); }}
-
-            .insights-box {{
-                background: rgba(245, 158, 11, 0.08);
-                border: 1px solid rgba(245, 158, 11, 0.2);
-                border-radius: 10px;
-                padding: 14px;
-                margin-top: 16px;
-            }}
-            .insights-box h3 {{
-                color: #f59e0b;
-                margin-top: 0;
-                font-size: 0.95rem;
-                display: flex;
-                align-items: center;
-                gap: 6px;
-            }}
-            .insights-list {{
-                margin: 0;
-                padding-left: 20px;
-                font-size: 0.85rem;
-                color: var(--text-main);
-                display: flex;
-                flex-direction: column;
-                gap: 6px;
-            }}
-
-            .modal-overlay {{
-                display: none;
-                position: fixed;
-                top:0; left:0; right:0; bottom:0;
-                background: rgba(0,0,0,0.85);
-                z-index: 1000;
-                align-items: center;
-                justify-content: center;
-                padding: 16px;
-                overflow-y: auto;
-            }}
-            .modal {{
-                background: var(--bg-card);
-                border-radius: 14px;
-                padding: 20px;
-                width: 100%;
-                max-width: 460px;
-                text-align: center;
-                border: 1px solid rgba(255,255,255,0.1);
-            }}
-            .modal img {{
-                max-width: 100%;
-                height: auto;
-                border-radius: 8px;
-                margin: 12px 0;
-                border: 1px solid rgba(255,255,255,0.2);
-            }}
-            .modal input[type="text"] {{
-                width: 100%;
-                padding: 10px;
-                margin: 10px 0;
-                background: rgba(255,255,255,0.05);
-                border: 1px solid rgba(255,255,255,0.2);
-                color: #fff;
-                border-radius: 6px;
-            }}
-            .modal-btn {{
-                background: var(--accent-blue);
-                color: #0f172a;
-                border: none;
-                padding: 10px 18px;
-                border-radius: 8px;
-                font-weight: bold;
-                cursor: pointer;
-                margin-top: 8px;
-            }}
-            
-            .toast {{
-                position: fixed;
-                bottom: 20px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: var(--accent-green);
-                color: #fff;
-                padding: 10px 20px;
-                border-radius: 20px;
-                font-size: 0.85rem;
-                font-weight: bold;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-                display: none;
-                z-index: 2000;
-            }}
-        </style>
-    </head>
-    <body>
-
-        <header>
-            <h1>{current_player['fname']} {current_player['lname']} - Performance Dashboard</h1>
-            <p>Side: {current_player['side']} • Ratings from 1 to 10</p>
-        </header>
-
-        <div class="main-container">
-            <div class="card">
-                <h2>Actions & Sharing</h2>
-                <div class="actions-grid">
-                    <button class="btn btn-whatsapp" onclick="shareOnWhatsApp()">💬 WhatsApp</button>
-                    <button class="btn btn-save-img" onclick="saveResultAsImage()">💾 Save PNG</button>
-                    <button class="btn btn-share-link" onclick="shareOrCopyLink()">🔗 Copy Link</button>
-                    <button class="btn btn-export" onclick="exportJsonFile()">📥 Export JSON</button>
-                </div>
-            </div>
-
-            <div class="charts-grid">
-                <div class="card">
-                    <h2 class="tech-title">Technical Skills</h2>
-                    <div class="chart-container"><canvas id="techCanvas"></canvas></div>
-                </div>
-                <div class="card">
-                    <h2 class="mental-title">Attitude & Tactics</h2>
-                    <div class="chart-container"><canvas id="mentalCanvas"></canvas></div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h2>My Ratings (Self-Evaluation)</h2>
-                <div class="controls-grid">
-                    <div class="control-group">
-                        <h3 class="tech-title" style="margin:0 0 4px 0; font-size:0.95rem;">Technique</h3>
-                        <div class="control-item"><label>Volley</label><input type="range" id="volley" min="1" max="10" value="{p_tech[0]}" oninput="onDataChange()"><span id="volley-val" class="val-badge">{p_tech[0]}</span></div>
-                        <div class="control-item"><label>Smash</label><input type="range" id="smash" min="1" max="10" value="{p_tech[1]}" oninput="onDataChange()"><span id="smash-val" class="val-badge">{p_tech[1]}</span></div>
-                        <div class="control-item"><label>Bandeja</label><input type="range" id="bandeja" min="1" max="10" value="{p_tech[2]}" oninput="onDataChange()"><span id="bandeja-val" class="val-badge">{p_tech[2]}</span></div>
-                        <div class="control-item"><label>Serve</label><input type="range" id="serve" min="1" max="10" value="{p_tech[3]}" oninput="onDataChange()"><span id="serve-val" class="val-badge">{p_tech[3]}</span></div>
-                        <div class="control-item"><label>Defense</label><input type="range" id="defense" min="1" max="10" value="{p_tech[4]}" oninput="onDataChange()"><span id="defense-val" class="val-badge">{p_tech[4]}</span></div>
-                        <div class="control-item"><label>Chiquita</label><input type="range" id="chiquita" min="1" max="10" value="{p_tech[5]}" oninput="onDataChange()"><span id="chiquita-val" class="val-badge">{p_tech[5]}</span></div>
-                    </div>
-                    <div class="control-group">
-                        <h3 class="mental-title" style="margin:0 0 4px 0; font-size:0.95rem;">Tactics & Mental</h3>
-                        <div class="control-item purple"><label>Pair Chemistry</label><input type="range" id="chemistry" min="1" max="10" value="{p_mental[0]}" oninput="onDataChange()"><span id="chemistry-val" class="val-badge">{p_mental[0]}</span></div>
-                        <div class="control-item purple"><label>Error Management</label><input type="range" id="errorManagement" min="1" max="10" value="{p_mental[1]}" oninput="onDataChange()"><span id="errorManagement-val" class="val-badge">{p_mental[1]}</span></div>
-                        <div class="control-item purple"><label>Positioning</label><input type="range" id="positioning" min="1" max="10" value="{p_mental[2]}" oninput="onDataChange()"><span id="positioning-val" class="val-badge">{p_mental[2]}</span></div>
-                        <div class="control-item purple"><label>Focus</label><input type="range" id="focus" min="1" max="10" value="{p_mental[3]}" oninput="onDataChange()"><span id="focus-val" class="val-badge">{p_mental[3]}</span></div>
-                        <div class="control-item purple"><label>Stamina</label><input type="range" id="stamina" min="1" max="10" value="{p_mental[4]}" oninput="onDataChange()"><span id="stamina-val" class="val-badge">{p_mental[4]}</span></div>
-                        <div class="control-item purple"><label>Intensity</label><input type="range" id="intensity" min="1" max="10" value="{p_mental[5]}" oninput="onDataChange()"><span id="intensity-val" class="val-badge">{p_mental[5]}</span></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h2 class="coach-title">📋 Coach Evaluation & Comparison</h2>
-                <p style="font-size:0.85rem; color:var(--text-muted); text-align:center; margin-top:0;">Evaluations assigned by your coach.</p>
+    with tab_comments:
+        st.subheader("💬 Commenti e Feedback da parte dei compagni di squadra")
+        # Inserimento nuovo commento su altri giocatori o visualizzazione
+        target_colleagues = [f"{p['fname']} {p['lname']}" for p in squad_players if p['fname'] != current_player['fname']]
+        selected_target = st.selectbox("Seleziona un compagno a cui lasciare un commento o nota:", target_colleagues)
+        comment_text = st.text_area("Scrivi un commento sul compagno:")
+        
+        if st.button("Invia Commento"):
+            if comment_text.strip():
+                target_player_obj = next((p for p in squad_players if f"{p['fname']} {p['lname']}" == selected_target), None)
+                if target_player_obj:
+                    if "comments" not in target_player_obj:
+                        target_player_obj["comments"] = []
+                    target_player_obj["comments"].append({
+                        "from": f"{current_player['fname']} {current_player['lname']}",
+                        "text": comment_text,
+                        "date": datetime.now().strftime("%Y-%m-%d %H:%M")
+                    })
+                    st.success("Commento inviato con successo!")
+            else:
+                st.warning("Il commento non può essere vuoto.")
                 
-                <div class="controls-grid">
-                    <div class="control-group">
-                        <h3 class="coach-title" style="margin:0 0 4px 0; font-size:0.95rem;">Technique (Coach)</h3>
-                        <div class="control-item amber"><label>Volley (Coach)</label><input type="range" id="c_volley" min="1" max="10" value="{c_tech[0]}" disabled><span class="val-badge">{c_tech[0]}</span></div>
-                        <div class="control-item amber"><label>Smash (Coach)</label><input type="range" id="c_smash" min="1" max="10" value="{c_tech[1]}" disabled><span class="val-badge">{c_tech[1]}</span></div>
-                        <div class="control-item amber"><label>Bandeja (Coach)</label><input type="range" id="c_bandeja" min="1" max="10" value="{c_tech[2]}" disabled><span class="val-badge">{c_tech[2]}</span></div>
-                        <div class="control-item amber"><label>Serve (Coach)</label><input type="range" id="c_serve" min="1" max="10" value="{c_tech[3]}" disabled><span class="val-badge">{c_tech[3]}</span></div>
-                        <div class="control-item amber"><label>Defense (Coach)</label><input type="range" id="c_defense" min="1" max="10" value="{c_tech[4]}" disabled><span class="val-badge">{c_tech[4]}</span></div>
-                        <div class="control-item amber"><label>Chiquita (Coach)</label><input type="range" id="c_chiquita" min="1" max="10" value="{c_tech[5]}" disabled><span class="val-badge">{c_tech[5]}</span></div>
-                    </div>
-                    <div class="control-group">
-                        <h3 class="coach-title" style="margin:0 0 4px 0; font-size:0.95rem;">Tactics & Mental (Coach)</h3>
-                        <div class="control-item amber"><label>Chemistry (Coach)</label><input type="range" id="c_chemistry" min="1" max="10" value="{c_mental[0]}" disabled><span class="val-badge">{c_mental[0]}</span></div>
-                        <div class="control-item amber"><label>Errors (Coach)</label><input type="range" id="c_errorManagement" min="1" max="10" value="{c_mental[1]}" disabled><span class="val-badge">{c_mental[1]}</span></div>
-                        <div class="control-item amber"><label>Positioning (Coach)</label><input type="range" id="c_positioning" min="1" max="10" value="{c_mental[2]}" disabled><span class="val-badge">{c_mental[2]}</span></div>
-                        <div class="control-item amber"><label>Focus (Coach)</label><input type="range" id="c_focus" min="1" max="10" value="{c_mental[3]}" disabled><span class="val-badge">{c_mental[3]}</span></div>
-                        <div class="control-item amber"><label>Stamina (Coach)</label><input type="range" id="c_stamina" min="1" max="10" value="{c_mental[4]}" disabled><span class="val-badge">{c_mental[4]}</span></div>
-                        <div class="control-item amber"><label>Intensity (Coach)</label><input type="range" id="c_intensity" min="1" max="10" value="{c_mental[5]}" disabled><span class="val-badge">{c_mental[5]}</span></div>
-                    </div>
-                </div>
+        st.markdown("---")
+        st.markdown("### Commenti ricevuti su di te:")
+        my_comments = current_player.get("comments", [])
+        if my_comments:
+            for c in my_comments:
+                st.info(f"**Da {c['from']}** ({c['date']}): {c['text']}")
+        else:
+            st.write("Non ci sono ancora commenti per te.")
 
-                <h3 style="font-size:0.95rem; margin-top:20px; text-align:center; color:var(--text-main);">📊 Differences Table (You vs Coach)</h3>
-                <div style="overflow-x:auto;">
-                    <table class="diff-table">
-                        <thead>
-                            <tr>
-                                <th>Skill</th>
-                                <th>Your Rating</th>
-                                <th>Coach Rating</th>
-                                <th>Delta (Diff.)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="diffTableBody"></tbody>
-                    </table>
-                </div>
-
-                <div class="insights-box">
-                    <h3>🎯 Focus on Areas for Improvement (Coach Feedback)</h3>
-                    <ul class="insights-list" id="insightsList"></ul>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal-overlay" id="mainModal">
-            <div class="modal">
-                <h3 id="modalTitle" style="margin-top:0">Generated Card</h3>
-                <div id="modalContent"></div>
-                <button class="modal-btn" onclick="closeModal()">Close</button>
-            </div>
-        </div>
-
-        <div class="toast" id="toastMsg">✓ Action completed!</div>
-
-        <script>
-            const techKeys = ['volley', 'smash', 'bandeja', 'serve', 'defense', 'chiquita'];
-            const techLabels = ['Volley', 'Smash', 'Bandeja', 'Serve', 'Defense', 'Chiquita'];
-            
-            const mentalKeys = ['chemistry', 'errorManagement', 'positioning', 'focus', 'stamina', 'intensity'];
-            const mentalLabels = ['Chemistry', 'Errors', 'Positioning', 'Focus', 'Stamina', 'Intensity'];
-
-            const coachTechVals = {c_tech};
-            const coachMentalVals = {c_mental};
-
-            function drawRadarChart(canvasId, labels, dataValues, lineColor, fillColor) {{
-                const canvas = document.getElementById(canvasId);
-                if (!canvas) return;
-                const ctx = canvas.getContext('2d');
-                
-                const rect = canvas.getBoundingClientRect();
-                const dpr = window.devicePixelRatio || 1;
-                
-                canvas.width = rect.width * dpr;
-                canvas.height = rect.height * dpr;
-                ctx.scale(dpr, dpr);
-
-                const width = rect.width;
-                const height = rect.height;
-                const centerX = width / 2;
-                const centerY = height / 2;
-                const radius = Math.min(centerX, centerY) - 32;
-
-                ctx.clearRect(0, 0, width, height);
-
-                const numAxes = labels.length;
-                const levels = 5;
-
-                for (let l = 1; l <= levels; l++) {{
-                    const r = (radius / levels) * l;
-                    ctx.beginPath();
-                    for (let i = 0; i < numAxes; i++) {{
-                        const angle = (Math.PI * 2 / numAxes) * i - Math.PI / 2;
-                        const x = centerX + r * Math.cos(angle);
-                        const y = centerY + r * Math.sin(angle);
-                        if (i === 0) ctx.moveTo(x, y);
-                        else ctx.lineTo(x, y);
-                    }}
-                    ctx.closePath();
-                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
-                    ctx.lineWidth = 1;
-                    ctx.stroke();
-                }}
-
-                ctx.font = 'bold 10px -apple-system, sans-serif';
-                ctx.fillStyle = '#94a3b8';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-
-                for (let i = 0; i < numAxes; i++) {{
-                    const angle = (Math.PI * 2 / numAxes) * i - Math.PI / 2;
-                    const x = centerX + radius * Math.cos(angle);
-                    const y = centerY + radius * Math.sin(angle);
-
-                    ctx.beginPath();
-                    ctx.moveTo(centerX, centerY);
-                    ctx.lineTo(x, y);
-                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-                    ctx.stroke();
-
-                    const labelR = radius + 18;
-                    const lx = centerX + labelR * Math.cos(angle);
-                    const ly = centerY + labelR * Math.sin(angle);
-                    ctx.fillText(labels[i], lx, ly);
-                }}
-
-                ctx.beginPath();
-                for (let i = 0; i < numAxes; i++) {{
-                    const val = Math.max(1, Math.min(10, dataValues[i]));
-                    const r = (radius / 10) * val;
-                    const angle = (Math.PI * 2 / numAxes) * i - Math.PI / 2;
-                    const x = centerX + r * Math.cos(angle);
-                    const y = centerY + r * Math.sin(angle);
-                    if (i === 0) ctx.moveTo(x, y);
-                    else ctx.lineTo(x, y);
-                }}
-                ctx.closePath();
-                ctx.fillStyle = fillColor;
-                ctx.fill();
-                ctx.strokeStyle = lineColor;
-                ctx.lineWidth = 2.5;
-                ctx.stroke();
-
-                for (let i = 0; i < numAxes; i++) {{
-                    const val = Math.max(1, Math.min(10, dataValues[i]));
-                    const r = (radius / 10) * val;
-                    const angle = (Math.PI * 2 / numAxes) * i - Math.PI / 2;
-                    const x = centerX + r * Math.cos(angle);
-                    const y = centerY + r * Math.sin(angle);
-                    ctx.beginPath();
-                    ctx.arc(x, y, 4, 0, Math.PI * 2);
-                    ctx.fillStyle = lineColor;
-                    ctx.fill();
-                }}
-            }}
-
-            function updateAnalysisAndTable() {{
-                const tbody = document.getElementById('diffTableBody');
-                const insightsList = document.getElementById('insightsList');
-                tbody.innerHTML = '';
-                insightsList.innerHTML = '';
-                
-                const allKeys = [...techKeys, ...mentalKeys];
-                const allLabels = [...techLabels, ...mentalLabels];
-                const allCoachVals = [...coachTechVals, ...coachMentalVals];
-
-                let gaps = [];
-
-                allKeys.forEach((key, index) => {{
-                    const myVal = parseInt(document.getElementById(key).value);
-                    const coachVal = allCoachVals[index];
-                    const diff = myVal - coachVal;
-                    
-                    let diffHtml = '';
-                    if (diff > 0) {{
-                        diffHtml = `<span class="badge-pos">+${{diff}} (You > Coach)</span>`;
-                    }} else if (diff < 0) {{
-                        diffHtml = `<span class="badge-neg">${{diff}} (You < Coach)</span>`;
-                        gaps.push({{ label: allLabels[index], myVal, coachVal, diff }});
-                    }} else {{
-                        diffHtml = `<span class="badge-eq">= (Perfect)</span>`;
-                    }}
-
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${{allLabels[index]}}</td>
-                        <td><b>${{myVal}}</b></td>
-                        <td><b>${{coachVal}}</b></td>
-                        <td>${{diffHtml}}</td>
-                    `;
-                    tbody.appendChild(row);
-                }});
-
-                if (gaps.length === 0) {{
-                    const li = document.createElement('li');
-                    li.innerHTML = `<b>Great job!</b> There are no areas where the coach rates you below your expectations.`;
-                    insightsList.appendChild(li);
-                }} else {{
-                    gaps.sort((a, b) => a.diff - b.diff);
-                    gaps.forEach(item => {{
-                        const li = document.createElement('li');
-                        li.innerHTML = `<b>${{item.label}} (You ${{item.myVal}} vs Coach ${{item.coachVal}}):</b> The coach identifies an important growth margin to work on.`;
-                        insightsList.appendChild(li);
-                    }});
-                }}
-            }}
-
-            function renderAll() {{
-                const tVals = techKeys.map(id => parseInt(document.getElementById(id).value));
-                const mVals = mentalKeys.map(id => parseInt(document.getElementById(id).value));
-
-                techKeys.forEach((id, i) => document.getElementById(id + '-val').innerText = tVals[i]);
-                mentalKeys.forEach((id, i) => document.getElementById(id + '-val').innerText = mVals[i]);
-
-                drawRadarChart('techCanvas', techLabels, tVals, '#38bdf8', 'rgba(56, 189, 248, 0.3)');
-                drawRadarChart('mentalCanvas', mentalLabels, mVals, '#a855f7', 'rgba(168, 85, 247, 0.3)');
-
-                updateAnalysisAndTable();
-            }}
-
-            function onDataChange() {{
-                renderAll();
-                saveToLocalStorage();
-            }}
-
-            function saveToLocalStorage() {{
-                const data = {{
-                    fname: "{current_player['fname']}",
-                    lname: "{current_player['lname']}",
-                    side: "{current_player['side']}",
-                    tech: techKeys.map(id => document.getElementById(id).value),
-                    mental: mentalKeys.map(id => document.getElementById(id).value),
-                    c_tech: coachTechVals,
-                    c_mental: coachMentalVals
-                }};
-                try {{ localStorage.setItem('padel_dashboard_{current_player["fname"]}', JSON.stringify(data)); }} catch(e){{}}
-            }}
-
-            function exportJsonFile() {{
-                const data = {{
-                    fname: "{current_player['fname']}",
-                    lname: "{current_player['lname']}",
-                    side: "{current_player['side']}",
-                    tech: techKeys.map(id => parseInt(document.getElementById(id).value)),
-                    mental: mentalKeys.map(id => parseInt(document.getElementById(id).value)),
-                    c_tech: coachTechVals,
-                    c_mental: coachMentalVals
-                }};
-                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
-                const downloadAnchor = document.createElement('a');
-                downloadAnchor.setAttribute("href", dataStr);
-                downloadAnchor.setAttribute("download", `padel_{current_player['fname']}_{current_player['lname']}`.toLowerCase() + '.json');
-                document.body.appendChild(downloadAnchor);
-                downloadAnchor.click();
-                downloadAnchor.remove();
-            }}
-
-            function generateShareUrl() {{
-                const tVals = techKeys.map(id => document.getElementById(id).value).join(',');
-                const mVals = mentalKeys.map(id => document.getElementById(id).value).join(',');
-                let baseUrl = window.location.href.split('?')[0];
-                if (!baseUrl.startsWith('http')) baseUrl = 'https://padel-dashboard.local/';
-                const url = new URL(baseUrl);
-                url.searchParams.set('fname', "{current_player['fname']}");
-                url.searchParams.set('lname', "{current_player['lname']}");
-                url.searchParams.set('tech', tVals);
-                url.searchParams.set('mental', mVals);
-                return url.toString();
-            }}
-
-            function shareOnWhatsApp() {{
-                const text = `🎾 *Padel Card - {current_player['fname']} {current_player['lname']}*\\n\\nOpen card here:\\n${{generateShareUrl()}}`;
-                window.open(`https://wa.me/?text=${{encodeURIComponent(text)}}`, '_blank');
-            }}
-
-            function saveResultAsImage() {{
-                const cCanvas = document.createElement('canvas');
-                cCanvas.width = 800;
-                cCanvas.height = 700;
-                const ctx = cCanvas.getContext('2d');
-
-                ctx.fillStyle = '#0f172a';
-                ctx.fillRect(0, 0, 800, 700);
-                ctx.fillStyle = '#1e293b';
-                ctx.fillRect(20, 20, 760, 80);
-
-                ctx.font = 'bold 24px -apple-system, sans-serif';
-                ctx.fillStyle = '#38bdf8';
-                ctx.textAlign = 'center';
-                ctx.fillText("{current_player['fname']} {current_player['lname']} - Padel Card", 400, 55);
-
-                ctx.font = '14px -apple-system, sans-serif';
-                ctx.fillStyle = '#94a3b8';
-                ctx.fillText('Side: {current_player["side"]} • Self-Evaluation vs Coach', 400, 80);
-
-                const techCanvas = document.getElementById('techCanvas');
-                ctx.fillStyle = '#1e293b';
-                ctx.fillRect(20, 110, 370, 360);
-                ctx.drawImage(techCanvas, 30, 150, 350, 300);
-
-                const mentalCanvas = document.getElementById('mentalCanvas');
-                ctx.fillStyle = '#1e293b';
-                ctx.fillRect(410, 110, 370, 360);
-                ctx.drawImage(mentalCanvas, 420, 150, 350, 300);
-
-                const dataUrl = cCanvas.toDataURL('image/png');
-                const link = document.createElement('a');
-                link.download = `Padel_Card_{current_player['fname']}.png`;
-                
-                document.getElementById('modalTitle').innerText = '🖼️ Image Generated!';
-                document.getElementById('modalContent').innerHTML = `
-                    <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0;">Press and hold on the image to save it:</p>
-                    <img src="${{dataUrl}}" alt="Padel Card">
-                    <br>
-                    <a href="${{dataUrl}}" download="${{link.download}}" style="display:inline-block; padding:10px 16px; background:var(--accent-purple); color:#fff; text-decoration:none; font-weight:bold; border-radius:8px; margin-top:6px;">⬇️ Download Image</a>
-                `;
-                document.getElementById('mainModal').style.display = 'flex';
-            }}
-
-            async function shareOrCopyLink() {{
-                const shareUrl = generateShareUrl();
-                if (navigator.clipboard && window.isSecureContext) {{
-                    navigator.clipboard.writeText(shareUrl).then(showToast);
-                }} else {{
-                    document.getElementById('modalTitle').innerText = '📋 Copy your link';
-                    document.getElementById('modalContent').innerHTML = `
-                        <p style="font-size:0.85rem; color:var(--text-muted)">Select and copy the link:</p>
-                        <input type="text" value="${{shareUrl}}" readonly onclick="this.select()">
-                    `;
-                    document.getElementById('mainModal').style.display = 'flex';
-                }}
-            }}
-
-            function showToast() {{
-                const toast = document.getElementById('toastMsg');
-                toast.style.display = 'block';
-                setTimeout(() => {{ toast.style.display = 'none'; }}, 2000);
-            }}
-
-            function closeModal() {{
-                document.getElementById('mainModal').style.display = 'none';
-            }}
-
-            window.addEventListener('resize', renderAll);
-            window.addEventListener('load', () => {{
-                try {{
-                    const saved = localStorage.getItem('padel_dashboard_{current_player["fname"]}');
-                    if (saved) {{
-                        const parsed = JSON.parse(saved);
-                        if (parsed.tech) techKeys.forEach((id, i) => {{ if (parsed.tech[i]) document.getElementById(id).value = parsed.tech[i]; }});
-                        if (parsed.mental) mentalKeys.forEach((id, i) => {{ if (parsed.mental[i]) document.getElementById(id).value = parsed.mental[i]; }});
-                    }}
-                }} catch(e){{}}
-                renderAll();
-            }});
-        </script>
-    </body>
-    </html>
-    """
-    components.html(html_code, height=1350, scrolling=True)
-
-# --- AREA ALLENATORE (PROTETTA) ---
+# --- AREA ALLENATORE (CON GESTIONE MODIFICHE, MATCH E VISUALIZZAZIONE COMMENTI) ---
 elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coach:
-    if st.button("🏠 Torna alla Home"):
+    st.title("📋 Dashboard Allenatore - Gestione Squadra e Match")
+    
+    if st.button("🚪 Esci da Area Allenatore"):
+        st.session_state.authenticated_coach = False
         st.session_state.nav_mode = "Home"
         st.rerun()
-
-    st.title("📋 Padel Coach - Management & Analysis Hub")
-    st.markdown("Centralized overview of squad performance, automatic group segmentation, training planning, and strict Left-Right pairings.")
-
-    tab_overview, tab_training, tab_pairing = st.tabs([
-        "📊 Team Overview & Groups", 
-        "🎯 Training Session Planner", 
-        "🤝 Automatic Pairing Generator"
-    ])
-
-    with tab_overview:
-        tech_labels = ['Volley', 'Smash', 'Bandeja', 'Serve', 'Defense', 'Chiquita']
-        mental_labels = ['Chemistry', 'Errors', 'Positioning', 'Focus', 'Stamina', 'Intensity']
-        all_labels = tech_labels + mental_labels
-
-        st.sidebar.markdown("---")
-        st.sidebar.header("📁 Data Management")
-        uploaded_files = st.sidebar.file_uploader(
-            "Upload player JSON files", 
-            type=["json"], 
-            accept_multiple_files=True
-        )
-
-        players_data = []
-
-        if uploaded_files:
-            for file in uploaded_files:
-                try:
-                    data = json.load(file)
-                    players_data.append({
-                        "fname": data.get("fname", "Name"),
-                        "lname": data.get("lname", "Lastname"),
-                        "side": data.get("side", "Right"),
-                        "tech": [int(x) for x in data.get("tech", [5]*6)],
-                        "mental": [int(x) for x in data.get("mental", [5]*6)],
-                        "c_tech": [int(x) for x in data.get("c_tech", [5]*6)],
-                        "c_mental": [int(x) for x in data.get("c_mental", [5]*6)]
-                    })
-                except Exception as e:
-                    st.sidebar.error(f"Error in file {file.name}: {e}")
-        else:
-            players_data = squad_players
-
-        total_players = len(players_data)
         
-        summary_rows = []
-        player_weaknesses = {}
-
-        for p in players_data:
-            full_name = f"{p['fname']} {p['lname']}"
-            ct_vals = p['c_tech']
-            cm_vals = p['c_mental']
+    coach_tab1, coach_tab2, coach_tab3 = st.tabs([
+        "👥 Gestione Giocatori & Valutazioni", 
+        f"📅 {lang_dict['matches_dash']}", 
+        f"💬 {lang_dict['all_comments']}"
+    ])
+    
+    with coach_tab1:
+        st.subheader("Modifica Valutazioni Giocatore (Riservato al Coach)")
+        selected_player_name = st.selectbox("Seleziona giocatore da aggiornare:", [f"{p['fname']} {p['lname']}" for p in squad_players])
+        p_obj = next((p for p in squad_players if f"{p['fname']} {p['lname']}" == selected_player_name), None)
+        
+        if p_obj:
+            st.markdown(f"Modifica dei valori tecnici e mentali assegnati da coach per **{selected_player_name}**:")
             
-            avg_tech_coach = sum(ct_vals) / len(ct_vals)
-            avg_mental_coach = sum(cm_vals) / len(cm_vals)
+            c_tech_new = []
+            col_c1, col_c2 = st.columns(2)
+            with col_c1:
+                st.markdown("**Tecnica (Coach)**")
+                tech_labels_list = ['Volley', 'Smash', 'Bandeja', 'Serve', 'Defense', 'Chiquita']
+                for idx, t_label in enumerate(tech_labels_list):
+                    val = st.slider(f"{t_label}", 1, 10, int(p_obj['c_tech'][idx]), key=f"scoach_tech_{idx}")
+                    c_tech_new.append(val)
             
-            summary_rows.append({
-                "Player": full_name,
-                "Side": p['side'],
-                "Tech Average": round(avg_tech_coach, 1),
-                "Mental Average": round(avg_mental_coach, 1),
-                "Overall Average": round((avg_tech_coach + avg_mental_coach) / 2, 1)
-            })
+            c_mental_new = []
+            with col_c2:
+                st.markdown("**Tattica & Mentale (Coach)**")
+                mental_labels_list = ['Chemistry', 'Errors', 'Positioning', 'Focus', 'Stamina', 'Intensity']
+                for idx, m_label in enumerate(mental_labels_list):
+                    val = st.slider(f"{m_label}", 1, 10, int(p_obj['c_mental'][idx]), key=f"scoach_mental_{idx}")
+                    c_mental_new.append(val)
+                    
+            if st.button("Salva Modifiche e Registra Storico"):
+                # Registra storico per grafico evolutivo (Richiesta 7)
+                if "history" not in p_obj:
+                    p_obj["history"] = []
+                p_obj["history"].append({
+                    "date": datetime.now().strftime("%Y-%m-%d %H:%M"),
+                    "values": c_tech_new + c_mental_new
+                })
+                p_obj['c_tech'] = c_tech_new
+                p_obj['c_mental'] = c_mental_new
+                st.success(f"Valutazioni aggiornate per {selected_player_name}! Storico registrato.")
+
+    with coach_tab2:
+        st.subheader("📅 Inserimento e Tracciamento Partite")
+        st.markdown("Inserisci qui i match disputati e i relativi risultati per tenerne traccia.")
+        
+        with st.form("match_form"):
+            match_date = st.date_input("Data Partita", datetime.now())
+            col_m1, col_m2 = st.columns(2)
+            with col_m1:
+                team_a = st.text_input("Coppia Team A (es. Alvaro / Yannik)")
+            with col_m2:
+                team_b = st.text_input("Coppia Team B (es. Josu / Andrea)")
             
-            all_coach_scores = ct_vals + cm_vals
-            combined_skills = list(zip(all_labels, all_coach_scores))
-            combined_skills.sort(key=lambda x: x[1])
+            result_score = st.text_input("Risultato (es. 6-4, 3-6, 7-6)")
+            submit_match = st.form_submit_button("Registra Partita")
             
-            worst_skills = [skill[0] for skill in combined_skills if skill[1] <= 6]
-            if not worst_skills:
-                worst_skills = [combined_skills[0][0]]
-                
-            player_weaknesses[full_name] = worst_skills
-
-        df_summary = pd.DataFrame(summary_rows)
-        squad_avg_overall = df_summary["Overall Average"].mean()
-
-        kpi1, kpi2, kpi3 = st.columns(3)
-        kpi1.metric(label="👥 Active Roster", value=f"{total_players} Players")
-        kpi2.metric(label="⭐ Squad General Average", value=f"{squad_avg_overall:.1f} / 10")
-        kpi3.metric(label="📁 Data Source", value="Uploaded JSONs" if uploaded_files else "Default Memory Roster")
-
-        st.markdown("---")
-        st.subheader("📊 Team Summary Table")
-        st.dataframe(df_summary, use_container_width=True, hide_index=True)
-
-        st.markdown("---")
-        st.subheader("🎯 Automated Training Groups")
-        st.markdown("Players automatically segmented by shared areas for improvement:")
-
-        skill_to_players = {}
-        for player, skills in player_weaknesses.items():
-            for skill in skills:
-                if skill not in skill_to_players:
-                    skill_to_players[skill] = []
-                skill_to_players[skill].append(player)
-
-        sorted_groups = sorted(skill_to_players.items(), key=lambda x: len(x[1]), reverse=True)
-
-        col1, col2 = st.columns(2)
-        for idx, (skill, members) in enumerate(sorted_groups):
-            target_col = col1 if idx % 2 == 0 else col2
-            with target_col:
-                with st.expander(f"🛠️ Focus on: {skill} ({len(members)} players)"):
-                    for m in members:
-                        st.markdown(f"- **{m}**")
-
-    with tab_training:
-        st.subheader("🎯 Daily Training Session Planner")
-        st.markdown("Select attending players for today's session to instantly generate technical training priorities.")
-
-        tech_labels = ['Volley', 'Smash', 'Bandeja', 'Serve', 'Defense', 'Chiquita']
-
-        player_names = [f"{p['fname']} {p['lname']}" for p in squad_players]
-        present_players_names = st.multiselect("Select attending players for today's training:", player_names, default=player_names[:4], key="training_present")
-
-        if present_players_names:
-            st.markdown("---")
-            st.markdown(f"### 📋 Session Insights for Group ({len(present_players_names)} players)")
-
-            tech_sums = {label: 0 for label in tech_labels}
-            tech_counts = {label: 0 for label in tech_labels}
-
-            present_players_data = [p for p in squad_players if f"{p['fname']} {p['lname']}" in present_players_names]
-
-            for p in present_players_data:
-                for idx, label in enumerate(tech_labels):
-                    tech_sums[label] += p['c_tech'][idx]
-                    tech_counts[label] += 1
-
-            tech_averages = {label: (tech_sums[label] / tech_counts[label]) if tech_counts[label] > 0 else 0 for label in tech_labels}
-            
-            sorted_skills = sorted(tech_averages.items(), key=lambda x: x[1])
-
-            col_a, col_b = st.columns(2)
-
-            with col_a:
-                st.markdown("#### 📉 Technical Skill Averages")
-                df_group_tech = pd.DataFrame(list(sorted_skills), columns=["Technical Skill", "Group Average (Coach)"])
-                df_group_tech["Group Average (Coach)"] = df_group_tech["Group Average (Coach)"].round(1)
-                st.dataframe(df_group_tech, use_container_width=True, hide_index=True)
-
-            with col_b:
-                st.markdown("#### 🔥 Recommended Training Focus")
-                lowest_skill_1, avg_1 = sorted_skills[0]
-                lowest_skill_2, avg_2 = sorted_skills[1]
-
-                st.error(f"**Primary Focus:** `{lowest_skill_1}` (Group Avg: {avg_1:.1f}/10)")
-                st.warning(f"**Secondary Focus:** `{lowest_skill_2}` (Group Avg: {avg_2:.1f}/10)")
-                st.info("💡 **Coach Tip:** Build today's drill exercises around high-repetition feeds targeting these specific technical gaps.")
+            if submit_match:
+                if team_a and team_b and result_score:
+                    st.session_state.match_results.append({
+                        "date": str(match_date),
+                        "team_a": team_a,
+                        "team_b": team_b,
+                        "score": result_score
+                    })
+                    st.success("Partita registrata con successo!")
+                else:
+                    st.error("Compila tutti i campi della partita.")
+                    
+        st.markdown("### Storico Partite Registrate:")
+        if st.session_state.match_results:
+            df_matches = pd.DataFrame(st.session_state.match_results)
+            st.table(df_matches)
         else:
-            st.warning("Please select at least one player to generate the training session focus.")
+            st.info("Nessuna partita registrata.")
 
-    with tab_pairing:
-        st.subheader("🤝 Automatic Match Pairing Generator (Left + Right)")
-        st.markdown("Select available players. The system will separate them into **Left** and **Right** players and pair them strictly as one Left + one Right per team.")
-
-        player_names = [f"{p['fname']} {p['lname']} ({p['side']})" for p in squad_players]
-        match_players_strs = st.multiselect("Select available players for pairing:", player_names, default=player_names[:4], key="pairing_present")
-
-        if match_players_strs:
-            left_pool = []
-            right_pool = []
-
-            for s in match_players_strs:
-                parts = s.split(" (")
-                full_name = parts[0]
-                side = parts[1].replace(")", "")
-                
-                p_data = next((pl for pl in squad_players if f"{pl['fname']} {pl['lname']}" == full_name), None)
-                if p_data:
-                    avg_c = (sum(p_data['c_tech']) + sum(p_data['c_mental'])) / 12
-                    item = {"name": full_name, "score": avg_c}
-                    if side == "Left":
-                        left_pool.append(item)
-                    else:
-                        right_pool.append(item)
-
-            left_pool.sort(key=lambda x: x["score"], reverse=True)
-            right_pool.sort(key=lambda x: x["score"], reverse=True)
-
-            num_pairs = min(len(left_pool), len(right_pool))
-            pairs = []
-
-            for i in range(num_pairs):
-                p_left = left_pool[i]
-                p_right = right_pool[i]
-                team_avg = (p_left["score"] + p_right["score"]) / 2
-                pairs.append((p_left["name"], p_right["name"], team_avg))
-
-            st.markdown("---")
-            st.markdown(f"### 🎾 Valid Teams Generated ({num_pairs} pairs with 1 Left & 1 Right)")
-
-            if pairs:
-                col_t1, col_t2 = st.columns(2)
-                for idx, (pl_left, pl_right, team_score) in enumerate(pairs):
-                    target_col = col_t1 if idx % 2 == 0 else col_t2
-                    with target_col:
-                        st.success(f"**Team {idx + 1} (Combined Avg: {team_score:.1f}/10)**\n\n- ⬅️ **Left:** {pl_left}\n- ➡️ **Right:** {pl_right}")
-
-            unpaired_left = left_pool[num_pairs:]
-            unpaired_right = right_pool[num_pairs:]
-
-            if unpaired_left or unpaired_right:
-                st.warning("⚠️ **Unpaired Players (Imbalance between Left and Right count):**")
-                for u in unpaired_left:
-                    st.markdown(f"- ⬅️ {u['name']} (Left)")
-                for u in unpaired_right:
-                    st.markdown(f"- ➡️ {u['name']} (Right)")
-        else:
-            st.warning("Please select available players to generate balanced Left/Right pairings.")
+    with coach_tab3:
+        st.subheader("💬 Vista Globale di Tutti i Commenti dei Giocatori")
+        all_comments_found = False
+        for p in squad_players:
+            if p.get("comments"):
+                all_comments_found = True
+                st.markdown(f"#### 👤 {p['fname']} {p['lname']}")
+                for c in p["comments"]:
+                    st.markdown(f"- *Da {c['from']}* ({c['date']}): {c['text']}")
+                st.markdown("---")
+        if not all_comments_found:
+            st.info("Nessun commento inserito dai giocatori al momento.")
