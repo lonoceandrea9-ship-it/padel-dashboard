@@ -697,7 +697,7 @@ translations = {
         "coach_tab_matches": "Kampstyring",
         "coach_tab_comments": "Alle Kommentarer",
         "coach_tab_pairing": "Automatisk Makkerparring",
-        "squad_desc": "'Trainings' og 'Participated' synkroniseres automatisk med træningskalenderen. Engagement (%) genberegnes i realtid.",
+        "squad_desc": "'Trainings' and 'Participated' synkroniseres automatisk med træningskalenderen. Engagement (%) genberegnes i realtid.",
         "col_name": "Navn", "col_role": "Rolle", "col_hand": "Hånd", "col_style": "Stil", "col_trainings": "Träninger", "col_participated": "Deltaget", "col_commitment": "Engagement (%)",
         "work_groups": "Arbejdsgrupper & Målrettet Forbedring",
         "work_groups_desc": "Automatisk gruppering af alle spillere baseret på almindelige svagheder fundet i trænerevalueringer (værdier ≤ 6).",
@@ -1482,6 +1482,18 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             if st.session_state.planned_trainings:
                 df_planned = pd.DataFrame(st.session_state.planned_trainings).sort_values(by="Data").reset_index(drop=True)
                 st.markdown(df_planned.to_html(escape=False, index=False, classes="custom-table"), unsafe_allow_html=True)
+                
+                # --- GESTIONE CANCELLAZIONE ALLENAMENTO ---
+                st.markdown("#### 🗑️ Cancella Allenamento dal Calendario")
+                with st.form("delete_training_form"):
+                    training_options = [f"{t['Data']} - {t['1° Priorità']} ({t['Partecipanti'][:25]}...)" for t in st.session_state.planned_trainings]
+                    selected_training_to_delete = st.selectbox("Seleziona allenamento da rimuovere", training_options)
+                    
+                    if st.form_submit_button("🗑️ Elimina Allenamento Selezionato", type="secondary"):
+                        selected_index = training_options.index(selected_training_to_delete)
+                        removed_training = st.session_state.planned_trainings.pop(selected_index)
+                        st.success(f"Allenamento del {removed_training['Data']} eliminato con successo dal calendario!")
+                        st.rerun()
             else:
                 st.info("Nessun allenamento ancora confermato e salvato nel calendario.")
             
