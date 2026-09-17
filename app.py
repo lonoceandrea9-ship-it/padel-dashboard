@@ -41,13 +41,17 @@ st.markdown("""
     
     /* Pulsanti specifici di accesso (Allenatore / Giocatore) in rosso brillante */
     .element-container:has(button:contains("Allenatore")) button,
-    .element-container:has(button:contains("Giocatore")) button {
+    .element-container:has(button:contains("Giocatore")) button,
+    .element-container:has(button:contains("Coach")) button,
+    .element-container:has(button:contains("Player")) button {
         background-color: #dc2626 !important;
         color: white !important;
         border-color: #b91c1c !important;
     }
     .element-container:has(button:contains("Allenatore")) button:hover,
-    .element-container:has(button:contains("Giocatore")) button:hover {
+    .element-container:has(button:contains("Giocatore")) button:hover,
+    .element-container:has(button:contains("Coach")) button:hover,
+    .element-container:has(button:contains("Player")) button:hover {
         background-color: #b91c1c !important;
         color: white !important;
     }
@@ -56,6 +60,7 @@ st.markdown("""
     .element-container:has(button:contains("Esci")) button,
     .element-container:has(button:contains("Logout")) button,
     .element-container:has(button:contains("Torna alla Home")) button,
+    .element-container:has(button:contains("Back")) button,
     div.stButton > button {
         background-color: #2563eb !important;
         color: white !important;
@@ -146,6 +151,151 @@ translations = {
         "comments_tab": "Commenti & Feedback",
         "matches_dash": "Gestione Partite (Coach)",
         "all_comments": "Tutti i Commenti (Coach)"
+    },
+    "English": {
+        "welcome": "Welcome to the Padel Performance Hub",
+        "select_area": "Select your access area to continue:",
+        "player_area": "Player Area",
+        "player_desc": "Access your password-protected personal card to view and update your evaluations.",
+        "player_btn": "Access as Player",
+        "coach_area": "Coach Area",
+        "coach_desc": "Restricted access for coaching staff to manage data, planning, and matches.",
+        "coach_btn": "Access as Coach",
+        "login_player_title": "Player Area Login",
+        "login_player_sub": "Select your name and enter your password (your first name).",
+        "profile_select": "Select your profile:",
+        "pwd_label": "Password (Your first name)",
+        "enter_card": "Enter my card",
+        "back_home": "Back to Home",
+        "wrong_pwd": "Wrong password! Remember the password is your first name.",
+        "coach_login_title": "Coach Area Authentication",
+        "coach_login_sub": "Enter the security password to access management features.",
+        "coach_pwd_label": "Coach Password",
+        "verify_pwd": "Verify Password",
+        "logout": "Logout",
+        "tech_skills": "Technical Skills",
+        "mental_skills": "Attitude & Tactics (Mental)",
+        "partners_tab": "Partner Ranking",
+        "history_tab": "History & Improvements",
+        "comments_tab": "Comments & Feedback",
+        "matches_dash": "Match Management (Coach)",
+        "all_comments": "All Comments (Coach)"
+    },
+    "Español": {
+        "welcome": "Bienvenido al Padel Performance Hub",
+        "select_area": "Selecciona tu área de acceso para continuar:",
+        "player_area": "Área de Jugador",
+        "player_desc": "Accede a tu ficha personal protegida con contraseña para ver y actualizar tus valoraciones.",
+        "player_btn": "Acceder como Jugador",
+        "coach_area": "Área de Entrenador",
+        "coach_desc": "Acceso restringido al cuerpo técnico para la gestión de datos, planificación y partidos.",
+        "coach_btn": "Acceder como Entrenador",
+        "login_player_title": "Acceso Área de Jugador",
+        "login_player_sub": "Selecciona tu nombre e introduce tu contraseña (tu nombre de pila).",
+        "profile_select": "Selecciona tu perfil:",
+        "pwd_label": "Contraseña (Tu nombre de pila)",
+        "enter_card": "Entrar en mi ficha",
+        "back_home": "Volver al Inicio",
+        "wrong_pwd": "¡Contraseña incorrecta! Recuerda que la contraseña es tu nombre de pila.",
+        "coach_login_title": "Autenticación Área de Entrenador",
+        "coach_login_sub": "Introduce la contraseña de seguridad para acceder a las funciones de gestión.",
+        "coach_pwd_label": "Contraseña de Entrenador",
+        "verify_pwd": "Verificar Contraseña",
+        "logout": "Salir",
+        "tech_skills": "Habilidades Técnicas",
+        "mental_skills": "Actitud y Táctica (Mentales)",
+        "partners_tab": "Ranking de Compañeros",
+        "history_tab": "Historial y Mejoras",
+        "comments_tab": "Comentarios y Feedback",
+        "matches_dash": "Gestión de Partidos (Coach)",
+        "all_comments": "Todos los Comentarios (Coach)"
+    },
+    "Svenska": {
+        "welcome": "Välkommen till Padel Performance Hub",
+        "select_area": "Välj ditt åtkomstområde för att fortsätta:",
+        "player_area": "Spelarområde",
+        "player_desc": "Gå till ditt lösenordsskyddade personliga kort för att visa och uppdatera dina utvärderingar.",
+        "player_btn": "Logga in som Spelare",
+        "coach_area": "Tränarområde",
+        "coach_desc": "Begränsad åtkomst för tränarstab för datahantering, planering och matcher.",
+        "coach_btn": "Logga in som Tränare",
+        "login_player_title": "Inloggning Spelarområde",
+        "login_player_sub": "Välj ditt namn och ange ditt lösenord (ditt förnamn).",
+        "profile_select": "Välj din profil:",
+        "pwd_label": "Lösenord (Ditt förnamn)",
+        "enter_card": "Gå till mitt kort",
+        "back_home": "Tillbaka till Hem",
+        "wrong_pwd": "Fel lösenord! Kom ihåg att lösenordet är ditt förnamn.",
+        "coach_login_title": "Autentisering Tränarområde",
+        "coach_login_sub": "Ange säkerhetslösenordet för att komma åt hanteringsfunktioner.",
+        "coach_pwd_label": "Tränarlösenord",
+        "verify_pwd": "Verifiera lösenord",
+        "logout": "Logga ut",
+        "tech_skills": "Tekniska färdigheter",
+        "mental_skills": "Attityd & Taktik (Mentalt)",
+        "partners_tab": "Partnerranking",
+        "history_tab": "Historik & Förbättringar",
+        "comments_tab": "Kommentarer & Feedback",
+        "matches_dash": "Matchhantering (Coach)",
+        "all_comments": "Alla kommentarer (Coach)"
+    },
+    "Nederlands": {
+        "welcome": "Welkom bij de Padel Performance Hub",
+        "select_area": "Selecteer je toegangsgebied om door te gaan:",
+        "player_area": "Spelersgebied",
+        "player_desc": "Ga naar je met een wachtwoord beveiligde persoonlijke kaart om je evaluaties te bekijken en bij te werken.",
+        "player_btn": "Toegang als Speler",
+        "coach_area": "Coachgebied",
+        "coach_desc": "Beperkte toegang voor de technische staf voor gegevensbeheer, planning en wedstrijden.",
+        "coach_btn": "Toegang als Coach",
+        "login_player_title": "Inloggen Spelersgebied",
+        "login_player_sub": "Selecteer je naam en voer je wachtwoord in (je voornaam).",
+        "profile_select": "Selecteer je profiel:",
+        "pwd_label": "Wachtwoord (Je voornaam)",
+        "enter_card": "Ga naar mijn kaart",
+        "back_home": "Terug naar Home",
+        "wrong_pwd": "Verkeerd wachtwoord! Onthoud dat het wachtwoord je voornaam is.",
+        "coach_login_title": "Authenticatie Coachgebied",
+        "coach_login_sub": "Voer het beveiligingswachtwoord in om toegang te krijgen tot de beheerfuncties.",
+        "coach_pwd_label": "Coachwachtwoord",
+        "verify_pwd": "Wachtwoord verifiëren",
+        "logout": "Uitloggen",
+        "tech_skills": "Technische vaardigheden",
+        "mental_skills": "Houding & Tactiek (Mentaal)",
+        "partners_tab": "Partner Ranking",
+        "history_tab": "Geschiedenis & Verbeteringen",
+        "comments_tab": "Opmerkingen & Feedback",
+        "matches_dash": "Wedstrijdbeheer (Coach)",
+        "all_comments": "Alle opmerkingen (Coach)"
+    },
+    "Dansk": {
+        "welcome": "Velkommen til Padel Performance Hub",
+        "select_area": "Vælg dit adgangsområde for at fortsætte:",
+        "player_area": "Spillerområde",
+        "player_desc": "Gå til dit adgangskodebeskyttede personlige kort for at se og opdatere dine evalueringer.",
+        "player_btn": "Log ind som Spiller",
+        "coach_area": "Trænerområde",
+        "coach_desc": "Begrænset adgang for trænerstab til datahåndtering, planlægning og kampe.",
+        "coach_btn": "Log ind som Træner",
+        "login_player_title": "Login Spillerområde",
+        "login_player_sub": "Vælg dit navn og indtast din adgangskode (dit fornavn).",
+        "profile_select": "Vælg din profil:",
+        "pwd_label": "Adgangskode (Dit fornavn)",
+        "enter_card": "Gå til mit kort",
+        "back_home": "Tilbage til Hjem",
+        "wrong_pwd": "Forkert adgangskode! Husk at adgangskoden er dit fornavn.",
+        "coach_login_title": "Godkendelse Trænerområde",
+        "coach_login_sub": "Indtast sikkerhedsadgangskoden for at få adgang til administrationsfunktionerne.",
+        "coach_pwd_label": "Træneradgangskode",
+        "verify_pwd": "Bekræft adgangskode",
+        "logout": "Log ud",
+        "tech_skills": "Tekniske færdigheder",
+        "mental_skills": "Holdning & Taktik (Mentalt)",
+        "partners_tab": "Partnerranking",
+        "history_tab": "Historik & Forbedringer",
+        "comments_tab": "Kommentarer & Feedback",
+        "matches_dash": "Kampstyring (Coach)",
+        "all_comments": "Alle kommentarer (Coach)"
     }
 }
 
@@ -228,13 +378,21 @@ if "match_results" not in st.session_state:
     st.session_state.match_results = []
 
 squad_players = st.session_state.squad_data
-lang_dict = translations.get(st.session_state.language, translations["Italiano"])
 
-# --- SIDEBAR ---
+# --- SIDEBAR & LINGUA ---
 with st.sidebar:
     st.image("https://img.icons8.com/color/96/padel.png", width=64)
     st.title("Padel Hub")
-    selected_lang = st.selectbox("🌐 Lingua / Language", ["Italiano"], index=0)
+    
+    available_languages = ["Italiano", "English", "Español", "Svenska", "Nederlands", "Dansk"]
+    current_lang_index = available_languages.index(st.session_state.language) if st.session_state.language in available_languages else 0
+    selected_lang = st.selectbox("🌐 Lingua / Language", available_languages, index=current_lang_index)
+    
+    if selected_lang != st.session_state.language:
+        st.session_state.language = selected_lang
+        st.rerun()
+        
+    lang_dict = translations.get(st.session_state.language, translations["Italiano"])
     
     st.markdown("---")
     if st.session_state.authenticated_coach:
@@ -249,6 +407,9 @@ with st.sidebar:
             st.session_state.authenticated_player = None
             st.session_state.nav_mode = "Home"
             st.rerun()
+
+# Assicura che lang_dict sia disponibile ovunque
+lang_dict = translations.get(st.session_state.language, translations["Italiano"])
 
 # --- HOME SELECTION ---
 if st.session_state.nav_mode == "Home":
