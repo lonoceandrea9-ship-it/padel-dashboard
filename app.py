@@ -736,7 +736,7 @@ translations = {
     }
 }
 
-# --- LISTA DELLE SKILLS ---
+# --- LISTE DELLE SKILLS ---
 TECH_SKILLS = ["Volley", "Bandeja", "Remate", "Smash", "Bajada", "Chiquita", "Lob"]
 
 # --- INIZIALIZZAZIONE STATO PROTETTA ---
@@ -760,6 +760,11 @@ if "show_roster_modal" not in st.session_state:
 
 if "match_results" not in st.session_state:
     st.session_state.match_results = []
+
+# Caricamento sicuro di MENTAL_SKILLS basato sulla lingua attiva nello state
+lang_dict = translations.get(st.session_state.language, translations["Italiano"])
+MENTAL_SKILLS = lang_dict["mental_list"]
+ALL_SKILLS = TECH_SKILLS + MENTAL_SKILLS
 
 if "squad_data" not in st.session_state:
     st.session_state.squad_data = [
@@ -848,6 +853,7 @@ with st.sidebar:
             st.session_state.nav_mode = "Home"
             st.rerun()
 
+# Ricarichiamo lang_dict e MENTAL_SKILLS anche qui per sicurezza dopo la sidebar
 lang_dict = translations.get(st.session_state.language, translations["Italiano"])
 MENTAL_SKILLS = lang_dict["mental_list"]
 ALL_SKILLS = TECH_SKILLS + MENTAL_SKILLS
