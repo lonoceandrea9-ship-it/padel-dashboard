@@ -1,44 +1,1453 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
+import plotly.graph_objects as go
+from datetime import datetime
 
-st.title("🎾 Gestione Convocazioni e Pairing Padel")
-
-# 1. Inizializziamo lo stato della sessione se non esiste
-if "pairing_confermato" not in st.session_state:
-    st.session_state.pairing_confermato = False
-if "coppie_finali_modificate" not in st.session_state:
-    st.session_state.coppie_finali_modificate = None
-
-# Esempio di dati di pairing iniziali (simulati o generati dal tuo algoritmo)
-if "pairing_iniziale" not in st.session_state:
-    st.session_state.pairing_iniziale = [
-        {"Campo": 1, "Giocatore 1": "Mario Rossi", "Giocatore 2": "Luca Bianchi"},
-        {"Campo": 2, "Giocatore 1": "Giovanni Verdi", "Giocatore 2": "Marco Neri"},
-    ]
-
-st.subheader("📋 Risultato Pairing Consigliato")
-st.markdown("Il coach può modificare direttamente i nomi dei giocatori nella tabella sottostante se desidera fare variazioni prima di confermare.")
-
-# 2. Tabella modificabile con st.data_editor
-df_pairs = pd.DataFrame(st.session_state.pairing_iniziale)
-
-edited_df = st.data_editor(
-    df_pairs,
-    num_rows="dynamic",
-    disabled=False,
-    key="editor_coppie_tutto"
+# Streamlit page configuration
+st.set_page_config(
+    page_title="Padel Performance Hub",
+    page_icon="🎾",
+    layout="wide"
 )
 
-# 3. Pulsante di Conferma
-col_btn1, col_btn2 = st.columns([1, 3])
-with col_btn1:
-    if st.button("✅ Conferma Selezione", type="primary"):
-        st.session_state.pairing_confermato = True
-        # Salviamo la versione modificata e confermata nello stato per usi futuri
-        st.session_state.coppie_finali_modificate = edited_df.copy()
-        st.success("Coppie confermate con successo dal coach!")
+# --- CUSTOM CSS: SFONDO BLU SCURO, TESTO BIANCO, HEADER, BOTTONI E TABELLE STILIZZATE ---
+st.markdown("""
+    <style>
+    /* Sfondo generale dell'applicazione */
+    .stApp {
+        background-color: #0d1b2a;
+        color: #ffffff;
+    }
+    
+    /* Rimozione della barra bianca superiore (Header di Streamlit) e colorazione in blu scuro */
+    header[data-testid="stHeader"] {
+        background-color: #0d1b2a !important;
+    }
+    
+    /* Colore dei testi principali, intestazioni e label */
+    h1, h2, h3, h4, h5, h6, p, label, span, .stMarkdown, div[data-baseweb="select"] span {
+        color: #ffffff !important;
+    }
+    
+    /* Sidebar */
+    [data-testid="stSidebar"] {
+        background-color: #1b263b;
+        color: #ffffff;
+    }
+    [data-testid="stSidebar"] h1, [data-testid="stSidebar"] span, [data-testid="stSidebar"] label {
+        color: #ffffff !important;
+    }
+    
+    /* Pulsanti specifici di accesso in rosso brillante */
+    .element-container:has(button:contains("Allenatore")) button,
+    .element-container:has(button:contains("Giocatore")) button,
+    .element-container:has(button:contains("Coach")) button,
+    .element-container:has(button:contains("Player")) button,
+    .element-container:has(button:contains("Entrenador")) button,
+    .element-container:has(button:contains("Jugador")) button,
+    .element-container:has(button:contains("Tränare")) button,
+    .element-container:has(button:contains("Spelare")) button,
+    .element-container:has(button:contains("Speler")) button,
+    .element-container:has(button:contains("Træner")) button,
+    .element-container:has(button:contains("Spiller")) button {
+        background-color: #dc2626 !important;
+        color: white !important;
+        border-color: #b91c1c !important;
+    }
+    
+    /* Tutti gli altri bottoni standard in Blu scuro */
+    div.stButton > button, div.stFormSubmitButton > button, button[kind="secondary"] {
+        background-color: #2563eb !important;
+        color: white !important;
+        border-color: #1d4ed8 !important;
+    }
+    div.stButton > button:hover {
+        background-color: #1d4ed8 !important;
+        color: white !important;
+    }
+    
+    /* Tabs */
+    .stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] p {
+        color: #ffffff !important;
+    }
 
-# 4. Stato di riscontro post-conferma
-if st.session_state.pairing_confermato and st.session_state.coppie_finali_modificate is not None:
-    st.divider()
-    st.info("Le coppie sono state salvate e confermate. Il sistema è pronto per i passaggi successivi.")
+    /* --- STILE TABELLE HTML PERSONALIZZATE IN TEMA SCURO --- */
+    .custom-table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #1b263b !important;
+        color: #ffffff !important;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #334155;
+        margin-bottom: 20px;
+    }
+    .custom-table th {
+        background-color: #0d1b2a !important;
+        color: #ffffff !important;
+        padding: 12px;
+        text-align: left;
+        border-bottom: 2px solid #334155 !important;
+        font-weight: 600;
+    }
+    .custom-table td {
+        background-color: #1b263b !important;
+        color: #ffffff !important;
+        padding: 10px 12px;
+        border-bottom: 1px solid #334155 !important;
+    }
+    .custom-table tr:hover {
+        background-color: #24344d !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# --- TRADUZIONI COMPLETE (6 LINGUE) ---
+translations = {
+    "Italiano": {
+        "welcome": "Benvenuto nel Padel Performance Hub",
+        "select_area": "Seleziona la tua area di accesso per continuare:",
+        "player_area": "Area Giocatore",
+        "player_desc": "Accedi alla tua scheda personale protetta da password per visualizzare e aggiornare le tue valutazioni.",
+        "player_btn": "Accedi come Giocatore",
+        "coach_area": "Area Allenatore",
+        "coach_desc": "Accesso riservato allo staff tecnico per la gestione dei dati, la pianificazione e le partite.",
+        "coach_btn": "Accedi come Allenatore",
+        "login_player_title": "Accesso Area Giocatore",
+        "login_player_sub": "Seleziona il tuo nome e inserisci la tua password (il tuo nome di battesimo).",
+        "profile_select": "Seleziona il tuo profilo:",
+        "pwd_label": "Password (Il tuo nome di battesimo)",
+        "enter_card": "Entra nella mia scheda",
+        "back_home": "Torna alla Home",
+        "wrong_pwd": "Password errata! Ricorda che la password è il tuo nome di battesimo.",
+        "coach_login_title": "Autenticazione Area Allenatore",
+        "coach_login_sub": "Inserisci la password di sicurezza per accedere alle funzioni di gestione.",
+        "coach_pwd_label": "Password Allenatore",
+        "verify_pwd": "Verifica Password",
+        "logout": "Esci",
+        "tech_skills": "Competenze Tecniche",
+        "mental_skills": "Attitudine e Tattica (Mentali)",
+        "mental_list": ["Attitudine positiva / Supporto partner", "Consistenza gioco", "Gestione errori", "Posizionamento", "Resistenza", "Comunicazione con compagno", "Coachability"],
+        "partners_tab": "Ranking Partner",
+        "history_tab": "Storico & Miglioramenti",
+        "comments_tab": "Commenti & Feedback",
+        "eval_coach_tab": "Autovalutazione & Coach",
+        "eval_desc": "Regola i cursori e seleziona il tuo stile di gioco per la tua autovalutazione. A sinistra trovi le competenze Tecniche e a destra quelle Mentali.",
+        "style_select_lbl": "Seleziona il tuo Stile di Gioco (Autovalutazione):",
+        "save_eval": "Salva Autovalutazione",
+        "eval_saved": "Autovalutazione salvata con successo!",
+        "radar_title": "Grafici a Tela di Ragno (Confronto Separato)",
+        "player_radar_title": "Autovalutazione Giocatore",
+        "coach_radar_title": "Valutazione Coach",
+        "play_style_lbl": "Stile di Gioco:",
+        "diff_tables": "Tabelle delle Differenze (Tu vs Coach)",
+        "tech_feat": "Caratteristiche Tecniche",
+        "mental_feat": "Caratteristiche Mentali",
+        "partner_mgmt": "Gestione Ranking Partner (Fino a 5)",
+        "save_partners": "Salva Ranking Partner",
+        "partners_saved": "Ranking partner aggiornato con successo!",
+        "current_ranking": "Classifica Attuale:",
+        "no_partners": "Nessun partner configurato.",
+        "history_title": "Storico & Evoluzione Valutazioni Coach",
+        "no_history": "Nessuna modifica precedente registrata dal coach.",
+        "official_note": "Nota Ufficiale del Coach",
+        "no_coach_note": "Nessuna nota inserita al momento dal coach.",
+        "peer_feedback": "Feedback dei compagni",
+        "select_partner_lbl": "Seleziona compagno:",
+        "note_on_partner": "Nota sul compagno:",
+        "send_note": "Invia Nota",
+        "note_sent": "Nota inviata!",
+        "empty_note_warn": "Il testo non può essere vuoto.",
+        "received_lbl": "Ricevuti:",
+        "coach_dash_title": "Dashboard Allenatore",
+        "exit_coach": "Esci da Area Allenatore",
+        "coach_tab_squad": "Gestione Squadra & Presenze",
+        "coach_tab_evals": "Gestione Voti Coach",
+        "coach_tab_matches": "Gestione Partite",
+        "coach_tab_comments": "Tutti i Commenti",
+        "coach_tab_pairing": "Pairing Coppie Automatico",
+        "squad_desc": "Modifica direttamente qui sotto i dati della squadra. I cambiamenti si salvano in tempo reale e il Commitment (%) viene ricalcolato automaticamente.",
+        "col_name": "Nome", "col_role": "Role", "col_hand": "Mano", "col_style": "Play Style", "col_trainings": "Trainings", "col_participated": "Participated", "col_commitment": "Commitment (%)",
+        "work_groups": "Gruppi di Lavoro e Miglioramento Mirato",
+        "work_groups_desc": "Raggruppamento automatico di tutti i giocatori in base alle carenze comuni rilevate nelle valutazioni del coach (valori ≤ 6).",
+        "no_critics": "Nessuna criticità rilevata (tutti i giocatori hanno voti superiori a 6).",
+        "coach_eval_title": "Gestione Voti Coach & Profilo di Gioco",
+        "coach_eval_desc": "Seleziona un giocatore per aggiornare le sue valutazioni, il profilo tattico e la nota ufficiale.",
+        "select_player_eval": "Seleziona giocatore da valutare:",
+        "coach_eval_sub_title": "Valutazione Coach",
+        "coach_note_lbl": "Nota / Commento Ufficiale del Coach (Visibile al giocatore)",
+        "coach_note_placeholder": "Scrivi qui il commento per il giocatore...",
+        "tech_skills_coach": "Competenze Tecniche (Coach)",
+        "mental_skills_coach": "Competenze Mentali (Coach)",
+        "save_coach_eval": "Salva Voti, Profilo e Nota Coach",
+        "match_mgmt": "Registrazione Partite",
+        "match_mgmt_desc": "Seleziona i giocatori per ciascuna squadra (ciascun team richiede 1 giocatore di Sinistra e 1 di Destra).",
+        "match_date": "Data Partita",
+        "team_a": "Team A",
+        "team_b": "Team B",
+        "left_role": "Sinistra (Left)",
+        "right_role": "Destra (Right)",
+        "score_lbl": "Risultato (es. 6-4, 6-2)",
+        "register_match": "Registra Partita",
+        "same_player_err": "All'interno dello stesso team non puoi selezionare due volte lo stesso giocatore!",
+        "match_saved": "Partita registrata con successo!",
+        "match_history": "Storico Partite Registrate",
+        "global_comments": "Vista Globale Note & Commenti",
+        "pairing_title": "Algoritmo Intelligente di Pairing per Coppie",
+        "pairing_desc": "Seleziona qui sotto i giocatori disponibili per questa sessione. L'algoritmo abbinerà esclusivamente tra loro i giocatori selezionati, rispettando il vincolo di ruolo (1 Sinistra + 1 Destra) e bilanciando:",
+        "pairing_p1": "Peso 1.0: Valutazione complessiva del Coach.",
+        "pairing_p2": "Peso 0.5: Volontà / preferenza reciproca dei giocatori.",
+        "select_available_players": "Seleziona i giocatori disponibili oggi:",
+        "run_pairing": "Genera Coppie Ottimali con i Disponibili",
+        "pairing_err": "Per formare le coppie servono almeno un giocatore di sinistra e un giocatore di destra tra i selezionati!",
+        "recommended_pairing": "Risultato Pairing Consigliato:",
+        "unmatched_warn": "Giocatori selezionati ma rimasti esclusi in questo turno per sbilanciamento numerico tra Destra e Sinistra:"
+    },
+    "English": {
+        "welcome": "Welcome to the Padel Performance Hub",
+        "select_area": "Select your access area to continue:",
+        "player_area": "Player Area",
+        "player_desc": "Access your password-protected personal card to view and update your evaluations.",
+        "player_btn": "Access as Player",
+        "coach_area": "Coach Area",
+        "coach_desc": "Restricted access for coaching staff to manage data, planning, and matches.",
+        "coach_btn": "Access as Coach",
+        "login_player_title": "Player Area Login",
+        "login_player_sub": "Select your name and enter your password (your first name).",
+        "profile_select": "Select your profile:",
+        "pwd_label": "Password (Your first name)",
+        "enter_card": "Enter my card",
+        "back_home": "Back to Home",
+        "wrong_pwd": "Wrong password! Remember the password is your first name.",
+        "coach_login_title": "Coach Area Authentication",
+        "coach_login_sub": "Enter the security password to access management features.",
+        "coach_pwd_label": "Coach Password",
+        "verify_pwd": "Verify Password",
+        "logout": "Logout",
+        "tech_skills": "Technical Skills",
+        "mental_skills": "Attitude & Tactics (Mental)",
+        "mental_list": ["Positive Attitude / Partner Support", "Game Consistency", "Error Management", "Positioning", "Stamina", "Partner Communication", "Coachability"],
+        "partners_tab": "Partner Ranking",
+        "history_tab": "History & Improvements",
+        "comments_tab": "Comments & Feedback",
+        "eval_coach_tab": "Self-Evaluation & Coach",
+        "eval_desc": "Adjust the sliders and select your play style for your self-evaluation. On the left you will find Technical skills and on the right Mental skills.",
+        "style_select_lbl": "Select your Play Style (Self-Evaluation):",
+        "save_eval": "Save Self-Evaluation",
+        "eval_saved": "Self-evaluation successfully saved!",
+        "radar_title": "Spider Radar Charts (Separate Comparison)",
+        "player_radar_title": "Player Self-Evaluation",
+        "coach_radar_title": "Coach Evaluation",
+        "play_style_lbl": "Play Style:",
+        "diff_tables": "Difference Tables (You vs Coach)",
+        "tech_feat": "Technical Features",
+        "mental_feat": "Mental Features",
+        "partner_mgmt": "Partner Ranking Management (Up to 5)",
+        "save_partners": "Save Partner Ranking",
+        "partners_saved": "Partner ranking successfully updated!",
+        "current_ranking": "Current Ranking:",
+        "no_partners": "No partners configured.",
+        "history_title": "History & Coach Evaluation Evolution",
+        "no_history": "No previous modifications recorded by the coach.",
+        "official_note": "Official Coach Note",
+        "no_coach_note": "No note entered by the coach at the moment.",
+        "peer_feedback": "Peer Feedback",
+        "select_partner_lbl": "Select partner:",
+        "note_on_partner": "Note on partner:",
+        "send_note": "Send Note",
+        "note_sent": "Note sent!",
+        "empty_note_warn": "Text cannot be empty.",
+        "received_lbl": "Received:",
+        "coach_dash_title": "Coach Dashboard",
+        "exit_coach": "Exit Coach Area",
+        "coach_tab_squad": "Squad Management & Attendance",
+        "coach_tab_evals": "Coach Grades Management",
+        "coach_tab_matches": "Match Management",
+        "coach_tab_comments": "All Comments",
+        "coach_tab_pairing": "Automatic Pair Pairing",
+        "squad_desc": "Edit squad data directly below. Changes save in real time and Commitment (%) is automatically recalculated.",
+        "col_name": "Name", "col_role": "Role", "col_hand": "Hand", "col_style": "Play Style", "col_trainings": "Trainings", "col_participated": "Participated", "col_commitment": "Commitment (%)",
+        "work_groups": "Work Groups & Targeted Improvement",
+        "work_groups_desc": "Automatic grouping of all players based on common weaknesses identified in coach evaluations (values ≤ 6).",
+        "no_critics": "No critical issues detected (all players have grades above 6).",
+        "coach_eval_title": "Coach Grades Management & Play Profile",
+        "coach_eval_desc": "Select a player to update their evaluations, tactical profile, and official note.",
+        "select_player_eval": "Select player to evaluate:",
+        "coach_eval_sub_title": "Coach Evaluation",
+        "coach_note_lbl": "Official Coach Note / Comment (Visible to player)",
+        "coach_note_placeholder": "Write the comment for the player here...",
+        "tech_skills_coach": "Technical Skills (Coach)",
+        "mental_skills_coach": "Mental Skills (Coach)",
+        "save_coach_eval": "Save Grades, Profile and Coach Note",
+        "match_mgmt": "Match Registration",
+        "match_mgmt_desc": "Select players for each team (each team requires 1 Left player and 1 Right player).",
+        "match_date": "Match Date",
+        "team_a": "Team A",
+        "team_b": "Team B",
+        "left_role": "Left",
+        "right_role": "Right",
+        "score_lbl": "Result (e.g. 6-4, 6-2)",
+        "register_match": "Register Match",
+        "same_player_err": "Within the same team you cannot select the same player twice!",
+        "match_saved": "Match successfully registered!",
+        "match_history": "Registered Match History",
+        "global_comments": "Global Notes & Comments View",
+        "pairing_title": "Intelligent Pair Pairing Algorithm",
+        "pairing_desc": "Select below the players available for this session. The algorithm will pair only the selected players with each other, respecting the role constraint (1 Left + 1 Right) and balancing:",
+        "pairing_p1": "Weight 1.0: Overall Coach evaluation.",
+        "pairing_p2": "Weight 0.5: Mutual willingness / preference of players.",
+        "select_available_players": "Select available players today:",
+        "run_pairing": "Generate Optimal Pairs with Available",
+        "pairing_err": "To form pairs you need at least one left player and one right player among the selected ones!",
+        "recommended_pairing": "Recommended Pairing Result:",
+        "unmatched_warn": "Selected players left out in this round due to numerical imbalance between Right and Left:"
+    },
+    "Español": {
+        "welcome": "Bienvenido al Padel Performance Hub",
+        "select_area": "Selecciona tu área de acceso para continuar:",
+        "player_area": "Área de Jugador",
+        "player_desc": "Accede a tu ficha personal protegida con contraseña para ver y actualizar tus valoraciones.",
+        "player_btn": "Acceder como Jugador",
+        "coach_area": "Área de Entrenador",
+        "coach_desc": "Acceso restringido al cuerpo técnico para la gestión de datos, planificación y partidos.",
+        "coach_btn": "Acceder como Entrenador",
+        "login_player_title": "Acceso Área de Jugador",
+        "login_player_sub": "Selecciona tu nombre e introduce tu contraseña (tu nombre de pila).",
+        "profile_select": "Selecciona tu perfil:",
+        "pwd_label": "Contraseña (Tu nombre de pila)",
+        "enter_card": "Entrar en mi ficha",
+        "back_home": "Volver al Inicio",
+        "wrong_pwd": "¡Contraseña incorrecta! Recuerda que la contraseña es tu nombre de pila.",
+        "coach_login_title": "Autenticación Área de Entrenador",
+        "coach_login_sub": "Introduce la contraseña de seguridad para acceder a las funciones de gestión.",
+        "coach_pwd_label": "Contraseña de Entrenador",
+        "verify_pwd": "Verificar Contraseña",
+        "logout": "Salir",
+        "tech_skills": "Habilidades Técnicas",
+        "mental_skills": "Actitud y Táctica (Mentales)",
+        "mental_list": ["Actitud positiva / Apoyo al compañero", "Consistencia de juego", "Gestión de errores", "Posicionamiento", "Resistencia", "Comunicación con el compañero", "Coachability"],
+        "partners_tab": "Ranking de Compañeros",
+        "history_tab": "Historial y Mejoras",
+        "comments_tab": "Comentarios y Feedback",
+        "eval_coach_tab": "Autovaloración y Coach",
+        "eval_desc": "Ajusta los controles deslizantes y selecciona tu estilo de juego para tu autoevaluación. A la izquierda encontrarás las habilidades Técnicas y a la derecha las Mentales.",
+        "style_select_lbl": "Selecciona tu Estilo de Juego (Autoevaluación):",
+        "save_eval": "Guardar Autoevaluación",
+        "eval_saved": "¡Autoevaluación guardada con éxito!",
+        "radar_title": "Gráficos de Radar (Comparación Separada)",
+        "player_radar_title": "Autoevaluación del Jugador",
+        "coach_radar_title": "Evaluación del Entrenador",
+        "play_style_lbl": "Estilo de Juego:",
+        "diff_tables": "Tablas de Diferencias (Tú vs Entrenador)",
+        "tech_feat": "Características Técnicas",
+        "mental_feat": "Características Mentales",
+        "partner_mgmt": "Gestión de Ranking de Compañeros (Hasta 5)",
+        "save_partners": "Guardar Ranking de Compañeros",
+        "partners_saved": "¡Ranking de compañeros actualizado con éxito!",
+        "current_ranking": "Clasificación Actual:",
+        "no_partners": "Ningún compañero configurado.",
+        "history_title": "Historial y Evolución de Valoraciones del Entrenador",
+        "no_history": "Ninguna modificación previa registrada por el entrenador.",
+        "official_note": "Nota Oficial del Entrenador",
+        "no_coach_note": "Ninguna nota introducida por el entrenador en este momento.",
+        "peer_feedback": "Feedback de Compañeros",
+        "select_partner_lbl": "Selecciona compañero:",
+        "note_on_partner": "Nota sobre el compañero:",
+        "send_note": "Enviar Nota",
+        "note_sent": "¡Nota enviada!",
+        "empty_note_warn": "El texto no puede estar vacío.",
+        "received_lbl": "Recibidos:",
+        "coach_dash_title": "Dashboard de Entrenador",
+        "exit_coach": "Salir del Área de Entrenador",
+        "coach_tab_squad": "Gestión de Plantilla y Asistencia",
+        "coach_tab_evals": "Gestión de Notas del Entrenador",
+        "coach_tab_matches": "Gestión de Partidos",
+        "coach_tab_comments": "Todos los Comentarios",
+        "coach_tab_pairing": "Emparejamiento Automático de Parejas",
+        "squad_desc": "Modifica directamente los datos de la plantilla a continuación. Los cambios se guardan en tiempo real y el Compromiso (%) se recalcula automáticamente.",
+        "col_name": "Nombre", "col_role": "Rol", "col_hand": "Mano", "col_style": "Estilo", "col_trainings": "Entrenamientos", "col_participated": "Participado", "col_commitment": "Compromiso (%)",
+        "work_groups": "Grupos de Trabajo y Mejora Dirigida",
+        "work_groups_desc": "Agrupación automática de todos los jugadores basada en carencias comunes detectadas en las evaluaciones del entrenador (valores ≤ 6).",
+        "no_critics": "Ninguna criticidad detectada (todos los jugadores tienen notas superiores a 6).",
+        "coach_eval_title": "Gestión de Notas del Entrenador y Perfil de Juego",
+        "coach_eval_desc": "Selecciona un jugador para actualizar sus valoraciones, perfil táctico y nota oficial.",
+        "select_player_eval": "Selecciona jugador a evaluar:",
+        "coach_eval_sub_title": "Evaluación del Entrenador",
+        "coach_note_lbl": "Nota / Comentario Oficial del Entrenador (Visible para el jugador)",
+        "coach_note_placeholder": "Escribe aquí el comentario para el jugador...",
+        "tech_skills_coach": "Habilidades Técnicas (Entrenador)",
+        "mental_skills_coach": "Habilidades Mentales (Entrenador)",
+        "save_coach_eval": "Guardar Notas, Perfil y Nota del Entrenador",
+        "match_mgmt": "Registro de Partidos",
+        "match_mgmt_desc": "Selecciona los jugadores para cada equipo (cada equipo requiere 1 jugador de Izquierda y 1 de Derecha).",
+        "match_date": "Fecha del Partido",
+        "team_a": "Equipo A",
+        "team_b": "Equipo B",
+        "left_role": "Izquierda (Left)",
+        "right_role": "Derecha (Right)",
+        "score_lbl": "Resultado (ej. 6-4, 6-2)",
+        "register_match": "Registrar Partido",
+        "same_player_err": "¡Dentro del mismo equipo no puedes seleccionar dos veces al mismo jugador!",
+        "match_saved": "¡Partido registrado con éxito!",
+        "match_history": "Historial de Partidos Registrados",
+        "global_comments": "Vista Global de Notas y Comentarios",
+        "pairing_title": "Algoritmo Inteligente de Emparejamiento de Parejas",
+        "pairing_desc": "Selecciona a continuación los jugadores disponibles para esta sesión. El algoritmo emparejará exclusivamente entre sí a los jugadores seleccionados, respetando la restricción de rol (1 Izquierda + 1 Derecha) y equilibrando:",
+        "pairing_p1": "Peso 1.0: Evaluación global del Entrenador.",
+        "pairing_p2": "Peso 0.5: Voluntad / preferencia mutua de los jugadores.",
+        "select_available_players": "Selecciona los jugadores disponibles hoy:",
+        "run_pairing": "Generar Parejas Óptimas con los Disponibles",
+        "pairing_err": "¡Para formar parejas se necesita al menos un jugador de izquierda y un jugador de derecha entre los seleccionados!",
+        "recommended_pairing": "Resultado de Emparejamiento Recomendado:",
+        "unmatched_warn": "Jugadores seleccionados pero excluidos en esta ronda por desequilibrio numérico entre Derecha e Izquierda:"
+    },
+    "Svenska": {
+        "welcome": "Välkommen till Padel Performance Hub",
+        "select_area": "Välj ditt åtkomstområde för att fortsätta:",
+        "player_area": "Spelarområde",
+        "player_desc": "Gå till ditt lösenordsskyddade personliga kort för att visa och uppdatera dina utvärderingar.",
+        "player_btn": "Logga in som Spelare",
+        "coach_area": "Tränarområde",
+        "coach_desc": "Begränsad åtkomst för tränarstab för datahantering, planering och matcher.",
+        "coach_btn": "Logga in som Tränare",
+        "login_player_title": "Inloggning Spelarområde",
+        "login_player_sub": "Välj ditt namn och ange ditt lösenord (ditt förnamn).",
+        "profile_select": "Välj din profil:",
+        "pwd_label": "Lösenord (Ditt förnamn)",
+        "enter_card": "Gå till mitt kort",
+        "back_home": "Tillbaka till Hem",
+        "wrong_pwd": "Fel lösenord! Kom ihåg att lösenordet är ditt förnamn.",
+        "coach_login_title": "Autentisering Tränarområde",
+        "coach_login_sub": "Ange säkerhetslösenordet för att komma åt hanteringsfunktioner.",
+        "coach_pwd_label": "Tränarlösenord",
+        "verify_pwd": "Verifiera lösenord",
+        "logout": "Logga ut",
+        "tech_skills": "Tekniska färdigheter",
+        "mental_skills": "Attityd & Taktik (Mentalt)",
+        "mental_list": ["Positiv attityd / Partnersupport", "Spelkonsistens", "Felhantering", "Positionering", "Uthållighet", "Kommunikation med partner", "Coachability"],
+        "partners_tab": "Partnerranking",
+        "history_tab": "Historik & Förbättringar",
+        "comments_tab": "Kommentarer & Feedback",
+        "eval_coach_tab": "Självutvärdering & Coach",
+        "eval_desc": "Justerreglagen och välj din spelstil för din självutvärdering. Till vänster hittar du Tekniska färdigheter och till höger Mentala.",
+        "style_select_lbl": "Välj din Spelstil (Självutvärdering):",
+        "save_eval": "Spara Självutvärdering",
+        "eval_saved": "Självutvärdering har sparats!",
+        "radar_title": "Spindeldiagram (Separat Jämförelse)",
+        "player_radar_title": "Spelares Självutvärdering",
+        "coach_radar_title": "Coachutvärdering",
+        "play_style_lbl": "Spelstil:",
+        "diff_tables": "Differenstabeller (Du vs Coach)",
+        "tech_feat": "Tekniska Egenskaper",
+        "mental_feat": "Mentala Egenskaper",
+        "partner_mgmt": "Partnerrankinghantering (Upp till 5)",
+        "save_partners": "Spara Partnerranking",
+        "partners_saved": "Partnerranking uppdaterad!",
+        "current_ranking": "Aktuell Ranking:",
+        "no_partners": "Inga partner konfigurerade.",
+        "history_title": "Historik & Coachutvärderingens Utveckling",
+        "no_history": "Inga tidigare ändringar registrerade av coachen.",
+        "official_note": "Officiell Coachanteckning",
+        "no_coach_note": "Ingen anteckning tillagd av coachen för tillfället.",
+        "peer_feedback": "Feedback från medspelare",
+        "select_partner_lbl": "Välj medspelare:",
+        "note_on_partner": "Anteckning om medspelare:",
+        "send_note": "Skicka Anteckning",
+        "note_sent": "Anteckning skickad!",
+        "empty_note_warn": "Texten får inte vara tom.",
+        "received_lbl": "Mottagna:",
+        "coach_dash_title": "Coachdashboard",
+        "exit_coach": "Logga ut från Tränarområde",
+        "coach_tab_squad": "Trupphantering & Närvaro",
+        "coach_tab_evals": "Coachbetygshantering",
+        "coach_tab_matches": "Matchhantering",
+        "coach_tab_comments": "Alla Kommentarer",
+        "coach_tab_pairing": "Automatiskt Parval",
+        "squad_desc": "Redigera truppdata direkt nedanför. Ändringar sparas i realtid och Engagemang (%) räknas om automatiskt.",
+        "col_name": "Namn", "col_role": "Roll", "col_hand": "Hand", "col_style": "Spelstil", "col_trainings": "Träningar", "col_participated": "Deltagit", "col_commitment": "Engagemang (%)",
+        "work_groups": "Arbetsgrupper & Riktad Förbättring",
+        "work_groups_desc": "Automatisk gruppering av alla spelare baserat på vanliga svagheter identifierade i coachbedömningar (värden ≤ 6).",
+        "no_critics": "Inga kritiska punkter upptäckta (alla spelare har betyg över 6).",
+        "coach_eval_title": "Coachbetyg & Spelprofil",
+        "coach_eval_desc": "Välj en spelare för att uppdatera hens utvärderingar, taktiskt profil och officiell anteckning.",
+        "select_player_eval": "Välj spelare att utvärdera:",
+        "coach_eval_sub_title": "Coachutvärdering",
+        "coach_note_lbl": "Officiell Coachanteckning / Kommentar (Synlig för spelaren)",
+        "coach_note_placeholder": "Skriv kommentaren till spelaren här...",
+        "tech_skills_coach": "Tekniska Färdigheter (Coach)",
+        "mental_skills_coach": "Mentala Färdigheter (Coach)",
+        "save_coach_eval": "Spara Betyg, Profil och Coachanteckning",
+        "match_mgmt": "Matchregistrering",
+        "match_mgmt_desc": "Välj spelare för varje lag (varje lag kräver 1 Vänsterspelare och 1 Högerspelare).",
+        "match_date": "Matchdatum",
+        "team_a": "Lag A",
+        "team_b": "Lag B",
+        "left_role": "Vänster (Left)",
+        "right_role": "Höger (Right)",
+        "score_lbl": "Resultat (t.ex. 6-4, 6-2)",
+        "register_match": "Registrera Match",
+        "same_player_err": "Inom samma lag kan du inte välja samma spelare två gånger!",
+        "match_saved": "Match registrerad!",
+        "match_history": "Registrerad Matchhistorik",
+        "global_comments": "Global Översikt av Anteckningar & Kommentarer",
+        "pairing_title": "Intelligent Parningalgoritm",
+        "pairing_desc": "Välj nedan vilka spelare som är tillgängliga för denna session. Algoritmen parar ihop enbart de valda spelarna, respekterar rollkravet (1 Vänster + 1 Höger) och balanserar:",
+        "pairing_p1": "Vikt 1.0: Övergripande Coachbedömning.",
+        "pairing_p2": "Vikt 0.5: Spelares ömsesidiga vilja / preferens.",
+        "select_available_players": "Välj tillgängliga spelare idag:",
+        "run_pairing": "Generera Optimala Par med Tillgängliga",
+        "pairing_err": "För att bilda par behöver du minst en vänsterspelare och en högerspelare bland de valda!",
+        "recommended_pairing": "Rekommenderat Parresultat:",
+        "unmatched_warn": "Spelare som valdes men utelämnades denna omgång på grund av numerisk obalans mellan Höger och Vänster:"
+    },
+    "Nederlands": {
+        "welcome": "Welkom bij de Padel Performance Hub",
+        "select_area": "Selecteer je toegangsgebied om door te gaan:",
+        "player_area": "Spelersgebied",
+        "player_desc": "Ga naar je met een wachtwoord beveiligde persoonlijke kaart om je evaluaties te bekijken en bij te werken.",
+        "player_btn": "Toegang als Speler",
+        "coach_area": "Coachgebied",
+        "coach_desc": "Beperkte toegang voor de technische staf voor gegevensbeheer, planning en wedstrijden.",
+        "coach_btn": "Toegang als Coach",
+        "login_player_title": "Inloggen Spelersgebied",
+        "login_player_sub": "Selecteer je naam en voer je wachtwoord in (je voornaam).",
+        "profile_select": "Selecteer je profiel:",
+        "pwd_label": "Wachtwoord (Je voornaam)",
+        "enter_card": "Ga naar mijn kaart",
+        "back_home": "Terug naar Home",
+        "wrong_pwd": "Verkeerd wachtwoord! Onthoud dat het wachtwoord je voornaam is.",
+        "coach_login_title": "Authenticatie Coachgebied",
+        "coach_login_sub": "Voer het beveiligingswachtwoord in om toegang te krijgen tot de beheerfuncties.",
+        "coach_pwd_label": "Coachwachtwoord",
+        "verify_pwd": "Wachtwoord verifiëren",
+        "logout": "Uitloggen",
+        "tech_skills": "Technische vaardigheden",
+        "mental_skills": "Houding & Tactiek (Mentaal)",
+        "mental_list": ["Positieve houding / Partnersupport", "Spelconsistensie", "Foutenbeheer", "Positionering", "Uithoudingsvermogen", "Communicatie met partner", "Coachability"],
+        "partners_tab": "Partner Ranking",
+        "history_tab": "Geschiedenis & Verbeteringen",
+        "comments_tab": "Opmerkingen & Feedback",
+        "eval_coach_tab": "Zelfevaluatie & Coach",
+        "eval_desc": "Pas de schuifregelaars aan en selecteer je speelstijl voor je zelfevaluatie. Links vind je Technische vaardigheden en rechts Mentale.",
+        "style_select_lbl": "Selecteer je Speelstijl (Zelfevaluatie):",
+        "save_eval": "Zelfevaluatie Opslaan",
+        "eval_saved": "Zelfevaluatie succesvol opgeslagen!",
+        "radar_title": "Spindiagrammen (Afzonderlijke Vergelijking)",
+        "player_radar_title": "Zelfevaluatie Speler",
+        "coach_radar_title": "Coachevaluatie",
+        "play_style_lbl": "Speelstijl:",
+        "diff_tables": "Verschillentabellen (Jij vs Coach)",
+        "tech_feat": "Technische Kenmerken",
+        "mental_feat": "Mentale Kenmerken",
+        "partner_mgmt": "Partner Ranking Beheer (Tot 5)",
+        "save_partners": "Partner Ranking Opslaan",
+        "partners_saved": "Partner ranking succesvol bijgewerkt!",
+        "current_ranking": "Huidige Ranking:",
+        "no_partners": "Geen partners geconfigureerd.",
+        "history_title": "Geschiedenis & Evolutie Coachevaluaties",
+        "no_history": "Geen eerdere wijzigingen geregistreerd door de coach.",
+        "official_note": "Officiële Coachnotitie",
+        "no_coach_note": "Geen notitie ingevoerd door de coach op dit moment.",
+        "peer_feedback": "Feedback van teamgenoten",
+        "select_partner_lbl": "Selecteer teamgenoot:",
+        "note_on_partner": "Notitie over teamgenoot:",
+        "send_note": "Notitie Verzenden",
+        "note_sent": "Notitie verzonden!",
+        "empty_note_warn": "Tekst mag niet leeg zijn.",
+        "received_lbl": "Ontvangen:",
+        "coach_dash_title": "Coach Dashboard",
+        "exit_coach": "Verlaat Coachgebied",
+        "coach_tab_squad": "Selectiebeheer & Aanwezigheid",
+        "coach_tab_evals": "Coach Cijfers Beheer",
+        "coach_tab_matches": "Wedstrijdbeheer",
+        "coach_tab_comments": "Alle Opmerkingen",
+        "coach_tab_pairing": "Automatische Koppelindeling",
+        "squad_desc": "Bewerk selectiegegevens direct hieronder. Wijzigingen worden in realtime opgeslagen en Betrokkenheid (%) wordt automatisch herberekend.",
+        "col_name": "Naam", "col_role": "Rol", "col_hand": "Hand", "col_style": "Stijl", "col_trainings": "Trainingen", "col_participated": "Deelgenomen", "col_commitment": "Betrokkenheid (%)",
+        "work_groups": "Werkgroepen & Gerichte Verbetering",
+        "work_groups_desc": "Automatische groepering van alle spelers op basis van veelvoorkomende zwakke punten gedetecteerd in coachevaluaties (waarden ≤ 6).",
+        "no_critics": "Geen kritieke punten gedetecteerd (alle spelers hebben cijfers boven 6).",
+        "coach_eval_title": "Coach Cijfers Beheer & Speelprofiel",
+        "coach_eval_desc": "Selecteer een speler om hun evaluaties, tactisch profiel en officiële notitie bij te werken.",
+        "select_player_eval": "Selecteer speler om te evalueren:",
+        "coach_eval_sub_title": "Coachevaluatie",
+        "coach_note_lbl": "Officiële Coachnotitie / Opmerking (Zichtbaar voor speler)",
+        "coach_note_placeholder": "Schrijf hier de opmerking voor de speler...",
+        "tech_skills_coach": "Technische Vaardigheden (Coach)",
+        "mental_skills_coach": "Mentale Vaardigheden (Coach)",
+        "save_coach_eval": "Cijfers, Profiel en Coachnotitie Opslaan",
+        "match_mgmt": "Wedstrijdregistratie",
+        "match_mgmt_desc": "Selecteer spelers voor elk team (elk team vereist 1 Linkerspeler en 1 Rechterspeler).",
+        "match_date": "Wedstrijddatum",
+        "team_a": "Team A",
+        "team_b": "Team B",
+        "left_role": "Links (Left)",
+        "right_role": "Rechts (Right)",
+        "score_lbl": "Resultaat (bijv. 6-4, 6-2)",
+        "register_match": "Wedstrijd Registreren",
+        "same_player_err": "Binnen hetzelfde team kun je niet twee keer dezelfde speler selecteren!",
+        "match_saved": "Wedstrijd succesvol geregistreerd!",
+        "match_history": "Geregistreerde Wedstrijdgeschiedenis",
+        "global_comments": "Globale Weergave Notities & Opmerkingen",
+        "pairing_title": "Intelligente Koppelingsalgoritme",
+        "pairing_desc": "Selecteer hieronder de spelers die beschikbaar zijn voor deze sessie. Het algoritme koppelt uitsluitend de geselecteerde spelers aan elkaar, met respect voor de rolbeperking (1 Links + 1 Rechts) en balancing:",
+        "pairing_p1": "Gewicht 1.0: Algemene Coachevaluatie.",
+        "pairing_p2": "Gewicht 0.5: Wederzijdse wil / voorkeur van spelers.",
+        "select_available_players": "Selecteer beschikbare spelers vandaag:",
+        "run_pairing": "Genereer Optimale Koppels met Beschikbaren",
+        "pairing_err": "Om koppels te vormen heb je minimaal één linkerspeler en één rechterspeler nodig onder de geselecteerden!",
+        "recommended_pairing": "Aanbevolen Koppeling Resultaat:",
+        "unmatched_warn": "Geselecteerde spelers weggelaten in deze ronde vanwege numeriek evenwicht tussen Rechts en Links:"
+    },
+    "Dansk": {
+        "welcome": "Velkommen til Padel Performance Hub",
+        "select_area": "Vælg dit adgangsområde for at fortsætte:",
+        "player_area": "Spillerområde",
+        "player_desc": "Gå til dit adgangskodebeskyttede personlige kort for at se og opdatere dine evalueringer.",
+        "player_btn": "Log ind som Spiller",
+        "coach_area": "Trænerområde",
+        "coach_desc": "Begrænset adgang for trænerstab til datahåndtering, planlægning og kampe.",
+        "coach_btn": "Log ind som Træner",
+        "login_player_title": "Login Spillerområde",
+        "login_player_sub": "Vælg dit navn og indtast din adgangskode (dit fornavn).",
+        "profile_select": "Vælg din profil:",
+        "pwd_label": "Adgangskode (Dit fornavn)",
+        "enter_card": "Gå til mit kort",
+        "back_home": "Tilbage til Hjem",
+        "wrong_pwd": "Forkert adgangskode! Husk at adgangskoden er dit fornavn.",
+        "coach_login_title": "Godkendelse Trænerområde",
+        "coach_login_sub": "Indtast sikkerhedsadgangskoden for at få adgang til administrationsfunktionerne.",
+        "coach_pwd_label": "Træneradgangskode",
+        "verify_pwd": "Bekræft adgangskode",
+        "logout": "Log ud",
+        "tech_skills": "Tekniske færdigheder",
+        "mental_skills": "Holdning & Taktik (Mentalt)",
+        "mental_list": ["Positiv holdning / Partnersupport", "Spelkonsistens", "Fejlhåndtering", "Positionering", "Utholdendhed", "Kommunikation med partner", "Coachability"],
+        "partners_tab": "Partnerranking",
+        "history_tab": "Historik & Forbedringer",
+        "comments_tab": "Kommentarer & Feedback",
+        "eval_coach_tab": "Selvevaluering & Coach",
+        "eval_desc": "Juster skyderne og vælg din spillestil til din selvevaluering. Til venstre finder du Tekniske færdigheder og til højre Mentale.",
+        "style_select_lbl": "Vælg din Spillestil (Selvevaluering):",
+        "save_eval": "Gem Selvevaluering",
+        "eval_saved": "Selvevaluering gemt successfully!",
+        "radar_title": "Spindelvævsdiagrammer (Separat Sammenligning)",
+        "player_radar_title": "Spillers Selvevaluering",
+        "coach_radar_title": "Trænerevaluering",
+        "play_style_lbl": "Spillestil:",
+        "diff_tables": "Differenstabeller (Du vs Træner)",
+        "tech_feat": "Tekniske Egenskaber",
+        "mental_feat": "Mentale Egenskaber",
+        "partner_mgmt": "Partnerranking Håndtering (Op til 5)",
+        "save_partners": "Gem Partnerranking",
+        "partners_saved": "Partnerranking opdateret!",
+        "current_ranking": "Aktuel Ranking:",
+        "no_partners": "Ingen partnere konfigureret.",
+        "history_title": "Historik & Trænerevalueringens Udvikling",
+        "no_history": "Ingen tidligere ændringer registreret af træneren.",
+        "official_note": "Officiel Trænernote",
+        "no_coach_note": "Ingen note indtastet af træneren i øjeblikket.",
+        "peer_feedback": "Medspillerfeedback",
+        "select_partner_lbl": "Vælg medspiller:",
+        "note_on_partner": "Note om medspiller:",
+        "send_note": "Send Note",
+        "note_sent": "Note sendt!",
+        "empty_note_warn": "Teksten må ikke være tom.",
+        "received_lbl": "Modtagne:",
+        "coach_dash_title": "Træner Dashboard",
+        "exit_coach": "Log ud fra Trænerområde",
+        "coach_tab_squad": "Trupstyring & Fremmøde",
+        "coach_tab_evals": "Trænerkarakterer Håndtering",
+        "coach_tab_matches": "Kampstyring",
+        "coach_tab_comments": "Alle Kommentarer",
+        "coach_tab_pairing": "Automatisk Makkerparring",
+        "squad_desc": "Rediger trupdata direkte nedenfor. Ændringer gemmes i realtid og Engagement (%) genberegnes automatisk.",
+        "col_name": "Navn", "col_role": "Rolle", "col_hand": "Hånd", "col_style": "Stil", "col_trainings": "Træninger", "col_participated": "Deltaget", "col_commitment": "Engagement (%)",
+        "work_groups": "Arbejdsgrupper & Målrettet Forbedring",
+        "work_groups_desc": "Automatisk gruppering af alle spillere baseret på almindelige svagheder fundet i trænerevalueringer (værdier ≤ 6).",
+        "no_critics": "Ingen kritiske punkter opdaget (alle spillere har karakterer over 6).",
+        "coach_eval_title": "Trænerkarakterer & Spillerprofil",
+        "coach_eval_desc": "Vælg en spiller for at opdatere vedkommendes evalueringer, taktiske profil og officielle note.",
+        "select_player_eval": "Vælg spiller at evaluere:",
+        "coach_eval_sub_title": "Trænerevaluering",
+        "coach_note_lbl": "Officiel Trænernote / Kommentar (Synlig for spilleren)",
+        "coach_note_placeholder": "Skriv kommentaren til spilleren her...",
+        "tech_skills_coach": "Tekniske Færdigheder (Træner)",
+        "mental_skills_coach": "Mentale Færdigheder (Træner)",
+        "save_coach_eval": "Gem Karakterer, Profil og Trænernote",
+        "match_mgmt": "Kampregistrering",
+        "match_mgmt_desc": "Vælg spillere til hvert hold (hvert hold kræver 1 Venstrespiller og 1 Højrespiller).",
+        "match_date": "Kampdato",
+        "team_a": "Hold A",
+        "team_b": "Hold B",
+        "left_role": "Venstre (Left)",
+        "right_role": "Højre (Right)",
+        "score_lbl": "Resultat (f.eks. 6-4, 6-2)",
+        "register_match": "Registrer Kamp",
+        "same_player_err": "Inden for det samme hold kan du ikke vælge den samme spiller to gange!",
+        "match_saved": "Kamp registreret!",
+        "match_history": "Registreret Kamphistorik",
+        "global_comments": "Global Oversigt over Noter & Kommentarer",
+        "pairing_title": "Intelligent Parringsalgoritme",
+        "pairing_desc": "Vælg nedenfor de spillere, der er tilgængelige til denne session. Algoritmen parrer udelukkende de valgte spillere med hinanden, idet den respekterer rollekravet (1 Venstre + 1 Højre) og balancerer:",
+        "pairing_p1": "Vægt 1.0: Overordnede Trænerevaluering.",
+        "pairing_p2": "Vægt 0.5: Spillernes gensidige vilje / præference.",
+        "select_available_players": "Vælg tilgængelige spillere i dag:",
+        "run_pairing": "Generer Optimale Par med Tilgængelige",
+        "pairing_err": "For at danne par skal du bruge mindst én venstrespiller og én højrespiller blandt de valgte!",
+        "recommended_pairing": "Anbefalet Parringsresultat:",
+        "unmatched_warn": "Spillere valgt men udeladt i denne runde på grund af numerisk ubalance mellem Højre og Venstre:"
+    }
+}
+
+# --- LISTA DELLE SKILLS ---
+TECH_SKILLS = ["Volley", "Bandeja", "Remate", "Smash", "Bajada", "Chiquita", "Lob"]
+
+# --- INIZIALIZZAZIONE STATO ---
+if "language" not in st.session_state:
+    st.session_state.language = "Italiano"
+
+if "nav_mode" not in st.session_state:
+    st.session_state.nav_mode = "Home"
+
+if "authenticated_coach" not in st.session_state:
+    st.session_state.authenticated_coach = False
+
+if "authenticated_player" not in st.session_state:
+    st.session_state.authenticated_player = None
+
+# Recupero dizionario lingua corrente per le mental skills dinamiche
+lang_dict = translations.get(st.session_state.language, translations["Italiano"])
+MENTAL_SKILLS = lang_dict["mental_list"]
+ALL_SKILLS = TECH_SKILLS + MENTAL_SKILLS
+
+# Lista giocatori iniziale (ordinata alfabeticamente per nome)
+if "squad_data" not in st.session_state:
+    st.session_state.squad_data = [
+        {"fname": "Alexander", "lname": "Wennstam", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1,
+         "tech": [8, 8, 7, 7, 8, 6, 7], "mental": [7, 7, 8, 8, 7, 7, 8], "c_tech": [7, 7, 6, 6, 7, 5, 6], "c_mental": [6, 6, 7, 7, 6, 6, 7], "play_style": "equilibrated", "player_play_style": "equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []},
+        {"fname": "Alvaro", "lname": "Gomez", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1,
+         "tech": [7, 7, 6, 7, 6, 6, 7], "mental": [8, 7, 7, 7, 8, 7, 8], "c_tech": [6, 6, 5, 6, 5, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6, 7], "play_style": "equilibrated", "player_play_style": "equilibrated", "history": [], "coach_note": "", "partners": {"Yannik Langeslag": 12, "Josu Usabiaga": 8}, "comments": []},
+        {"fname": "Andrea", "lname": "Lonoce", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1,
+         "tech": [8, 7, 8, 7, 9, 6, 8], "mental": [9, 7, 8, 8, 9, 7, 9], "c_tech": [8, 7, 8, 7, 9, 6, 8], "c_mental": [9, 7, 8, 8, 9, 7, 9], "play_style": "offensive", "player_play_style": "offensive", "history": [], "coach_note": "", "partners": {"Alexander Wennstam": 14}, "comments": []},
+        {"fname": "Benjamin", "lname": "Thyrell", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1,
+         "tech": [7, 7, 8, 6, 7, 6, 7], "mental": [8, 7, 7, 7, 8, 7, 8], "c_tech": [6, 6, 7, 5, 6, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6, 7], "play_style": "counterattack", "player_play_style": "counterattack", "history": [], "coach_note": "", "partners": {}, "comments": []},
+        {"fname": "Doug", "lname": "Ramsay", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0,
+         "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "play_style": "equilibrated", "player_play_style": "equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []},
+        {"fname": "Fernando", "lname": "Oribe", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 0,
+         "tech": [8, 7, 8, 7, 8, 6, 7], "mental": [8, 7, 8, 8, 8, 7, 8], "c_tech": [7, 6, 7, 6, 7, 5, 6], "c_mental": [7, 6, 7, 7, 7, 6, 7], "play_style": "counterattack", "player_play_style": "counterattack", "history": [], "coach_note": "", "partners": {}, "comments": []},
+        {"fname": "Gonzalo", "lname": "Diez de Onate", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1,
+         "tech": [8, 7, 8, 7, 8, 6, 7], "mental": [8, 7, 8, 8, 8, 7, 8], "c_tech": [7, 6, 7, 6, 7, 5, 6], "c_mental": [7, 6, 7, 7, 7, 6, 7], "play_style": "equilibrated", "player_play_style": "equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []},
+        {"fname": "Hector", "lname": "Guerrero", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1,
+         "tech": [7, 7, 7, 7, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 6, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6, 6], "play_style": "counterattack", "player_play_style": "counterattack", "history": [], "coach_note": "", "partners": {}, "comments": []},
+        {"fname": "Jairo", "lname": "Lopez", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0,
+         "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "play_style": "defensive", "player_play_style": "defensive", "history": [], "coach_note": "", "partners": {}, "comments": []},
+        {"fname": "Josu", "lname": "Usabiaga", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1,
+         "tech": [6, 8, 7, 7, 6, 7, 7], "mental": [6, 8, 6, 8, 7, 7, 8], "c_tech": [5, 7, 6, 6, 5, 6, 6], "c_mental": [5, 7, 5, 7, 6, 6, 7], "play_style": "defensive", "player_play_style": "defensive", "history": [], "coach_note": "", "partners": {"Alvaro Gomez": 8}, "comments": []},
+        {"fname": "Juanjo", "lname": "Lopez Benitez", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0,
+         "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7, 7], "play_style": "offensive", "player_play_style": "offensive", "history": [], "coach_note": "", "partners": {}, "comments": []},
+        {"fname": "Julio", "lname": "Morales", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1,
+         "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "play_style": "offensive", "player_play_style": "offensive", "history": [], "coach_note": "", "partners": {}, "comments": []},
+        {"fname": "Lars", "lname": "Mikkelsen", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0,
+         "tech": [7, 7, 7, 6, 8, 6, 7], "mental": [8, 7, 7, 7, 8, 7, 8], "c_tech": [6, 6, 6, 5, 7, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6, 7], "play_style": "equilibrated", "player_play_style": "equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []},
+        {"fname": "Mikkel", "lname": "Hoff", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1,
+         "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "play_style": "defensive", "player_play_style": "defensive", "history": [], "coach_note": "", "partners": {}, "comments": []},
+        {"fname": "Nacho", "lname": "Saracho", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 0,
+         "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7, 7], "play_style": "counterattack", "player_play_style": "counterattack", "history": [], "coach_note": "", "partners": {}, "comments": []},
+        {"fname": "Pedro", "lname": "Rios", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1,
+         "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7, 7], "play_style": "equilibrated", "player_play_style": "equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []},
+        {"fname": "Peter", "lname": "Gustafsson", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0,
+         "tech": [7, 7, 7, 6, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6, 6], "play_style": "equilibrated", "player_play_style": "equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []},
+        {"fname": "Sascha", "lname": "Van De Bilt", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 0,
+         "tech": [7, 7, 7, 6, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6, 6], "play_style": "defensive", "player_play_style": "defensive", "history": [], "coach_note": "", "partners": {}, "comments": []},
+        {"fname": "Yannik", "lname": "Langeslag", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1,
+         "tech": [8, 6, 7, 7, 7, 5, 6], "mental": [7, 6, 8, 6, 7, 6, 7], "c_tech": [7, 5, 6, 6, 6, 4, 5], "c_mental": [6, 5, 7, 5, 6, 5, 6], "play_style": "offensive", "player_play_style": "offensive", "history": [], "coach_note": "", "partners": {"Alvaro Gomez": 12}, "comments": []}
+    ]
+
+# Ordinamento alfabetico iniziale per nome (fname)
+st.session_state.squad_data = sorted(st.session_state.squad_data, key=lambda x: x['fname'])
+
+for p in st.session_state.squad_data:
+    if "hand" not in p: p["hand"] = "Mancino" if p.get("side") == "Left" else "Destro"
+    if "coach_note" not in p: p["coach_note"] = ""
+    if "play_style" not in p: p["play_style"] = "equilibrated"
+    if "player_play_style" not in p: p["player_play_style"] = p.get("play_style", "equilibrated")
+    if "trainings" not in p: p["trainings"] = 1
+    if "participated" not in p: p["participated"] = 1
+    
+    if len(p["tech"]) != len(TECH_SKILLS): p["tech"] = [7] * len(TECH_SKILLS)
+    if len(p["mental"]) != len(MENTAL_SKILLS): p["mental"] = [7] * len(MENTAL_SKILLS)
+    if len(p["c_tech"]) != len(TECH_SKILLS): p["c_tech"] = [6] * len(TECH_SKILLS)
+    if len(p["c_mental"]) != len(MENTAL_SKILLS): p["c_mental"] = [6] * len(MENTAL_SKILLS)
+
+if "match_results" not in st.session_state:
+    st.session_state.match_results = []
+
+squad_players = st.session_state.squad_data
+
+# --- SIDEBAR & LINGUA ---
+with st.sidebar:
+    st.title("Padel Hub")
+    
+    available_languages = ["Italiano", "English", "Español", "Svenska", "Nederlands", "Dansk"]
+    current_lang_index = available_languages.index(st.session_state.language) if st.session_state.language in available_languages else 0
+    selected_lang = st.selectbox("🌐 Lingua / Language", available_languages, index=current_lang_index)
+    
+    if selected_lang != st.session_state.language:
+        st.session_state.language = selected_lang
+        st.rerun()
+        
+    lang_dict = translations.get(st.session_state.language, translations["Italiano"])
+    
+    st.markdown("---")
+    if st.session_state.authenticated_coach:
+        st.success("🔒 Coach Logged In")
+        if st.button(lang_dict["logout"]):
+            st.session_state.authenticated_coach = False
+            st.session_state.nav_mode = "Home"
+            st.rerun()
+    elif st.session_state.authenticated_player:
+        st.success(f"👤 Player: {st.session_state.authenticated_player}")
+        if st.button(lang_dict["logout"]):
+            st.session_state.authenticated_player = None
+            st.session_state.nav_mode = "Home"
+            st.rerun()
+
+lang_dict = translations.get(st.session_state.language, translations["Italiano"])
+MENTAL_SKILLS = lang_dict["mental_list"]
+ALL_SKILLS = TECH_SKILLS + MENTAL_SKILLS
+
+# --- HOME SELECTION ---
+if st.session_state.nav_mode == "Home":
+    st.title(f"🎾 {lang_dict['welcome']}")
+    st.markdown(lang_dict['select_area'])
+    
+    col_home1, col_home2 = st.columns(2)
+    with col_home1:
+        st.markdown(f"### 👤 {lang_dict['player_area']}")
+        st.markdown(lang_dict['player_desc'])
+        if st.button(lang_dict['player_btn'], use_container_width=True, type="primary"):
+            st.session_state.nav_mode = "Player_Login"
+            st.rerun()
+            
+    with col_home2:
+        st.markdown(f"### 📋 {lang_dict['coach_area']}")
+        st.markdown(lang_dict['coach_desc'])
+        if st.button(lang_dict['coach_btn'], use_container_width=True, type="primary"):
+            st.session_state.nav_mode = "Coach_Login"
+            st.rerun()
+
+# --- LOGIN GIOCATORE ---
+elif st.session_state.nav_mode == "Player_Login":
+    st.title(f"🔐 {lang_dict['login_player_title']}")
+    st.markdown(lang_dict['login_player_sub'])
+    
+    player_options = [f"{p['fname']} {p['lname']} ({p['side']})" for p in squad_players]
+    selected_player_str = st.selectbox(lang_dict['profile_select'], player_options)
+    selected_fname = selected_player_str.split(" ")[0]
+    
+    player_pwd_input = st.text_input(lang_dict['pwd_label'], type="password")
+    
+    col_pl1, col_pl2 = st.columns(2)
+    with col_pl1:
+        if st.button(lang_dict['enter_card'], type="primary", use_container_width=True):
+            if player_pwd_input.strip().lower() == selected_fname.lower():
+                st.session_state.authenticated_player = selected_fname
+                st.session_state.nav_mode = "Player_Dashboard"
+                st.rerun()
+            else:
+                st.error(f"❌ {lang_dict['wrong_pwd']}")
+    with col_pl2:
+        if st.button(lang_dict['back_home'], use_container_width=True):
+            st.session_state.nav_mode = "Home"
+            st.rerun()
+
+# --- LOGIN ALLENATORE ---
+elif st.session_state.nav_mode == "Coach_Login":
+    st.title(f"🔒 {lang_dict['coach_login_title']}")
+    st.markdown(lang_dict['coach_login_sub'])
+    
+    COACH_PASSWORD = "padelcoach2026"
+    pwd_input = st.text_input(lang_dict['coach_pwd_label'], type="password")
+    
+    col_btn1, col_btn2 = st.columns(2)
+    with col_btn1:
+        if st.button(lang_dict['verify_pwd'], type="primary", use_container_width=True):
+            if pwd_input == COACH_PASSWORD:
+                st.session_state.authenticated_coach = True
+                st.session_state.nav_mode = "Coach"
+                st.rerun()
+            else:
+                st.error("❌ Password errata! Riprova.")
+    with col_btn2:
+        if st.button(lang_dict['back_home'], use_container_width=True):
+            st.session_state.nav_mode = "Home"
+            st.rerun()
+
+# --- DASHBOARD GIOCATORE ---
+elif st.session_state.nav_mode == "Player_Dashboard":
+    current_player = next((p for p in squad_players if p['fname'] == st.session_state.authenticated_player), None)
+    
+    col_top1, col_top2 = st.columns([6, 1])
+    with col_top1:
+        st.title(f"👤 {current_player['fname']} {current_player['lname']} ({current_player['side']})")
+    with col_top2:
+        if st.button(lang_dict['logout']):
+            st.session_state.authenticated_player = None
+            st.session_state.nav_mode = "Home"
+            st.rerun()
+            
+    st.markdown("---")
+    
+    tab_eval, tab_partners, tab_history, tab_comments = st.tabs([
+        f"📊 {lang_dict['eval_coach_tab']}", 
+        f"🏆 {lang_dict['partners_tab']}", 
+        f"📈 {lang_dict['history_tab']}", 
+        f"💬 {lang_dict['comments_tab']}"
+    ])
+    
+    with tab_eval:
+        st.subheader(f"📊 {lang_dict['eval_coach_tab']}")
+        st.markdown(lang_dict['eval_desc'])
+        
+        style_options = ["offensive", "defensive", "equilibrated", "counterattack"]
+        
+        col_eval_left, col_eval_right = st.columns(2)
+        
+        new_tech_vals = []
+        new_mental_vals = []
+        
+        with col_eval_left:
+            st.markdown(f"**{lang_dict['tech_skills']}**")
+            for i, skill in enumerate(TECH_SKILLS):
+                c1, c2 = st.columns(2)
+                with c1:
+                    val = st.slider(f"Tu - {skill}", 1, 10, int(current_player['tech'][i]), key=f"p_tech_{i}")
+                    new_tech_vals.append(val)
+                with c2:
+                    st.slider(f"Coach - {skill}", 1, 10, int(current_player['c_tech'][i]), disabled=True, key=f"c_tech_view_{i}")
+
+        with col_eval_right:
+            st.markdown(f"**{lang_dict['mental_skills']}**")
+            for i, skill in enumerate(MENTAL_SKILLS):
+                c1, c2 = st.columns(2)
+                with c1:
+                    val = st.slider(f"Tu - {skill}", 1, 10, int(current_player['mental'][i]), key=f"p_mental_{i}")
+                    new_mental_vals.append(val)
+                with c2:
+                    st.slider(f"Coach - {skill}", 1, 10, int(current_player['c_mental'][i]), disabled=True, key=f"c_mental_view_{i}")
+                
+        st.markdown("---")
+        current_p_style = current_player.get("player_play_style", "equilibrated")
+        if current_p_style not in style_options: current_p_style = "equilibrated"
+        new_player_style = st.selectbox(lang_dict['style_select_lbl'], options=style_options, index=style_options.index(current_p_style))
+                
+        if st.button(lang_dict['save_eval'], type="primary"):
+            current_player['tech'] = new_tech_vals
+            current_player['mental'] = new_mental_vals
+            current_player['player_play_style'] = new_player_style
+            st.success(lang_dict['eval_saved'])
+            st.rerun()
+
+        st.markdown("---")
+        st.subheader(f"🕸️ {lang_dict['radar_title']}")
+        
+        all_skills_labels = TECH_SKILLS + MENTAL_SKILLS
+        player_full_vals = current_player['tech'] + current_player['mental']
+        coach_full_vals = current_player['c_tech'] + current_player['c_mental']
+        
+        categories = all_skills_labels + [all_skills_labels[0]]
+        p_vals_radar = player_full_vals + [player_full_vals[0]]
+        c_vals_radar = coach_full_vals + [coach_full_vals[0]]
+        
+        radar_col1, radar_col2 = st.columns(2)
+        
+        with radar_col1:
+            st.markdown(f"### {lang_dict['player_radar_title']}")
+            p_style_display = current_player.get("player_play_style", "equilibrated").capitalize()
+            st.markdown(f"**{lang_dict['play_style_lbl']}** {p_style_display}")
+            
+            fig_player = go.Figure()
+            fig_player.add_trace(go.Scatterpolar(
+                r=p_vals_radar,
+                theta=categories,
+                fill='toself',
+                name='Autovalutazione',
+                line_color='#1f77b4'
+            ))
+            fig_player.update_layout(
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                font=dict(color='white'),
+                polar=dict(
+                    bgcolor='rgba(0,0,0,0)',
+                    radialaxis=dict(visible=True, range=[0, 10], color='white', gridcolor='#334155'),
+                    angularaxis=dict(gridcolor='#334155')
+                ),
+                showlegend=False,
+                height=420,
+                margin=dict(l=40, r=40, t=10, b=20)
+            )
+            st.plotly_chart(fig_player, use_container_width=True)
+            
+        with radar_col2:
+            st.markdown(f"### {lang_dict['coach_radar_title']}")
+            play_style_display = current_player.get("play_style", "equilibrated").capitalize()
+            st.markdown(f"**{lang_dict['play_style_lbl']}** {play_style_display}")
+            
+            fig_coach = go.Figure()
+            fig_coach.add_trace(go.Scatterpolar(
+                r=c_vals_radar,
+                theta=categories,
+                fill='toself',
+                name='Coach',
+                line_color='#ff7f0e'
+            ))
+            fig_coach.update_layout(
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                font=dict(color='white'),
+                polar=dict(
+                    bgcolor='rgba(0,0,0,0)',
+                    radialaxis=dict(visible=True, range=[0, 10], color='white', gridcolor='#334155'),
+                    angularaxis=dict(gridcolor='#334155')
+                ),
+                showlegend=False,
+                height=420,
+                margin=dict(l=40, r=40, t=10, b=20)
+            )
+            st.plotly_chart(fig_coach, use_container_width=True)
+
+        st.markdown("---")
+        st.subheader(f"📋 {lang_dict['diff_tables']}")
+        
+        diff_tech_rows = []
+        for i, skill in enumerate(TECH_SKILLS):
+            p_v = current_player['tech'][i]
+            c_v = current_player['c_tech'][i]
+            diff = p_v - c_v
+            
+            if diff > 0:
+                diff_display = f"<span style='color:#2ecc71; font-weight:bold;'>+{diff}</span>"
+            elif diff < 0:
+                diff_display = f"<span style='color:#e74c3c; font-weight:bold;'>{diff}</span>"
+            else:
+                diff_display = "<span style='color:#bdc3c7; font-weight:bold;'>0</span>"
+                
+            diff_tech_rows.append({"Tecnica": skill, "Tu": p_v, "Coach": c_v, "Diff": diff_display})
+
+        diff_mental_rows = []
+        for i, skill in enumerate(MENTAL_SKILLS):
+            p_v = current_player['mental'][i]
+            c_v = current_player['c_mental'][i]
+            diff = p_v - c_v
+            
+            if diff > 0:
+                diff_display = f"<span style='color:#2ecc71; font-weight:bold;'>+{diff}</span>"
+            elif diff < 0:
+                diff_display = f"<span style='color:#e74c3c; font-weight:bold;'>{diff}</span>"
+            else:
+                diff_display = "<span style='color:#bdc3c7; font-weight:bold;'>0</span>"
+                
+            diff_mental_rows.append({"Mentale": skill, "Tu": p_v, "Coach": c_v, "Diff": diff_display})
+
+        t_col1, t_col2 = st.columns(2)
+        with t_col1:
+            st.markdown(f"#### 🎾 {lang_dict['tech_feat']}")
+            st.markdown(pd.DataFrame(diff_tech_rows).to_html(escape=False, index=False, classes="custom-table"), unsafe_allow_html=True)
+            
+        with t_col2:
+            st.markdown(f"#### 🧠 {lang_dict['mental_feat']}")
+            st.markdown(pd.DataFrame(diff_mental_rows).to_html(escape=False, index=False, classes="custom-table"), unsafe_allow_html=True)
+
+    with tab_partners:
+        st.subheader(f"🏆 {lang_dict['partner_mgmt']}")
+        all_colleagues = [f"{p['fname']} {p['lname']}" for p in squad_players if p['fname'] != current_player['fname']]
+        current_partners = current_player.get("partners", {})
+        
+        with st.form("partners_form"):
+            new_partners_dict = {}
+            for i in range(5):
+                col_p1, col_p2 = st.columns([3, 1])
+                existing_keys = list(current_partners.keys())
+                default_partner = existing_keys[i] if i < len(existing_keys) else (all_colleagues[0] if all_colleagues else "")
+                default_val = int(current_partners.get(default_partner, 5 - i))
+                
+                with col_p1:
+                    p_sel = st.selectbox(f"Partner #{i+1}", all_colleagues, index=all_colleagues.index(default_partner) if default_partner in all_colleagues else 0, key=f"partner_sel_{i}")
+                with col_p2:
+                    p_score = st.number_input(f"Match #{i+1}", min_value=1, max_value=50, value=default_val, key=f"partner_val_{i}")
+                
+                if p_sel:
+                    new_partners_dict[p_sel] = p_score
+                    
+            if st.form_submit_button(lang_dict['save_partners'], type="primary"):
+                current_player["partners"] = new_partners_dict
+                st.success(lang_dict['partners_saved'])
+                st.rerun()
+                
+        st.markdown(f"### {lang_dict['current_ranking']}")
+        if current_player.get("partners"):
+            df_part = pd.DataFrame(list(current_player["partners"].items()), columns=["Compagno", "Match / Preferenza"]).sort_values(by="Match / Preferenza", ascending=False).reset_index(drop=True)
+            st.markdown(df_part.to_html(escape=False, index=False, classes="custom-table"), unsafe_allow_html=True)
+        else:
+            st.info(lang_dict['no_partners'])
+
+    with tab_history:
+        st.subheader(f"📈 {lang_dict['history_title']}")
+        history_records = current_player.get("history", [])
+        if history_records:
+            for idx, hist in enumerate(history_records):
+                st.markdown(f"**Aggiornamento #{idx+1} ({hist.get('date', '')})**")
+                st.json(hist.get('values'))
+        else:
+            st.info(lang_dict['no_history'])
+
+    with tab_comments:
+        st.subheader(f"💬 {lang_dict['comments_tab']}")
+        
+        st.markdown(f"### 📋 {lang_dict['official_note']}")
+        coach_note_val = current_player.get("coach_note", "")
+        if coach_note_val.strip():
+            st.info(coach_note_val)
+        else:
+            st.markdown(f"*{lang_dict['no_coach_note']}*")
+            
+        st.markdown("---")
+        st.subheader(f"💬 {lang_dict['peer_feedback']}")
+        target_colleagues = [f"{p['fname']} {p['lname']}" for p in squad_players if p['fname'] != current_player['fname']]
+        selected_target = st.selectbox(lang_dict['select_partner_lbl'], target_colleagues)
+        comment_text = st.text_area(lang_dict['note_on_partner'])
+        if st.button(lang_dict['send_note']):
+            if comment_text.strip():
+                target_p = next((p for p in squad_players if f"{p['fname']} {p['lname']}" == selected_target), None)
+                if target_p:
+                    target_p.setdefault("comments", []).append({
+                        "from": f"{current_player['fname']} {current_player['lname']}",
+                        "text": comment_text,
+                        "date": datetime.now().strftime("%Y-%m-%d %H:%M")
+                    })
+                    st.success(lang_dict['note_sent'])
+            else:
+                st.warning(lang_dict['empty_note_warn'])
+        
+        st.markdown(f"### {lang_dict['received_lbl']}")
+        for c in current_player.get("comments", []):
+            st.info(f"**Da {c['from']}** ({c['date']}): {c['text']}")
+
+# --- AREA ALLENATORE ---
+elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coach:
+    st.title(f"📋 {lang_dict['coach_dash_title']}")
+    if st.button(lang_dict['exit_coach']):
+        st.session_state.authenticated_coach = False
+        st.session_state.nav_mode = "Home"
+        st.rerun()
+        
+    coach_tab1, coach_tab_evals, coach_tab2, coach_tab3, coach_tab_pairing = st.tabs([
+        f"👥 {lang_dict['coach_tab_squad']}", 
+        f"✏️ {lang_dict['coach_tab_evals']}",
+        f"📅 {lang_dict['coach_tab_matches']}", 
+        f"💬 {lang_dict['coach_tab_comments']}",
+        f"🤖 {lang_dict['coach_tab_pairing']}"
+    ])
+    
+    with coach_tab1:
+        st.subheader(f"👥 {lang_dict['coach_tab_squad']}")
+        st.markdown(lang_dict['squad_desc'])
+        
+        # Ordinamento alfabetico della lista in base al nome (fname)
+        st.session_state.squad_data = sorted(st.session_state.squad_data, key=lambda x: x['fname'])
+        squad_players = st.session_state.squad_data
+        
+        th_cols = st.columns([1.8, 1.2, 1.2, 1.4, 0.9, 0.9, 0.9])
+        with th_cols[0]: st.markdown(lang_dict['col_name'])
+        with th_cols[1]: st.markdown(lang_dict['col_role'])
+        with th_cols[2]: st.markdown(lang_dict['col_hand'])
+        with th_cols[3]: st.markdown(lang_dict['col_style'])
+        with th_cols[4]: st.markdown(lang_dict['col_trainings'])
+        with th_cols[5]: st.markdown(lang_dict['col_participated'])
+        with th_cols[6]: st.markdown(f"<div style='text-align: center;'>{lang_dict['col_commitment']}</div>", unsafe_allow_html=True)
+        st.markdown("---")
+
+        for idx, p in enumerate(squad_players):
+            col_n, col_r, col_h, col_s, col_t, col_p, col_c = st.columns([1.8, 1.2, 1.2, 1.4, 0.9, 0.9, 0.9])
+            
+            with col_n:
+                st.markdown(f"**{p['fname']} {p['lname']}**")
+            with col_r:
+                new_side = st.selectbox("Role", ["Left", "Right"], index=0 if p["side"]=="Left" else 1, key=f"side_{idx}", label_visibility="collapsed")
+            with col_h:
+                new_hand = st.selectbox("Mano", ["Destro", "Mancino"], index=0 if p.get("hand","Destro")=="Destro" else 1, key=f"hand_{idx}", label_visibility="collapsed")
+            with col_s:
+                styles_list = ["offensive", "defensive", "equilibrated", "counterattack"]
+                curr_st = p.get("play_style", "equilibrated")
+                idx_st = styles_list.index(curr_st) if curr_st in styles_list else 2
+                new_st = st.selectbox("Style", styles_list, index=idx_st, key=f"style_{idx}", label_visibility="collapsed")
+            with col_t:
+                new_tr = st.number_input("Trainings", min_value=0, max_value=50, value=int(p.get("trainings", 1)), key=f"tr_{idx}", label_visibility="collapsed")
+            with col_p:
+                new_pa = st.number_input("Participated", min_value=0, max_value=50, value=int(p.get("participated", 1)), key=f"pa_{idx}", label_visibility="collapsed")
+            with col_c:
+                pct_calc = int(round((new_pa / new_tr) * 100)) if new_tr > 0 else 0
+                st.markdown(f"<div style='padding-top: 8px; font-weight: bold; text-align: center; color: {'#2ecc71' if pct_calc >= 70 else '#e74c3c'};'>{pct_calc}%</div>", unsafe_allow_html=True)
+            
+            # Salvataggio in tempo reale nello state se ci sono variazioni
+            if p["side"] != new_side or p.get("hand") != new_hand or p.get("play_style") != new_st or p.get("trainings") != new_tr or p.get("participated") != new_pa:
+                p["side"] = new_side
+                p["hand"] = new_hand
+                p["play_style"] = new_st
+                p["trainings"] = new_tr
+                p["participated"] = new_pa
+                st.rerun()
+
+        st.markdown("---")
+        st.subheader(f"🎯 {lang_dict['work_groups']}")
+        st.markdown(lang_dict['work_groups_desc'])
+        
+        skill_groups = {skill: [] for skill in ALL_SKILLS}
+        for p in squad_players:
+            p_coach_vals = p['c_tech'] + p['c_mental']
+            for i, skill in enumerate(ALL_SKILLS):
+                if p_coach_vals[i] <= 6:
+                    skill_groups[skill].append(f"{p['fname']} {p['lname']} (Voto: {p_coach_vals[i]})")
+                    
+        active_groups = {k: v for k, v in skill_groups.items() if len(v) > 0}
+        
+        if active_groups:
+            cols = st.columns(2)
+            col_idx = 0
+            for skill, members in active_groups.items():
+                with cols[col_idx % 2]:
+                    with st.expander(f"📌 Area di miglioramento: **{skill}** ({len(members)} giocatori)"):
+                        for m in members:
+                            st.markdown(f"- {m}")
+                col_idx += 1
+        else:
+            st.info(lang_dict['no_critics'])
+
+    with coach_tab_evals:
+        st.subheader(f"✏️ {lang_dict['coach_eval_title']}")
+        st.markdown(lang_dict['coach_eval_desc'])
+        
+        selected_player_name = st.selectbox(lang_dict['select_player_eval'], [f"{p['fname']} {p['lname']}" for p in squad_players], key="coach_eval_select")
+        p_obj = next((p for p in squad_players if f"{p['fname']} {p['lname']}" == selected_player_name), None)
+        
+        if p_obj:
+            with st.form("coach_eval_form"):
+                style_options = ["offensive", "defensive", "equilibrated", "counterattack"]
+                current_style = p_obj.get("play_style", "equilibrated")
+                if current_style not in style_options:
+                    current_style = "equilibrated"
+                
+                st.markdown(f"### {lang_dict['coach_eval_sub_title']}")
+                selected_style = st.selectbox(
+                    lang_dict['play_style_lbl'],
+                    options=style_options,
+                    index=style_options.index(current_style)
+                )
+                
+                st.markdown("---")
+                st.markdown(f"📝 **{lang_dict['coach_note_lbl']}**")
+                new_coach_note = st.text_area(lang_dict['coach_note_placeholder'], value=p_obj.get("coach_note", ""), key="coach_note_input")
+                
+                st.markdown("---")
+                col_c_left, col_c_right = st.columns(2)
+                
+                c_tech_new = []
+                c_mental_new = []
+                
+                with col_c_left:
+                    st.markdown(f"🎾 *{lang_dict['tech_skills_coach']}*")
+                    for idx, t_label in enumerate(TECH_SKILLS):
+                        val = st.slider(f"Coach - {t_label}", 1, 10, int(p_obj['c_tech'][idx]), key=f"scoach_tech_{idx}")
+                        c_tech_new.append(val)
+                
+                with col_c_right:
+                    st.markdown(f"🧠 *{lang_dict['mental_skills_coach']}*")
+                    for idx, m_label in enumerate(MENTAL_SKILLS):
+                        val = st.slider(f"Coach - {m_label}", 1, 10, int(p_obj['c_mental'][idx]), key=f"scoach_mental_{idx}")
+                        c_mental_new.append(val)
+                        
+                if st.form_submit_button(lang_dict['save_coach_eval'], type="primary"):
+                    p_obj.setdefault("history", []).append({
+                        "date": datetime.now().strftime("%Y-%m-%d %H:%M"),
+                        "values": c_tech_new + c_mental_new
+                    })
+                    p_obj['c_tech'] = c_tech_new
+                    p_obj['c_mental'] = c_mental_new
+                    p_obj['play_style'] = selected_style
+                    p_obj['coach_note'] = new_coach_note
+                    st.success(f"✅ {selected_player_name} updated successfully!")
+
+    with coach_tab2:
+        st.subheader(f"📅 {lang_dict['match_mgmt']}")
+        st.markdown(lang_dict['match_mgmt_desc'])
+        
+        left_list = [f"{p['fname']} {p['lname']}" for p in squad_players if p['side'] == "Left"]
+        right_list = [f"{p['fname']} {p['lname']}" for p in squad_players if p['side'] == "Right"]
+        
+        with st.form("match_form"):
+            m_date = st.date_input(lang_dict['match_date'], datetime.now())
+            
+            st.markdown(f"#### 🔵 {lang_dict['team_a']}")
+            col_ta1, col_ta2 = st.columns(2)
+            with col_ta1:
+                team_a_left = st.selectbox(f"{lang_dict['team_a']} - {lang_dict['left_role']}", left_list, key="ta_left")
+            with col_ta2:
+                team_a_right = st.selectbox(f"{lang_dict['team_a']} - {lang_dict['right_role']}", right_list, key="ta_right")
+                
+            st.markdown(f"#### 🔴 {lang_dict['team_b']}")
+            col_tb1, col_tb2 = st.columns(2)
+            with col_tb1:
+                team_b_left = st.selectbox(f"{lang_dict['team_b']} - {lang_dict['left_role']}", left_list, key="tb_left")
+            with col_tb2:
+                team_b_right = st.selectbox(f"{lang_dict['team_b']} - {lang_dict['right_role']}", right_list, key="tb_right")
+                
+            score = st.text_input(lang_dict['score_lbl'])
+            
+            if st.form_submit_button(lang_dict['register_match'], type="primary"):
+                team_a_players = {team_a_left, team_a_right}
+                team_b_players = {team_b_left, team_b_right}
+                
+                if len(team_a_players) < 2 or len(team_b_players) < 2:
+                    st.error(f"⚠️ {lang_dict['same_player_err']}")
+                else:
+                    team_a_str = f"{team_a_left} / {team_a_right}"
+                    team_b_str = f"{team_b_left} / {team_b_right}"
+                    
+                    st.session_state.match_results.append({
+                        "Data": str(m_date),
+                        "Team A": team_a_str,
+                        "Team B": team_b_str,
+                        "Risultato": score
+                    })
+                    st.success(f"✅ {lang_dict['match_saved']}")
+                    
+        if st.session_state.match_results:
+            st.markdown(f"### 📋 {lang_dict['match_history']}")
+            df_matches = pd.DataFrame(st.session_state.match_results)
+            st.markdown(df_matches.to_html(escape=False, index=False, classes="custom-table"), unsafe_allow_html=True)
+
+    with coach_tab3:
+        st.subheader(f"💬 {lang_dict['global_comments']}")
+        for p in squad_players:
+            st.markdown(f"#### 👤 {p['fname']} {p['lname']} (Coach Style: {p.get('play_style', 'equilibrated').capitalize()} | Player Style: {p.get('player_play_style', 'equilibrated').capitalize()})")
+            if p.get("coach_note"):
+                st.markdown(f"**Coach Note:** {p['coach_note']}")
+            else:
+                st.markdown("*No coach note.*")
+            
+            if p.get("comments"):
+                st.markdown("**Peer notes:**")
+                for c in p["comments"]:
+                    st.markdown(f"- *From {c['from']}*: {c['text']}")
+            st.markdown("---")
+
+    with coach_tab_pairing:
+        st.subheader(f"🤖 {lang_dict['pairing_title']}")
+        st.markdown(lang_dict['pairing_desc'])
+        st.markdown(f"- {lang_dict['pairing_p1']}")
+        st.markdown(f"- {lang_dict['pairing_p2']}")
+        
+        all_player_names = [f"{p['fname']} {p['lname']} ({p['side']})" for p in squad_players]
+        selected_available_str = st.multiselect(
+            lang_dict['select_available_players'],
+            options=all_player_names,
+            default=all_player_names
+        )
+        
+        selected_names_only = [s.split(" (")[0] for s in selected_available_str]
+        available_players = [p for p in squad_players if f"{p['fname']} {p['lname']}" in selected_names_only]
+        
+        left_players = [p for p in available_players if p["side"] == "Left"]
+        right_players = [p for p in available_players if p["side"] == "Right"]
+        
+        col_info1, col_info2 = st.columns(2)
+        with col_info1:
+            st.info(f"⬅️ **Left available: {len(left_players)}**\n" + ("\n".join([f"- {p['fname']} {p['lname']}" for p in left_players]) if left_players else "None"))
+        with col_info2:
+            st.info(f"➡️ **Right available: {len(right_players)}**\n" + ("\n".join([f"- {p['fname']} {p['lname']}" for p in right_players]) if right_players else "None"))
+        
+        if st.button(lang_dict['run_pairing'], type="primary"):
+            if not left_players or not right_players:
+                st.error(f"⚠️ {lang_dict['pairing_err']}")
+            else:
+                def get_coach_score(player):
+                    all_c = player['c_tech'] + player['c_mental']
+                    return sum(all_c) / len(all_c) if all_c else 5.0
+
+                pairs_matrix = []
+                for l_p in left_players:
+                    l_name = f"{l_p['fname']} {l_p['lname']}"
+                    l_coach_val = get_coach_score(l_p)
+                    l_partners = l_p.get("partners", {})
+                    
+                    for r_p in right_players:
+                        r_name = f"{r_p['fname']} {r_p['lname']}"
+                        r_coach_val = get_coach_score(r_p)
+                        r_partners = r_p.get("partners", {})
+                        
+                        coach_affinity = (l_coach_val + r_coach_val) / 2.0
+                        
+                        vol_l_to_r = l_partners.get(r_name, 0)
+                        vol_r_to_l = r_partners.get(l_name, 0)
+                        
+                        vol_score = 0.0
+                        count_vol = 0
+                        if vol_l_to_r > 0:
+                            vol_score += min(vol_l_to_r / 5.0, 10.0)
+                            count_vol += 1
+                        if vol_r_to_l > 0:
+                            vol_score += min(vol_r_to_l / 5.0, 10.0)
+                            count_vol += 1
+                        
+                        willingness_affinity = (vol_score / count_vol) if count_vol > 0 else 5.0
+                        total_score = (1.0 * coach_affinity) + (0.5 * willingness_affinity)
+                        
+                        pairs_matrix.append({
+                            "left": l_name,
+                            "right": r_name,
+                            "score": total_score,
+                            "coach_avg": round(coach_affinity, 2),
+                            "willingness": round(willingness_affinity, 2)
+                        })
+                
+                pairs_matrix = sorted(pairs_matrix, key=lambda x: x["score"], reverse=True)
+                
+                matched_left = set()
+                matched_right = set()
+                final_pairs = []
+                
+                for item in pairs_matrix:
+                    if item["left"] not in matched_left and item["right"] not in matched_right:
+                        final_pairs.append(item)
+                        matched_left.add(item["left"])
+                        matched_right.add(item["right"])
+                
+                unmatched_l = [l for l in left_players if f"{l['fname']} {l['lname']}" not in matched_left]
+                unmatched_r = [r for r in right_players if f"{r['fname']} {r['lname']}" not in matched_right]
+                
+                st.markdown(f"### 🏆 {lang_dict['recommended_pairing']}")
+                
+                pair_results_df = []
+                for idx, fp in enumerate(final_pairs):
+                    pair_results_df.append({
+                        "Pair #": idx + 1,
+                        "Left Player": fp["left"],
+                        "Right Player": fp["right"],
+                        "Coach Score": fp["coach_avg"],
+                        "Mutual Willingness": fp["willingness"],
+                        "Total Score": round(fp["score"], 2)
+                    })
+                
+                if pair_results_df:
+                    df_pairs = pd.DataFrame(pair_results_df)
+                    st.markdown(df_pairs.to_html(escape=False, index=False, classes="custom-table"), unsafe_allow_html=True)
+                else:
+                    st.info("No pairs can be generated.")
+                    
+                if unmatched_l or unmatched_r:
+                    st.warning(f"⚠️ {lang_dict['unmatched_warn']}")
+                    un_names = [f"{p['fname']} {p['lname']}" for p in unmatched_l + unmatched_r]
+                    st.markdown("- " + "\n- ".join(un_names))
