@@ -11,7 +11,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- CUSTOM CSS: SFONDO BLU SCURO E TESTO BIANCO ---
+# --- CUSTOM CSS: SFONDO BLU SCURO, TESTO BIANCO E PULSANTI PERSONALIZZATI ---
 st.markdown("""
     <style>
     /* Sfondo generale dell'applicazione */
@@ -34,9 +34,30 @@ st.markdown("""
         color: #ffffff !important;
     }
     
-    /* Tabelle ed editor */
-    dataframe, table {
-        color: #ffffff !important;
+    /* Bottoni di uscita / log-out generali in blu */
+    div.stButton > button:has-text("Esci"), 
+    div.stButton > button:has-text("Logout"),
+    div.stButton > button:has-text("Esci da Area Allenatore") {
+        background-color: #2563eb !important;
+        color: white !important;
+        border: none !important;
+    }
+    div.stButton > button:has-text("Esci"):hover, 
+    div.stButton > button:has-text("Logout"):hover,
+    div.stButton > button:has-text("Esci da Area Allenatore"):hover {
+        background-color: #1d4ed8 !important;
+        color: white !important;
+    }
+    
+    /* Pulsante specifico ACCEDI COME ALLENATORE in rosso nella Home */
+    div.stButton > button:has-text("Accedi come Allenatore") {
+        background-color: #dc2626 !important;
+        color: white !important;
+        border: none !important;
+    }
+    div.stButton > button:has-text("Accedi come Allenatore"):hover {
+        background-color: #b91c1c !important;
+        color: white !important;
     }
     
     /* Tabs */
