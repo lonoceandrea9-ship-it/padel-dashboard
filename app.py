@@ -429,13 +429,12 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
     
     with coach_tab1:
         st.subheader("👥 Elenco Intero Giocatori, Ruoli e Presenze")
-        st.markdown("Modifica il **Role (Left/Right)**, i **Trainings** e i **Participated**. Clicca su **Salva** in basso per aggiornare e applicare la percentuale di **Commitment (%)**calcolata automaticamente come `(Participated / Trainings) * 100`.")
+        st.markdown("Modifica il **Role (Left/Right)**, i **Trainings** e i **Participated**. La colonna **Commitment (%)** si ricalcolerà e si aggiornerà **in tempo reale** non appena modifichi i valori.")
         
         df_summary_data = []
         for p in squad_players:
             t = int(p.get("trainings", 1))
             part = int(p.get("participated", 1))
-            # Calcolo diretto e pulito in formato stringa percentuale
             pct_val = int(round((part / t) * 100)) if t > 0 else 0
             df_summary_data.append({
                 "Nome": p["fname"],
@@ -448,6 +447,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         
         df_editable = pd.DataFrame(df_summary_data)
         
+        # Tabella interattiva con reattività immediata
         edited_df = st.data_editor(
             df_editable,
             column_config={
@@ -462,24 +462,32 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             },
             hide_index=True,
             use_container_width=True,
-            height=650,
+            height=600,
             key="coach_squad_editor"
         )
         
-        if st.button("Salva Modifiche Squadra (Ruoli, Trainings, Presenze)", type="primary"):
-            for idx, row in edited_df.iterrows():
-                squad_players[idx]["side"] = row["Role"]
-                t_val = int(row["Trainings"])
-                p_val = int(row["Participated"])
-                squad_players[idx]["trainings"] = t_val
-                squad_players[idx]["participated"] = p_val
+        # AGGIORNAMENTO IN TEMPO REALE RIGA PER RIGA:
+        # Se l'utente cambia Trainings o Participated nella tabella, aggiorno subito i dati in sessione
+        has_changed = False
+        for idx, row in edited_df.iterrows():
+            curr_t = int(row["Trainings"])
+            curr_p = int(row["Participated"])
+            curr_role = row["Role"]
+            
+            # Controllo se ci sono differenze rispetto allo stato attuale
+            if (curr_t != squad_players[idx]["trainings"] or 
+                curr_p != squad_players[idx]["participated"] or 
+                curr_role != squad_players[idx]["side"]):
                 
-                # Calcolo esatto salvato nello stato
-                calc_pct = int(round((p_val / t_val) * 100)) if t_val > 0 else 0
+                squad_players[idx]["side"] = curr_role
+                squad_players[idx]["trainings"] = curr_t
+                squad_players[idx]["participated"] = curr_p
+                calc_pct = int(round((curr_p / curr_t) * 100)) if curr_t > 0 else 0
                 squad_players[idx]["commitment"] = f"{calc_pct}%"
-                
-            st.success("Modifiche salvate con successo! Le percentuali di commitment sono state calcolate e aggiornate.")
-            st.rerun()
+                has_changed = True
+
+        if has_changed:
+            st.rerun()  # Ricarica immediatamente la pagina per mostrare la percentuale aggiornata al volo
 
         st.markdown("---")
         st.subheader("🎯 Gruppi di Lavoro e Miglioramento Mirato")
