@@ -62,7 +62,7 @@ if "authenticated_coach" not in st.session_state:
 if "authenticated_player" not in st.session_state:
     st.session_state.authenticated_player = None
 
-# Lista completa e ufficiale di tutti i 19 giocatori
+# Lista aggiornata con Jairo Lopez al posto di Joahn Lohman
 if "squad_data" not in st.session_state:
     st.session_state.squad_data = [
         {"fname": "Álvaro", "lname": "Gomez", "side": "Left", "trainings": 1, "participated": 1,
@@ -89,7 +89,7 @@ if "squad_data" not in st.session_state:
          "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5], "history": [], "partners": {}, "comments": []},
         {"fname": "Lars", "lname": "Mikkelsen", "side": "Left", "trainings": 1, "participated": 0,
          "tech": [7, 7, 7, 6, 8, 6, 7], "mental": [8, 7, 7, 7, 8, 7], "c_tech": [6, 6, 6, 5, 7, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6], "history": [], "partners": {}, "comments": []},
-        {"fname": "Joahn", "lname": "Lohman", "side": "Left", "trainings": 1, "participated": 0,
+        {"fname": "Jairo", "lname": "Lopez", "side": "Left", "trainings": 1, "participated": 0,
          "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5], "history": [], "partners": {}, "comments": []},
         {"fname": "Nacho", "lname": "Saracho", "side": "Right", "trainings": 1, "participated": 0,
          "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7], "history": [], "partners": {}, "comments": []},
@@ -564,20 +564,17 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
 
     with coach_tab_pairing:
         st.subheader("🤖 Algoritmo Intelligente di Pairing per Coppie")
-        st.markdown("Seleziona qui sotto i giocatori **disponibili per questa sessione**. L'algoritmo abbinerà esclusivamente tra loro i giocatori selezionati, rispettando il vincolo di ruolo (**1 Sinistra + 1 Destra**) e bilanciando:**")
+        st.markdown("Seleziona qui sotto i giocatori **disponibili per questa sessione**. L'algoritmo abbinerà esclusivamente tra loro i giocatori selezionati, rispettando il vincolo di ruolo (**1 Sinistra + 1 Destra**) e bilanciando:")
         st.markdown("- **Peso 1.0**: Valutazione complessiva del Coach.")
         st.markdown("- **Peso 0.5**: Volontà / preferenza reciproca dei giocatori.")
         
-        # Menu interattivo con multiselect per scegliere i giocatori disponibili
         all_player_names = [f"{p['fname']} {p['lname']} ({p['side']})" for p in squad_players]
-        # Di default selezioniamo tutti i giocatori
         selected_available_str = st.multiselect(
             "Seleziona i giocatori disponibili oggi:",
             options=all_player_names,
             default=all_player_names
         )
         
-        # Filtriamo gli oggetti dei giocatori basandoci sulla selezione
         selected_names_only = [s.split(" (")[0] for s in selected_available_str]
         available_players = [p for p in squad_players if f"{p['fname']} {p['lname']}" in selected_names_only]
         
@@ -625,7 +622,6 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         
                         willingness_affinity = (vol_score / count_vol) if count_vol > 0 else 5.0
                         
-                        # Calcolo finale con i pesi richiesti (Coach = 1.0, Volontà = 0.5)
                         total_score = (1.0 * coach_affinity) + (0.5 * willingness_affinity)
                         
                         pairs_matrix.append({
