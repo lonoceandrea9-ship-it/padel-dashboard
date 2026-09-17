@@ -52,17 +52,28 @@ st.markdown("""
         color: white !important;
     }
 
-    /* Tutti i bottoni Esci / Logout / Torna alla Home in Blu scuro */
+    /* Tutti i bottoni Esci / Logout / Torna alla Home in Blu scuro (inclusi login giocatore/allenatore) */
     .element-container:has(button:contains("Esci")) button,
     .element-container:has(button:contains("Logout")) button,
-    .element-container:has(button:contains("Torna alla Home")) button {
+    .element-container:has(button:contains("Torna alla Home")) button,
+    div.stButton > button {
         background-color: #2563eb !important;
         color: white !important;
         border-color: #1d4ed8 !important;
     }
+    
+    /* Forza lo stile blu scuro per il bottone secondario/Torna alla Home nei form di login */
+    div.stFormSubmitButton > button, 
+    button[kind="secondary"] {
+        background-color: #2563eb !important;
+        color: white !important;
+        border-color: #1d4ed8 !important;
+    }
+
     .element-container:has(button:contains("Esci")) button:hover,
     .element-container:has(button:contains("Logout")) button:hover,
-    .element-container:has(button:contains("Torna alla Home")) button:hover {
+    .element-container:has(button:contains("Torna alla Home")) button:hover,
+    div.stButton > button:hover {
         background-color: #1d4ed8 !important;
         color: white !important;
     }
