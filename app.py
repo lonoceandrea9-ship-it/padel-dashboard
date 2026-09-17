@@ -63,20 +63,25 @@ if "authenticated_player" not in st.session_state:
 
 if "squad_data" not in st.session_state:
     st.session_state.squad_data = [
-        {"fname": "Álvaro", "lname": "Gomez", "side": "Left", 
+        {"fname": "Álvaro", "lname": "Gomez", "side": "Left", "level": 5, "pista": "1-2", "trainings": 1, "participated": 1, "commitment": "100%",
          "tech": [7, 7, 6, 7, 6, 6, 7], "mental": [8, 7, 7, 7, 8, 7], 
          "c_tech": [6, 6, 5, 6, 5, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6], "history": [], "partners": {"Yannik Langeslag": 12, "Josu Usabiaga": 8}, "comments": []},
-        {"fname": "Yannik", "lname": "Langeslag", "side": "Left", 
+        {"fname": "Yannik", "lname": "Langeslag", "side": "Left", "level": 5, "pista": "1-2", "trainings": 1, "participated": 1, "commitment": "100%",
          "tech": [8, 6, 7, 7, 7, 5, 6], "mental": [7, 6, 8, 6, 7, 6], 
          "c_tech": [7, 5, 6, 6, 6, 4, 5], "c_mental": [6, 5, 7, 5, 6, 5], "history": [], "partners": {"Álvaro Gomez": 12}, "comments": []},
-        {"fname": "Josu", "lname": "Usabiaga", "side": "Right", 
+        {"fname": "Josu", "lname": "Usabiaga", "side": "Right", "level": 5, "pista": "1-2", "trainings": 1, "participated": 1, "commitment": "100%",
          "tech": [6, 8, 7, 7, 6, 7, 7], "mental": [6, 8, 6, 8, 7, 7], 
          "c_tech": [5, 7, 6, 6, 5, 6, 6], "c_mental": [5, 7, 5, 7, 6, 6], "history": [], "partners": {"Álvaro Gomez": 8}, "comments": []},
-        {"fname": "Andrea", "lname": "Lonoce", "side": "Right", 
+        {"fname": "Andrea", "lname": "Lonoce", "side": "Right", "level": 3, "pista": "3-5", "trainings": 1, "participated": 1, "commitment": "100%",
          "tech": [8, 7, 8, 7, 9, 6, 8], "mental": [9, 7, 8, 8, 9, 7], 
          "c_tech": [8, 7, 8, 7, 9, 6, 8], "c_mental": [9, 7, 8, 8, 9, 7], "history": [], "partners": {"Alexander Wennstam": 14}, "comments": []}
     ]
     for p in st.session_state.squad_data:
+        if "level" not in p: p["level"] = 3
+        if "pista" not in p: p["pista"] = "3-5"
+        if "trainings" not in p: p["trainings"] = 1
+        if "participated" not in p: p["participated"] = 1
+        if "commitment" not in p: p["commitment"] = "100%"
         if len(p["tech"]) != len(TECH_SKILLS): p["tech"] = [7] * len(TECH_SKILLS)
         if len(p["mental"]) != len(MENTAL_SKILLS): p["mental"] = [7] * len(MENTAL_SKILLS)
         if len(p["c_tech"]) != len(TECH_SKILLS): p["c_tech"] = [6] * len(TECH_SKILLS)
@@ -280,7 +285,6 @@ elif st.session_state.nav_mode == "Player_Dashboard":
         st.markdown("---")
         st.subheader("📋 Tabelle delle Differenze (Tu vs Coach)")
         
-        # Suddivisione delle tabelle in Tecniche (Sinistra) e Mentali (Destra)
         diff_tech_rows = []
         for i, skill in enumerate(TECH_SKILLS):
             p_v = current_player['tech'][i]
@@ -294,12 +298,7 @@ elif st.session_state.nav_mode == "Player_Dashboard":
             else:
                 diff_display = "<span style='color:gray; font-weight:bold;'>0</span>"
                 
-            diff_tech_rows.append({
-                "Tecnica": skill,
-                "Tu": p_v,
-                "Coach": c_v,
-                "Diff": diff_display
-            })
+            diff_tech_rows.append({"Tecnica": skill, "Tu": p_v, "Coach": c_v, "Diff": diff_display})
 
         diff_mental_rows = []
         for i, skill in enumerate(MENTAL_SKILLS):
@@ -314,28 +313,19 @@ elif st.session_state.nav_mode == "Player_Dashboard":
             else:
                 diff_display = "<span style='color:gray; font-weight:bold;'>0</span>"
                 
-            diff_mental_rows.append({
-                "Mentale": skill,
-                "Tu": p_v,
-                "Coach": c_v,
-                "Diff": diff_display
-            })
+            diff_mental_rows.append({"Mentale": skill, "Tu": p_v, "Coach": c_v, "Diff": diff_display})
 
         t_col1, t_col2 = st.columns(2)
         with t_col1:
             st.markdown("#### 🎾 Caratteristiche Tecniche")
-            df_tech_table = pd.DataFrame(diff_tech_rows)
-            st.markdown(df_tech_table.to_html(escape=False, index=False), unsafe_allow_html=True)
+            st.markdown(pd.DataFrame(diff_tech_rows).to_html(escape=False, index=False), unsafe_allow_html=True)
             
         with t_col2:
             st.markdown("#### 🧠 Caratteristiche Mentali")
-            df_mental_table = pd.DataFrame(diff_mental_rows)
-            st.markdown(df_mental_table.to_html(escape=False, index=False), unsafe_allow_html=True)
+            st.markdown(pd.DataFrame(diff_mental_rows).to_html(escape=False, index=False), unsafe_allow_html=True)
 
     with tab_partners:
         st.subheader("🏆 Gestione Ranking Partner (Fino a 5)")
-        st.markdown("Seleziona fino a 5 compagni di squadra con cui preferisci giocare e assegna il numero di match o la preferenza.")
-        
         all_colleagues = [f"{p['fname']} {p['lname']}" for p in squad_players if p['fname'] != current_player['fname']]
         current_partners = current_player.get("partners", {})
         
@@ -343,7 +333,6 @@ elif st.session_state.nav_mode == "Player_Dashboard":
             new_partners_dict = {}
             for i in range(5):
                 col_p1, col_p2 = st.columns([3, 1])
-                
                 existing_keys = list(current_partners.keys())
                 default_partner = existing_keys[i] if i < len(existing_keys) else (all_colleagues[0] if all_colleagues else "")
                 default_val = int(current_partners.get(default_partner, 5 - i))
@@ -356,17 +345,14 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                 if p_sel:
                     new_partners_dict[p_sel] = p_score
                     
-            submit_partners = st.form_submit_button("Salva Ranking Partner", type="primary")
-            if submit_partners:
+            if st.form_submit_button("Salva Ranking Partner", type="primary"):
                 current_player["partners"] = new_partners_dict
                 st.success("Ranking partner aggiornato con successo!")
                 st.rerun()
                 
         st.markdown("### Classifica Attuale:")
         if current_player.get("partners"):
-            df_partners = pd.DataFrame(list(current_player["partners"].items()), columns=["Compagno", "Match / Preferenza"])
-            df_partners = df_partners.sort_values(by="Match / Preferenza", ascending=False).reset_index(drop=True)
-            st.table(df_partners)
+            st.table(pd.DataFrame(list(current_player["partners"].items()), columns=["Compagno", "Match / Preferenza"]).sort_values(by="Match / Preferenza", ascending=False).reset_index(drop=True))
         else:
             st.info("Nessun partner configurato.")
 
@@ -396,7 +382,7 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                     })
                     st.success("Nota inviata!")
             else:
-                st.warning("Il testo non può essere vuoto.")
+                st.warning("Il testo non non può essere vuoto.")
         
         st.markdown("### Ricevuti:")
         for c in current_player.get("comments", []):
@@ -411,37 +397,59 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         st.rerun()
         
     coach_tab1, coach_tab2, coach_tab3 = st.tabs([
-        "👥 Gestione Valutazioni Squadra", 
+        "👥 Gestione Squadra & Voti", 
         "📅 Gestione Partite", 
         "💬 Tutti i Commenti"
     ])
     
     with coach_tab1:
-        st.subheader("Modifica Valutazioni Coach per Giocatore")
-        selected_player_name = st.selectbox("Seleziona giocatore:", [f"{p['fname']} {p['lname']}" for p in squad_players])
+        st.subheader("👥 Elenco Giocatori, Parametri e Gestione Voti")
+        st.markdown("Visualizza la panoramica della rosa e seleziona un giocatore per aggiornarne i voti assegnati dall'allenatore.")
+        
+        # Tabella riassuntiva stile immagine
+        summary_rows = []
+        for p in squad_players:
+            summary_rows.append({
+                "Nome": p["fname"],
+                "Cognome": p["lname"],
+                "Level 1-5": p.get("level", 3),
+                "Pista": p.get("pista", "3-5"),
+                "Trainings": p.get("trainings", 1),
+                "Participated": p.get("participated", 1),
+                "Commitment": p.get("commitment", "100%"),
+                "Role": p["side"]
+            })
+        st.table(pd.DataFrame(summary_rows))
+        
+        st.markdown("---")
+        st.markdown("### ✏️ Modifica Voti Coach per Singolo Giocatore")
+        selected_player_name = st.selectbox("Seleziona giocatore da valutare:", [f"{p['fname']} {p['lname']}" for p in squad_players])
         p_obj = next((p for p in squad_players if f"{p['fname']} {p['lname']}" == selected_player_name), None)
         
         if p_obj:
-            c_tech_new = []
-            st.markdown("**Competenze Tecniche (Coach)**")
-            for idx, t_label in enumerate(TECH_SKILLS):
-                val = st.slider(f"Coach - {t_label}", 1, 10, int(p_obj['c_tech'][idx]), key=f"scoach_tech_{idx}")
-                c_tech_new.append(val)
-            
-            c_mental_new = []
-            st.markdown("**Competenze Mentali (Coach)**")
-            for idx, m_label in enumerate(MENTAL_SKILLS):
-                val = st.slider(f"Coach - {m_label}", 1, 10, int(p_obj['c_mental'][idx]), key=f"scoach_mental_{idx}")
-                c_mental_new.append(val)
-                    
-            if st.button("Salva Valutazioni Coach"):
-                p_obj.setdefault("history", []).append({
-                    "date": datetime.now().strftime("%Y-%m-%d %H:%M"),
-                    "values": c_tech_new + c_mental_new
-                })
-                p_obj['c_tech'] = c_tech_new
-                p_obj['c_mental'] = c_mental_new
-                st.success(f"Valutazioni aggiornate per {selected_player_name}!")
+            with st.form("coach_eval_form"):
+                st.markdown(f"**Modifica voti per: {selected_player_name}**")
+                
+                c_tech_new = []
+                st.markdown("🎾 *Competenze Tecniche (Coach)*")
+                for idx, t_label in enumerate(TECH_SKILLS):
+                    val = st.slider(f"Coach - {t_label}", 1, 10, int(p_obj['c_tech'][idx]), key=f"scoach_tech_{idx}")
+                    c_tech_new.append(val)
+                
+                c_mental_new = []
+                st.markdown("🧠 *Competenze Mentali (Coach)*")
+                for idx, m_label in enumerate(MENTAL_SKILLS):
+                    val = st.slider(f"Coach - {m_label}", 1, 10, int(p_obj['c_mental'][idx]), key=f"scoach_mental_{idx}")
+                    c_mental_new.append(val)
+                        
+                if st.form_submit_button("Salva Voti Coach", type="primary"):
+                    p_obj.setdefault("history", []).append({
+                        "date": datetime.now().strftime("%Y-%m-%d %H:%M"),
+                        "values": c_tech_new + c_mental_new
+                    })
+                    p_obj['c_tech'] = c_tech_new
+                    p_obj['c_mental'] = c_mental_new
+                    st.success(f"Voti aggiornati per {selected_player_name}!")
 
     with coach_tab2:
         st.subheader("📅 Registrazione Partite")
