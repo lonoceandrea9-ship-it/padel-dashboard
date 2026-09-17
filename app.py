@@ -136,55 +136,60 @@ if "authenticated_coach" not in st.session_state:
 if "authenticated_player" not in st.session_state:
     st.session_state.authenticated_player = None
 
-# Lista giocatori aggiornata con le lunghezze corrette per le nuove skill
+# Lista giocatori aggiornata con il campo mano dominante ("Mancino" o "Destro")
 if "squad_data" not in st.session_state:
     st.session_state.squad_data = [
-        {"fname": "Álvaro", "lname": "Gomez", "side": "Left", "trainings": 1, "participated": 1,
+        {"fname": "Álvaro", "lname": "Gomez", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1,
          "tech": [7, 7, 6, 7, 6, 6, 7], "mental": [8, 7, 7, 7, 8, 7, 8], "c_tech": [6, 6, 5, 6, 5, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6, 7], "history": [], "partners": {"Yannik Langeslag": 12, "Josu Usabiaga": 8}, "comments": []},
-        {"fname": "Yannik", "lname": "Langeslag", "side": "Left", "trainings": 1, "participated": 1,
+        {"fname": "Yannik", "lname": "Langeslag", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1,
          "tech": [8, 6, 7, 7, 7, 5, 6], "mental": [7, 6, 8, 6, 7, 6, 7], "c_tech": [7, 5, 6, 6, 6, 4, 5], "c_mental": [6, 5, 7, 5, 6, 5, 6], "history": [], "partners": {"Álvaro Gomez": 12}, "comments": []},
-        {"fname": "Josu", "lname": "Usabiaga", "side": "Right", "trainings": 1, "participated": 1,
+        {"fname": "Josu", "lname": "Usabiaga", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1,
          "tech": [6, 8, 7, 7, 6, 7, 7], "mental": [6, 8, 6, 8, 7, 7, 8], "c_tech": [5, 7, 6, 6, 5, 6, 6], "c_mental": [5, 7, 5, 7, 6, 6, 7], "history": [], "partners": {"Álvaro Gomez": 8}, "comments": []},
-        {"fname": "Benjamin", "lname": "Thyrell", "side": "Left", "trainings": 1, "participated": 1,
+        {"fname": "Benjamin", "lname": "Thyrell", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1,
          "tech": [7, 7, 8, 6, 7, 6, 7], "mental": [8, 7, 7, 7, 8, 7, 8], "c_tech": [6, 6, 7, 5, 6, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6, 7], "history": [], "partners": {}, "comments": []},
-        {"fname": "Alexander", "lname": "Wennstam", "side": "Left", "trainings": 1, "participated": 1,
+        {"fname": "Alexander", "lname": "Wennstam", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1,
          "tech": [8, 8, 7, 7, 8, 6, 7], "mental": [7, 7, 8, 8, 7, 7, 8], "c_tech": [7, 7, 6, 6, 7, 5, 6], "c_mental": [6, 6, 7, 7, 6, 6, 7], "history": [], "partners": {}, "comments": []},
-        {"fname": "Andrea", "lname": "Lonoce", "side": "Right", "trainings": 1, "participated": 1,
+        {"fname": "Andrea", "lname": "Lonoce", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1,
          "tech": [8, 7, 8, 7, 9, 6, 8], "mental": [9, 7, 8, 8, 9, 7, 9], "c_tech": [8, 7, 8, 7, 9, 6, 8], "c_mental": [9, 7, 8, 8, 9, 7, 9], "history": [], "partners": {"Alexander Wennstam": 14}, "comments": []},
-        {"fname": "Mikkel", "lname": "Hoff", "side": "Right", "trainings": 1, "participated": 1,
+        {"fname": "Mikkel", "lname": "Hoff", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1,
          "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "history": [], "partners": {}, "comments": []},
-        {"fname": "Pedro", "lname": "Rios", "side": "Right", "trainings": 1, "participated": 1,
+        {"fname": "Pedro", "lname": "Rios", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1,
          "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7, 7], "history": [], "partners": {}, "comments": []},
-        {"fname": "Hector", "lname": "Guerrero", "side": "Right", "trainings": 1, "participated": 1,
+        {"fname": "Hector", "lname": "Guerrero", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1,
          "tech": [7, 7, 7, 7, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 6, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6, 6], "history": [], "partners": {}, "comments": []},
-        {"fname": "Gonzalo", "lname": "Diez de Onate", "side": "Left", "trainings": 1, "participated": 1,
+        {"fname": "Gonzalo", "lname": "Diez de Onate", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1,
          "tech": [8, 7, 8, 7, 8, 6, 7], "mental": [8, 7, 8, 8, 8, 7, 8], "c_tech": [7, 6, 7, 6, 7, 5, 6], "c_mental": [7, 6, 7, 7, 7, 6, 7], "history": [], "partners": {}, "comments": []},
-        {"fname": "Julio", "lname": "Morales", "side": "Right", "trainings": 1, "participated": 1,
+        {"fname": "Julio", "lname": "Morales", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1,
          "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "history": [], "partners": {}, "comments": []},
-        {"fname": "Lars", "lname": "Mikkelsen", "side": "Left", "trainings": 1, "participated": 0,
+        {"fname": "Lars", "lname": "Mikkelsen", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0,
          "tech": [7, 7, 7, 6, 8, 6, 7], "mental": [8, 7, 7, 7, 8, 7, 8], "c_tech": [6, 6, 6, 5, 7, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6, 7], "history": [], "partners": {}, "comments": []},
-        {"fname": "Jairo", "lname": "Lopez", "side": "Left", "trainings": 1, "participated": 0,
+        {"fname": "Jairo", "lname": "Lopez", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0,
          "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "history": [], "partners": {}, "comments": []},
-        {"fname": "Nacho", "lname": "Saracho", "side": "Right", "trainings": 1, "participated": 0,
+        {"fname": "Nacho", "lname": "Saracho", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 0,
          "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7, 7], "history": [], "partners": {}, "comments": []},
-        {"fname": "Peter", "lname": "Gustafsson", "side": "Left", "trainings": 1, "participated": 0,
+        {"fname": "Peter", "lname": "Gustafsson", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0,
          "tech": [7, 7, 7, 6, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6, 6], "history": [], "partners": {}, "comments": []},
-        {"fname": "Juanjo", "lname": "Lopez Benitez", "side": "Left", "trainings": 1, "participated": 0,
+        {"fname": "Juanjo", "lname": "Lopez Benitez", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0,
          "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7, 7], "history": [], "partners": {}, "comments": []},
-        {"fname": "Sascha", "lname": "Van De Bilt", "side": "Right", "trainings": 1, "participated": 0,
+        {"fname": "Sascha", "lname": "Van De Bilt", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 0,
          "tech": [7, 7, 7, 6, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6, 6], "history": [], "partners": {}, "comments": []},
-        {"fname": "Fernando", "lname": "Oribe", "side": "Right", "trainings": 1, "participated": 0,
+        {"fname": "Fernando", "lname": "Oribe", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 0,
          "tech": [8, 7, 8, 7, 8, 6, 7], "mental": [8, 7, 8, 8, 8, 7, 8], "c_tech": [7, 6, 7, 6, 7, 5, 6], "c_mental": [7, 6, 7, 7, 7, 6, 7], "history": [], "partners": {}, "comments": []},
-        {"fname": "Doug", "lname": "Ramsay", "side": "Left", "trainings": 1, "participated": 0,
+        {"fname": "Doug", "lname": "Ramsay", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0,
          "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "history": [], "partners": {}, "comments": []}
     ]
-    for p in st.session_state.squad_data:
-        if "trainings" not in p: p["trainings"] = 1
-        if "participated" not in p: p["participated"] = 1
-        if len(p["tech"]) != len(TECH_SKILLS): p["tech"] = [7] * len(TECH_SKILLS)
-        if len(p["mental"]) != len(MENTAL_SKILLS): p["mental"] = [7] * len(MENTAL_SKILLS)
-        if len(p["c_tech"]) != len(TECH_SKILLS): p["c_tech"] = [6] * len(TECH_SKILLS)
-        if len(p["c_mental"]) != len(MENTAL_SKILLS): p["c_mental"] = [6] * len(MENTAL_SKILLS)
+
+# Controllo e correzione automatica per vecchie sessioni salvate (lunghezza liste skill)
+for p in st.session_state.squad_data:
+    if "hand" not in p: p["hand"] = "Mancino" if p.get("side") == "Left" else "Destro"
+    if "trainings" not in p: p["trainings"] = 1
+    if "participated" not in p: p["participated"] = 1
+    
+    # Riempie o taglia se le liste non corrispondono esattamente alle lunghezze attuali
+    if len(p["tech"]) != len(TECH_SKILLS): p["tech"] = [7] * len(TECH_SKILLS)
+    if len(p["mental"]) != len(MENTAL_SKILLS): p["mental"] = [7] * len(MENTAL_SKILLS)
+    if len(p["c_tech"]) != len(TECH_SKILLS): p["c_tech"] = [6] * len(TECH_SKILLS)
+    if len(p["c_mental"]) != len(MENTAL_SKILLS): p["c_mental"] = [6] * len(MENTAL_SKILLS)
 
 if "match_results" not in st.session_state:
     st.session_state.match_results = []
@@ -523,7 +528,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
     
     with coach_tab1:
         st.subheader("👥 Elenco Intero Giocatori, Ruoli e Presenze")
-        st.markdown("Modifica il **Role (Left/Right)**, i **Trainings** e i **Participated**. La colonna **Commitment (%)** si ricalcola e si aggiorna **in tempo reale** non appena modifichi i valori.")
+        st.markdown("Modifica il **Role (Left/Right)**, la **Mano (Destro/Mancino)**, i **Trainings** e i **Participated**. La colonna **Commitment (%)** si ricalcola e si aggiorna **in tempo reale** non appena modifichi i valori.")
         
         df_summary_data = []
         for p in squad_players:
@@ -534,6 +539,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 "Nome": p["fname"],
                 "Cognome": p["lname"],
                 "Role": p["side"],
+                "Mano": p.get("hand", "Destro"),
                 "Trainings": t,
                 "Participated": part,
                 "Commitment (%)": f"{pct_val}%"
@@ -547,6 +553,11 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 "Role": st.column_config.SelectboxColumn(
                     "Role (Side)",
                     options=["Left", "Right"],
+                    required=True
+                ),
+                "Mano": st.column_config.SelectboxColumn(
+                    "Mano",
+                    options=["Destro", "Mancino"],
                     required=True
                 ),
                 "Trainings": st.column_config.NumberColumn("Trainings", min_value=0, max_value=50, step=1),
@@ -564,12 +575,15 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             curr_t = int(row["Trainings"])
             curr_p = int(row["Participated"])
             curr_role = row["Role"]
+            curr_hand = row["Mano"]
             
             if (curr_t != squad_players[idx]["trainings"] or 
                 curr_p != squad_players[idx]["participated"] or 
-                curr_role != squad_players[idx]["side"]):
+                curr_role != squad_players[idx]["side"] or
+                curr_hand != squad_players[idx].get("hand", "Destro")):
                 
                 squad_players[idx]["side"] = curr_role
+                squad_players[idx]["hand"] = curr_hand
                 squad_players[idx]["trainings"] = curr_t
                 squad_players[idx]["participated"] = curr_p
                 calc_pct = int(round((curr_p / curr_t) * 100)) if curr_t > 0 else 0
@@ -783,6 +797,17 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 unmatched_r = [r for r in right_players if f"{r['fname']} {r['lname']}" not in matched_right]
                 
                 st.markdown("### 🏆 Risultato Pairing Consigliato:")
+                
+                pair_results_df = []
+                for idx, fp in enumerate(final_pairs):
+                    pair_results_df.append({
+                        "Coppia #": idx + 1,
+                        "Giocatore Sinistra (Left)": fp["left"],
+                        "Giocatore Destra (Right)": fp["right"],
+                        "Score Coach (Peso 1.0)": fp["coach_avg"],
+                        "Volontà Reciproca (Peso 0.5)": fp["willingness"],
+                        "Punteggio Totale": round(fp["score"], 2)
+                    })
                 
                 pair_results_df = []
                 for idx, fp in enumerate(final_pairs):
