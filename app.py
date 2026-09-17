@@ -713,7 +713,7 @@ translations = {
     }
 }
 
-# --- LISTA DELLE SKILLS AGGIORNATE ---
+# --- LISTA DELLE SKILLS ---
 TECH_SKILLS = ["Volley", "Bandeja", "Remate", "Smash", "Bajada", "Chiquita", "Lob"]
 
 # --- INIZIALIZZAZIONE STATO ---
@@ -797,7 +797,8 @@ squad_players = st.session_state.squad_data
 
 # --- SIDEBAR & LINGUA ---
 with st.sidebar:
-    st.image("https://img.icons8.com/color/96/padel.png", width=64)
+    # Inserisci qui l'immagine di Odin salvata nella cartella del progetto
+    st.image("odin.png", width=100)
     st.title("Padel Hub")
     
     available_languages = ["Italiano", "English", "Español", "Svenska", "Nederlands", "Dansk"]
