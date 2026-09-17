@@ -713,7 +713,7 @@ translations = {
     }
 }
 
-# --- LISTA DELLE SKILLS AGGIORNATE ---
+# --- LISTA DELLE SKILLS ---
 TECH_SKILLS = ["Volley", "Bandeja", "Remate", "Smash", "Bajada", "Chiquita", "Lob"]
 
 # --- INIZIALIZZAZIONE STATO ---
@@ -734,7 +734,7 @@ lang_dict = translations.get(st.session_state.language, translations["Italiano"]
 MENTAL_SKILLS = lang_dict["mental_list"]
 ALL_SKILLS = TECH_SKILLS + MENTAL_SKILLS
 
-# Lista giocatori
+# Lista giocatori iniziale
 if "squad_data" not in st.session_state:
     st.session_state.squad_data = [
         {"fname": "Álvaro", "lname": "Gomez", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1,
@@ -777,6 +777,9 @@ if "squad_data" not in st.session_state:
          "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "play_style": "equilibrated", "player_play_style": "equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []}
     ]
 
+# Ordinamento alfabetico iniziale per nome (fname)
+st.session_state.squad_data = sorted(st.session_state.squad_data, key=lambda x: x['fname'])
+
 for p in st.session_state.squad_data:
     if "hand" not in p: p["hand"] = "Mancino" if p.get("side") == "Left" else "Destro"
     if "coach_note" not in p: p["coach_note"] = ""
@@ -797,7 +800,6 @@ squad_players = st.session_state.squad_data
 
 # --- SIDEBAR & LINGUA ---
 with st.sidebar:
-    st.image("https://img.icons8.com/color/96/padel.png", width=64)
     st.title("Padel Hub")
     
     available_languages = ["Italiano", "English", "Español", "Svenska", "Nederlands", "Dansk"]
@@ -1165,6 +1167,10 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
     with coach_tab1:
         st.subheader(f"👥 {lang_dict['coach_tab_squad']}")
         st.markdown(lang_dict['squad_desc'])
+        
+        # Ordinamento alfabetico della lista in base al nome (fname) prima di mostrarla nella tabella
+        st.session_state.squad_data = sorted(st.session_state.squad_data, key=lambda x: x['fname'])
+        squad_players = st.session_state.squad_data
         
         with st.form("squad_edit_form"):
             th_cols = st.columns([1.8, 1.2, 1.2, 1.4, 0.9, 0.9, 0.9])
