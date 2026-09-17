@@ -429,22 +429,21 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
     
     with coach_tab1:
         st.subheader("👥 Elenco Intero Giocatori, Ruoli e Presenze")
-        st.markdown("Modifica il **Role (Left/Right)**, i **Trainings** e i **Participated**. La colonna **Commitment (%)** calcola automaticamente la percentuale (Participated / Trainings) riga per riga all'istante non appena salvi o aggiorni i dati.")
+        st.markdown("Modifica il **Role (Left/Right)**, i **Trainings** e i **Participated**. Clicca su **Salva** in basso per aggiornare e applicare la percentuale di **Commitment (%)**calcolata automaticamente come `(Participated / Trainings) * 100`.")
         
-        # Sincronizziamo i dati attuali di ciascun giocatore prima di creare il DataFrame
         df_summary_data = []
         for p in squad_players:
             t = int(p.get("trainings", 1))
             part = int(p.get("participated", 1))
-            # Calcolo sicuro per evitare divisioni per zero
-            pct = int(round((part / t) * 100)) if t > 0 else 0
+            # Calcolo diretto e pulito in formato stringa percentuale
+            pct_val = int(round((part / t) * 100)) if t > 0 else 0
             df_summary_data.append({
                 "Nome": p["fname"],
                 "Cognome": p["lname"],
                 "Role": p["side"],
                 "Trainings": t,
                 "Participated": part,
-                "Commitment (%)": pct
+                "Commitment (%)": f"{pct_val}%"
             })
         
         df_editable = pd.DataFrame(df_summary_data)
@@ -459,7 +458,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 ),
                 "Trainings": st.column_config.NumberColumn("Trainings", min_value=0, max_value=50, step=1),
                 "Participated": st.column_config.NumberColumn("Participated", min_value=0, max_value=50, step=1),
-                "Commitment (%)": st.column_config.NumberColumn("Commitment (%)", disabled=True, format="%d%%")
+                "Commitment (%)": st.column_config.TextColumn("Commitment (%)", disabled=True)
             },
             hide_index=True,
             use_container_width=True,
@@ -467,14 +466,6 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             key="coach_squad_editor"
         )
         
-        # Intercettiamo le modifiche fatte nella tabella: ricalcoliamo la percentuale riga per riga in tempo reale
-        for idx, row in edited_df.iterrows():
-            t_val = int(row["Trainings"])
-            p_val = int(row["Participated"])
-            # Eseguiamo il ricalcolo al volo riga per riga
-            new_pct = int(round((p_val / t_val) * 100)) if t_val > 0 else 0
-            edited_df.at[idx, "Commitment (%)"] = new_pct
-
         if st.button("Salva Modifiche Squadra (Ruoli, Trainings, Presenze)", type="primary"):
             for idx, row in edited_df.iterrows():
                 squad_players[idx]["side"] = row["Role"]
@@ -482,9 +473,12 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 p_val = int(row["Participated"])
                 squad_players[idx]["trainings"] = t_val
                 squad_players[idx]["participated"] = p_val
+                
+                # Calcolo esatto salvato nello stato
                 calc_pct = int(round((p_val / t_val) * 100)) if t_val > 0 else 0
                 squad_players[idx]["commitment"] = f"{calc_pct}%"
-            st.success("Modifiche salvate con successo! Percentuali di commitment aggiornate.")
+                
+            st.success("Modifiche salvate con successo! Le percentuali di commitment sono state calcolate e aggiornate.")
             st.rerun()
 
         st.markdown("---")
