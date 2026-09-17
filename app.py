@@ -421,8 +421,9 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         st.session_state.nav_mode = "Home"
         st.rerun()
         
-    coach_tab1, coach_tab2, coach_tab3, coach_tab_pairing = st.tabs([
-        "👥 Gestione Squadra & Parametri", 
+    coach_tab1, coach_tab_evals, coach_tab2, coach_tab3, coach_tab_pairing = st.tabs([
+        "👥 Gestione Squadra & Presenze", 
+        "✏️ Gestione Voti Coach",
         "📅 Gestione Partite", 
         "💬 Tutti i Commenti",
         "🤖 Pairing Coppie Automatico"
@@ -511,9 +512,11 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         else:
             st.info("Nessuna criticità rilevata (tutti i giocatori hanno voti superiori a 6).")
 
-        st.markdown("---")
+    with coach_tab_evals:
         st.subheader("✏️ Gestione Voti Coach per Singolo Giocatore")
-        selected_player_name = st.selectbox("Seleziona giocatore da valutare:", [f"{p['fname']} {p['lname']}" for p in squad_players])
+        st.markdown("Seleziona un giocatore per aggiornare le sue valutazioni tecniche e mentali.")
+        
+        selected_player_name = st.selectbox("Seleziona giocatore da valutare:", [f"{p['fname']} {p['lname']}" for p in squad_players], key="coach_eval_select")
         p_obj = next((p for p in squad_players if f"{p['fname']} {p['lname']}" == selected_player_name), None)
         
         if p_obj:
@@ -539,7 +542,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     })
                     p_obj['c_tech'] = c_tech_new
                     p_obj['c_mental'] = c_mental_new
-                    st.success(f"Voti aggiornati per {selected_player_name}!")
+                    st.success(f"✅ Voti aggiornati con successo per {selected_player_name}!")
 
     with coach_tab2:
         st.subheader("📅 Registrazione Partite")
@@ -568,7 +571,6 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             score = st.text_input("Risultato (es. 6-4, 6-2)")
             
             if st.form_submit_button("Registra Partita", type="primary"):
-                # Controllo che non ci siano duplicati nello stesso match
                 team_a_players = {team_a_left, team_a_right}
                 team_b_players = {team_b_left, team_b_right}
                 
