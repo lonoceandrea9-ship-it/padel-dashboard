@@ -183,9 +183,9 @@ translations = {
         "mental_skills_coach": "Competenze Mentali (Coach)",
         "save_coach_eval": "Salva Voti, Profilo e Nota Coach",
         "training_title": "Pianificazione Allenamento & Focus Consigliato",
-        "training_desc": "Seleziona i giocatori che parteciperanno alla sessione di oggi. L'app analizzerà i loro voti del coach per evidenziare le aree in cui il gruppo è complessivamente più debole.",
-        "select_attendees": "Seleziona i partecipanti alla sessione di oggi:",
-        "training_priorities": "🎯 Aree Prioritarie di Allenamento Consigliate per il Gruppo",
+        "training_desc": "Seleziona i giocatori presenti. Il sistema suggerisce le aree prioritarie. Il coach può modificarle, scegliere la data e confermare il salvataggio in calendario.",
+        "select_attendees": "Seleziona i partecipanti alla sessione:",
+        "training_priorities": "🎯 Aree Prioritarie Consigliate dal Sistema",
         "training_no_attendees": "Seleziona almeno un giocatore per visualizzare il focus di allenamento.",
         "match_mgmt": "Registrazione Partite",
         "match_mgmt_desc": "Seleziona i giocatori per ciascuna squadra (ciascun team richiede 1 giocatore di Sinistra e 1 di Destra).",
@@ -288,9 +288,9 @@ translations = {
         "mental_skills_coach": "Mental Skills (Coach)",
         "save_coach_eval": "Save Grades, Profile and Coach Note",
         "training_title": "Training Planning & Recommended Focus",
-        "training_desc": "Select the players attending today's session. The app will analyze their coach grades to highlight the areas where the group is weakest overall.",
-        "select_attendees": "Select attendees for today's session:",
-        "training_priorities": "🎯 Recommended Training Priorities for the Group",
+        "training_desc": "Select attendees. The system suggests priority areas. The coach can modify them, choose a date, and confirm saving to the calendar.",
+        "select_attendees": "Select attendees for the session:",
+        "training_priorities": "🎯 System Recommended Priority Areas",
         "training_no_attendees": "Please select at least one player to view the training focus.",
         "match_mgmt": "Match Registration",
         "match_mgmt_desc": "Select players for each team (each team requires 1 Left player and 1 Right player).",
@@ -310,7 +310,7 @@ translations = {
         "pairing_p1": "Weight 1.0: Overall Coach evaluation.",
         "pairing_p2": "Weight 0.5: Mutual willingness / preference of players.",
         "select_available_players": "Select available players today:",
-        "run_pairing": "Generate Optimal Pairs with Available",
+        "run_pairing": "Generates Optimal Pairs with Available",
         "pairing_err": "To form pairs you need at least one left player and one right player among the selected ones!",
         "recommended_pairing": "Recommended Pairing Result (Top 5 Teams):",
         "unmatched_warn": "Selected players left out in this round due to numerical imbalance between Right and Left:"
@@ -392,11 +392,6 @@ translations = {
         "tech_skills_coach": "Habilidades Técnicas (Entrenador)",
         "mental_skills_coach": "Habilidades Mentales (Entrenador)",
         "save_coach_eval": "Guardar Notas, Perfil y Nota del Entrenador",
-        "training_title": "Planificación de Entrenamiento y Enfoque Recomendado",
-        "training_desc": "Selecciona los jugadores que asistirán a la sesión de hoy. La aplicación analizará sus notas del entrenador para destacar las áreas en las que el grupo es más débil en general.",
-        "select_attendees": "Selecciona los asistentes a la sesión de hoy:",
-        "training_priorities": "🎯 Prioridades de Entrenamiento Recomendadas para el Grupo",
-        "training_no_attendees": "Selecciona al menos un jugador para ver el enfoque de entrenamiento.",
         "match_mgmt": "Registro de Partidos",
         "match_mgmt_desc": "Selecciona los jugadores para cada equipo (cada equipo requiere 1 jugador de Izquierda y 1 de Derecha).",
         "match_date": "Fecha del Partido",
@@ -517,7 +512,7 @@ translations = {
         "select_available_players": "Välj tillgängliga spelare idag:",
         "run_pairing": "Generera Optimala Par med Tillgängliga",
         "pairing_err": "För att bilda par behöver du minst en vänsterspelare och en högerspelare bland de valda!",
-        "recommended_pairing": "Rekommenderat Parresultat (Top 5 Lag):",
+        "recommended_pairing": "Rekommenderat Parresultat (Topp 5 Lag):",
         "unmatched_warn": "Spelare som valdes men utelämnades denna omgång på grund av numerisk obalans mellan Höger och Vänster:"
     },
     "Nederlands": {
@@ -737,6 +732,9 @@ if "authenticated_coach" not in st.session_state:
 
 if "authenticated_player" not in st.session_state:
     st.session_state.authenticated_player = None
+
+if "planned_trainings" not in st.session_state:
+    st.session_state.planned_trainings = []
 
 lang_dict = translations.get(st.session_state.language, translations["Italiano"])
 MENTAL_SKILLS = lang_dict["mental_list"]
@@ -1305,7 +1303,8 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         selected_attendees_names = st.multiselect(
             lang_dict['select_attendees'],
             options=all_player_names,
-            default=all_player_names
+            default=all_player_names,
+            key="captain_attendees_select"
         )
         
         if selected_attendees_names:
@@ -1322,81 +1321,65 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 
             # Ordiniamo le skill dalla media più bassa alla più alta
             sorted_skills = sorted(skill_averages.items(), key=lambda x: x[1])
+            top_priorities_system = [s[0] for s in sorted_skills[:3]]
             
             st.markdown("---")
             st.markdown(f"### {lang_dict['training_priorities']}")
-            st.markdown("Basato sui voti del coach dei giocatori presenti, ecco le competenze con la media più bassa (da allenare con priorità):")
-            
-            # Mostriamo le prime 3 priorità in evidenza con metriche o card
-            top_priorities = sorted_skills[:3]
+            st.markdown("Il sistema ha analizzato i voti del gruppo presente e suggerisce le seguenti 3 priorità:")
             
             col_p1, col_p2, col_p3 = st.columns(3)
             with col_p1:
-                if len(top_priorities) > 0:
-                    st.metric(label="🔥 1° Priorità (Criticità)", value=top_priorities[0][0], delta=f"Media gruppo: {round(top_priorities[0][1], 1)}/10", delta_color="inverse")
+                if len(sorted_skills) > 0:
+                    st.metric(label="🔥 1° Priorità Consigliata", value=sorted_skills[0][0], delta=f"Media: {round(sorted_skills[0][1], 1)}/10", delta_color="inverse")
             with col_p2:
-                if len(top_priorities) > 1:
-                    st.metric(label="⚡ 2° Priorità", value=top_priorities[1][0], delta=f"Media gruppo: {round(top_priorities[1][1], 1)}/10", delta_color="inverse")
+                if len(sorted_skills) > 1:
+                    st.metric(label="⚡ 2° Priorità Consigliata", value=sorted_skills[1][0], delta=f"Media: {round(sorted_skills[1][1], 1)}/10", delta_color="inverse")
             with col_p3:
-                if len(top_priorities) > 2:
-                    st.metric(label="💡 3° Priorità", value=top_priorities[2][0], delta=f"Media gruppo: {round(top_priorities[2][1], 1)}/10", delta_color="inverse")
-            
-            st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown("#### 📊 Top 5 Aree di Debolezza del Gruppo Presente")
-            
-            # Limitiamo rigorosamente ai primi 5 risultati
-            top_5_skills = sorted_skills[:5]
-            
-            training_table_data = []
-            for skill, avg_val in top_5_skills:
-                cat_type = "Tecnica" if skill in TECH_SKILLS else "Mentale"
-                training_table_data.append({
-                    "Competenza": skill,
-                    "Categoria": cat_type,
-                    "Media Gruppo Presente": f"{round(avg_val, 2)} / 10"
-                })
-                
-            df_training = pd.DataFrame(training_table_data)
-            st.markdown(df_training.to_html(escape=False, index=False, classes="custom-table"), unsafe_allow_html=True)
+                if len(sorted_skills) > 2:
+                    st.metric(label="💡 3° Priorità Consigliata", value=sorted_skills[2][0], delta=f"Media: {round(sorted_skills[2][1], 1)}/10", delta_color="inverse")
             
             st.markdown("---")
-            st.markdown("#### 📅 Calendario Programmazione Mercoledì (Fino a Gennaio 2027)")
-            st.markdown("Tabella riepilogativa con le date di tutti i mercoledì (dal prossimo fino a gennaio 2027) e le relative 3 priorità di allenamento basate sui partecipanti selezionati:")
+            st.markdown("### ✏️ Personalizzazione e Conferma del Coach")
+            st.markdown("Il coach può modificare le priorità dal menu a tendina e scegliere in quale data salvare l'allenamento nel calendario:")
             
-            # Generazione automatica di tutti i mercoledì fino a gennaio 2027
-            # Data di partenza: oggi (17 settembre 2026) o prossimo mercoledì
-            start_date = datetime(2026, 9, 16) # Il primo mercoledì utile o corrente
-            current_day = datetime.now()
-            
-            # Troviamo il prossimo mercoledì a partire da oggi
-            days_ahead = 2 - current_day.weekday() # Mercoledì = 2
-            if days_ahead <= 0:
-                days_ahead += 7
-            next_wednesday = current_day + timedelta(days=days_ahead)
-            
-            end_date = datetime(2027, 1, 31) # Fine gennaio 2027
-            
-            wednesdays_list = []
-            curr_w = next_wednesday
-            while curr_w <= end_date:
-                wednesdays_list.append(curr_w.strftime("%Y-%m-%d"))
-                curr_w += timedelta(days=7)
+            with st.form("coach_training_confirmation_form"):
+                col_m1, col_m2, col_m3 = st.columns(3)
                 
-            calendar_rows = []
-            for w_date in wednesdays_list:
-                p1 = top_priorities[0][0] if len(top_priorities) > 0 else "-"
-                p2 = top_priorities[1][0] if len(top_priorities) > 1 else "-"
-                p3 = top_priorities[2][0] if len(top_priorities) > 2 else "-"
+                default_p1_idx = ALL_SKILLS.index(top_priorities_system[0]) if top_priorities_system[0] in ALL_SKILLS else 0
+                default_p2_idx = ALL_SKILLS.index(top_priorities_system[1]) if len(top_priorities_system) > 1 and top_priorities_system[1] in ALL_SKILLS else 1
+                default_p3_idx = ALL_SKILLS.index(top_priorities_system[2]) if len(top_priorities_system) > 2 and top_priorities_system[2] in ALL_SKILLS else 2
                 
-                calendar_rows.append({
-                    "Data Mercoledì": w_date,
-                    "1° Priorità": p1,
-                    "2° Priorità": p2,
-                    "3° Priorità": p3
-                })
+                with col_m1:
+                    coach_choice_p1 = st.selectbox("1° Priorità (Coach)", options=ALL_SKILLS, index=default_p1_idx)
+                with col_m2:
+                    coach_choice_p2 = st.selectbox("2° Priorità (Coach)", options=ALL_SKILLS, index=default_p2_idx)
+                with col_m3:
+                    coach_choice_p3 = st.selectbox("3° Priorità (Coach)", options=ALL_SKILLS, index=default_p3_idx)
                 
-            df_calendar = pd.DataFrame(calendar_rows)
-            st.markdown(df_calendar.to_html(escape=False, index=False, classes="custom-table"), unsafe_allow_html=True)
+                st.markdown("<br>", unsafe_allow_html=True)
+                training_date = st.date_input("📅 In quale data vuoi salvare questo allenamento?", datetime.now() + timedelta(days=2))
+                
+                submit_training = st.form_submit_button("✅ Conferma e Salva nel Calendario", type="primary")
+                
+                if submit_training:
+                    # Salvataggio nella lista in session_state
+                    st.session_state.planned_trainings.append({
+                        "Data": str(training_date),
+                        "Partecipanti": ", ".join([p.split(" ")[0] for p in selected_attendees_names]),
+                        "1° Priorità": coach_choice_p1,
+                        "2° Priorità": coach_choice_p2,
+                        "3° Priorità": coach_choice_p3
+                    })
+                    st.success(f"🎉 Allenamento salvato con successo per il giorno {training_date}!")
+
+            # Visualizzazione dello Storico Calendario Allenamenti Pianificati
+            st.markdown("---")
+            st.markdown("### 📅 Storico Calendario Allenamenti Pianificati")
+            if st.session_state.planned_trainings:
+                df_planned = pd.DataFrame(st.session_state.planned_trainings).sort_values(by="Data").reset_index(drop=True)
+                st.markdown(df_planned.to_html(escape=False, index=False, classes="custom-table"), unsafe_allow_html=True)
+            else:
+                st.info("Nessun allenamento ancora confermato e salvato nel calendario.")
             
         else:
             st.info(lang_dict['training_no_attendees'])
