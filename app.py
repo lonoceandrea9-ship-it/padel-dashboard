@@ -685,7 +685,7 @@ translations = {
         "right_role": "Højre (Right)",
         "score_lbl": "Resultat (f.eks. 6-4, 6-2)",
         "register_match": "Registrer Kamp",
-        "same_player_err": "Inden for det samme hold kan du ikke vælge den samme spiller to gange!",
+        "same_player_err": "Inden for det samme hold kan du ikke vælge den samme spiller to gånger!",
         "match_saved": "Kamp registreret!",
         "match_history": "Registreret Kamphistorik",
         "global_comments": "Global Oversigt over Noter & Kommentarer",
@@ -694,7 +694,7 @@ translations = {
         "pairing_p1": "Vægt 1.0: Overordnede Trænerevaluering.",
         "pairing_p2": "Vægt 0.5: Spillernes gensidige vilje / præference.",
         "select_available_players": "Vælg tilgængelige spillere i dag:",
-        "run_pairing": "Generer Optimale Par med Tilgængelige",
+        "run_pairing": "Generer Optimal Par med Tilgængelige",
         "pairing_err": "For at danne par skal du bruge mindst én venstrespiller og én højrespiller blandt de valgte!",
         "recommended_pairing": "Anbefalet Parringsresultat:",
         "unmatched_warn": "Spillere valgt men udeladt i denne runde på grund af numerisk ubalance mellem Højre og Venstre:"
@@ -1429,9 +1429,18 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         if "final_pairs_cache" in st.session_state and st.session_state.final_pairs_cache:
             st.markdown(f"### 🏆 {lang_dict['recommended_pairing']}")
             
-            pair_results_df = []
+            # Liste dei nomi disponibili per i menu a tendina
+            available_left_names = [f"{p['fname']} {p['lname']}" for p in left_players]
+            available_right_names = [f"{p['fname']} {p['lname']}" for p in right_players]
+            
+            # Tracciamo i giocatori già selezionati per escluderli dagli altri menu
+            selected_lefts = []
+            selected_rights = []
+            
+            # Prima passata per raccogliere i valori attuali dallo state o dalla cache
+            temp_edited_pairs = []
             for idx, fp in enumerate(st.session_state.final_pairs_cache):
-                pair_results_df.append({
+                temp_edited_pairs.append({
                     "Pair #": idx + 1,
                     "Left Player": fp["left"],
                     "Right Player": fp["right"],
@@ -1440,19 +1449,66 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     "Total Score": round(fp["score"], 2)
                 })
             
-            df_pairs = pd.DataFrame(pair_results_df)
+            # Intestazione della tabella personalizzata in blu scuro coerente
+            st.markdown("""
+                <table class="custom-table">
+                    <tr>
+                        <th style="width: 10%;">Pair #</th>
+                        <th style="width: 30%;">Left Player</th>
+                        <th style="width: 30%;">Right Player</th>
+                        <th style="width: 10%;">Coach Score</th>
+                        <th style="width: 10%;">Mutual Willingness</th>
+                        <th style="width: 10%;">Total Score</th>
+                    </tr>
+                </table>
+            """, unsafe_allow_html=True)
             
-            # Tabella interattiva e modificabile dal coach
-            edited_pairs_df = st.data_editor(
-                df_pairs,
-                num_rows="dynamic",
-                key="editor_pairing_coppie",
-                use_container_width=True
-            )
+            new_confirmed_pairs = []
+            
+            # Generazione delle righe con selectbox dinamici che escludono i già selezionati
+            for idx, fp in enumerate(st.session_state.final_pairs_cache):
+                c_pair, c_left, c_right, c_cs, c_mw, c_ts = st.columns([1, 3, 3, 1, 1, 1])
+                
+                with c_pair:
+                    st.markdown(f"<div style='padding-top: 10px; font-weight: bold;'>#{idx + 1}</div>", unsafe_allow_html=True)
+                
+                with c_left:
+                    current_l = fp["left"]
+                    # Opzioni disponibili per la sinistra: quelli non ancora scelti altrove + il corrente
+                    options_l = [current_l] + [name for name in available_left_names if name not in selected_lefts and name != current_l]
+                    idx_l = options_l.index(current_l) if current_l in options_l else 0
+                    chosen_l = st.selectbox(f"Left {idx+1}", options=options_l, index=idx_l, key=f"edit_left_{idx}", label_visibility="collapsed")
+                    selected_lefts.append(chosen_l)
+                
+                with c_right:
+                    current_r = fp["right"]
+                    # Opzioni disponibili per la destra: quelli non ancora scelti altrove + il corrente
+                    options_r = [current_r] + [name for name in available_right_names if name not in selected_rights and name != current_r]
+                    idx_r = options_r.index(current_r) if current_r in options_r else 0
+                    chosen_r = st.selectbox(f"Right {idx+1}", options=options_r, index=idx_r, key=f"edit_right_{idx}", label_visibility="collapsed")
+                    selected_rights.append(chosen_r)
+                
+                with c_cs:
+                    st.markdown(f"<div style='padding-top: 10px;'>{fp['coach_avg']}</div>", unsafe_allow_html=True)
+                with c_mw:
+                    st.markdown(f"<div style='padding-top: 10px;'>{fp['willingness']}</div>", unsafe_allow_html=True)
+                with c_ts:
+                    st.markdown(f"<div style='padding-top: 10px; font-weight: bold;'>{round(fp['score'], 2)}</div>", unsafe_allow_html=True)
+                
+                new_confirmed_pairs.append({
+                    "Pair #": idx + 1,
+                    "Left Player": chosen_l,
+                    "Right Player": chosen_r,
+                    "Coach Score": fp["coach_avg"],
+                    "Mutual Willingness": fp["willingness"],
+                    "Total Score": round(fp["score"], 2)
+                })
+            
+            st.markdown("<br>", unsafe_allow_html=True)
             
             # Bottone di conferma della selezione
             if st.button("✅ Conferma Selezione Pairing", type="primary"):
-                st.session_state.confirmed_pairing = edited_pairs_df.copy()
+                st.session_state.confirmed_pairing = pd.DataFrame(new_confirmed_pairs)
                 st.success("Pairing confermato e salvato con successo!")
                 
             if "unmatched_cache" in st.session_state and st.session_state.unmatched_cache:
