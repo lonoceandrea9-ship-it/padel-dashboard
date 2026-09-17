@@ -739,7 +739,7 @@ translations = {
 # --- LISTA DELLE SKILLS ---
 TECH_SKILLS = ["Volley", "Bandeja", "Remate", "Smash", "Bajada", "Chiquita", "Lob"]
 
-# --- INIZIALIZZAZIONE STATO ---
+# --- INIZIALIZZAZIONE STATO PROTETTA ---
 if "language" not in st.session_state:
     st.session_state.language = "Italiano"
 
@@ -758,9 +758,8 @@ if "planned_trainings" not in st.session_state:
 if "show_roster_modal" not in st.session_state:
     st.session_state.show_roster_modal = False
 
-lang_dict = translations.get(st.session_state.language, translations["Italiano"])
-MENTAL_SKILLS = lang_dict["mental_list"]
-ALL_SKILLS = TECH_SKILLS + MENTAL_SKILLS
+if "match_results" not in st.session_state:
+    st.session_state.match_results = []
 
 if "squad_data" not in st.session_state:
     st.session_state.squad_data = [
@@ -818,9 +817,6 @@ for p in st.session_state.squad_data:
     if len(p["mental"]) != len(MENTAL_SKILLS): p["mental"] = [7] * len(MENTAL_SKILLS)
     if len(p["c_tech"]) != len(TECH_SKILLS): p["c_tech"] = [6] * len(TECH_SKILLS)
     if len(p["c_mental"]) != len(MENTAL_SKILLS): p["c_mental"] = [6] * len(MENTAL_SKILLS)
-
-if "match_results" not in st.session_state:
-    st.session_state.match_results = []
 
 squad_players = st.session_state.squad_data
 
@@ -1263,7 +1259,8 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
     ])
     
     with coach_tab1:
-        st.subheader(f"👥 Gestione Squadra & Presenze ({len(squad_players)} giocatori)")
+        st.subheader(f"👥 {lang_dict['coach_tab_squad']}")
+        st.markdown(f"Totale giocatori presenti: **{len(squad_players)}**")
         st.markdown(lang_dict['squad_desc'])
         
         st.session_state.squad_data = sorted(st.session_state.squad_data, key=lambda x: x['fname'])
