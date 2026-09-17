@@ -36,9 +36,6 @@ translations = {
         "logout": "Esci",
         "tech_skills": "Competenze Tecniche",
         "mental_skills": "Attitudine e Tattica (Mentali)",
-        "self_eval": "Le mie Valutazioni (Autovalutazione)",
-        "coach_eval": "Valutazione Coach & Confronto",
-        "diff_table": "Tabella Differenze (Tu vs Coach)",
         "partners_tab": "Ranking Partner",
         "history_tab": "Storico & Miglioramenti",
         "comments_tab": "Commenti Compagni",
@@ -204,7 +201,6 @@ elif st.session_state.nav_mode == "Player_Dashboard":
         st.subheader("📊 Gestione e Confronto Valutazioni")
         st.markdown("Regola i cursori per la tua autovalutazione. Sulla destra puoi consultare in sola lettura i valori assegnati dal coach.")
         
-        # Unica tabella/blocco unificato per evitare ripetizioni
         st.markdown(f"**{lang_dict['tech_skills']}**")
         new_tech_vals = []
         for i, skill in enumerate(TECH_SKILLS):
@@ -278,7 +274,6 @@ elif st.session_state.nav_mode == "Player_Dashboard":
             c_v = coach_full_vals[i]
             diff = p_v - c_v
             
-            # Formattazione richiesta: - in rosso per differenze negative, + in verde per positive, 0 se pari
             if diff > 0:
                 diff_display = f"<span style='color:green; font-weight:bold;'>+{diff}</span>"
             elif diff < 0:
@@ -296,14 +291,44 @@ elif st.session_state.nav_mode == "Player_Dashboard":
         st.markdown(df_diff_table.to_html(escape=False, index=False), unsafe_allow_html=True)
 
     with tab_partners:
-        st.subheader("🏆 Ranking dei partner")
-        partners_dict = current_player.get("partners", {})
-        if partners_dict:
-            df_partners = pd.DataFrame(list(partners_dict.items()), columns=["Compagno", "Match Giocati Insieme"])
-            df_partners = df_partners.sort_values(by="Match Giocati Insieme", ascending=False).reset_index(drop=True)
+        st.subheader("🏆 Gestione Ranking Partner (Fino a 5)")
+        st.markdown("Seleziona fino a 5 compagni di squadra con cui preferisci giocare e assegna il numero di match o la preferenza.")
+        
+        all_colleagues = [f"{p['fname']} {p['lname']}" for p in squad_players if p['fname'] != current_player['fname']]
+        current_partners = current_player.get("partners", {})
+        
+        with st.form("partners_form"):
+            new_partners_dict = {}
+            # Permettiamo di inserire fino a 5 partner
+            for i in range(5):
+                col_p1, col_p2 = st.columns([3, 1])
+                
+                # Pre-seleziona i partner esistenti se presenti
+                existing_keys = list(current_partners.keys())
+                default_partner = existing_keys[i] if i < len(existing_keys) else (all_colleagues[0] if all_colleagues else "")
+                default_val = int(current_partners.get(default_partner, 5 - i))
+                
+                with col_p1:
+                    p_sel = st.selectbox(f"Partner #{i+1}", all_colleagues, index=all_colleagues.index(default_partner) if default_partner in all_colleagues else 0, key=f"partner_sel_{i}")
+                with col_p2:
+                    p_score = st.number_input(f"Match #{i+1}", min_value=1, max_value=50, value=default_val, key=f"partner_val_{i}")
+                
+                if p_sel:
+                    new_partners_dict[p_sel] = p_score
+                    
+            submit_partners = st.form_submit_button("Salva Ranking Partner", type="primary")
+            if submit_partners:
+                current_player["partners"] = new_partners_dict
+                st.success("Ranking partner aggiornato con successo!")
+                st.rerun()
+                
+        st.markdown("### Classifica Attuale:")
+        if current_player.get("partners"):
+            df_partners = pd.DataFrame(list(current_player["partners"].items()), columns=["Compagno", "Match / Preferenza"])
+            df_partners = df_partners.sort_values(by="Match / Preferenza", ascending=False).reset_index(drop=True)
             st.table(df_partners)
         else:
-            st.info("Nessun dato registrato sui partner.")
+            st.info("Nessun partner configurato.")
 
     with tab_history:
         st.subheader("📈 Storico & Evoluzione Valutazioni Coach")
