@@ -566,7 +566,7 @@ translations = {
         "squad_desc": "Bewerk selectiegegevens direct hieronder. Wijzigingen worden in realtime opgeslagen en Betrokkenheid (%) wordt automatisch herberekend.",
         "col_name": "Naam", "col_role": "Rol", "col_hand": "Hand", "col_style": "Stijl", "col_trainings": "Trainingen", "col_participated": "Deelgenomen", "col_commitment": "Betrokkenheid (%)",
         "work_groups": "Werkgroepen & Gerichte Verbetering",
-        "work_groups_desc": "Automatische groepering van alle spelers op basis van veelvoorkomende zwakke punten gedetecteerd in coachevaluaties (waarden ≤ 6).",
+        "work_groups_desc": "Automatische groepering van alle spelers op basis van veelvoorkomende zwakke punten gedetectererd in coachevaluaties (waarden ≤ 6).",
         "no_critics": "Geen kritieke punten gedetecteerd (alle spelers hebben cijfers boven 6).",
         "coach_eval_title": "Coach Cijfers Beheer & Speelprofiel",
         "coach_eval_desc": "Selecteer een speler om hun evaluaties, tactisch profiel en officiële notitie bij te werken.",
@@ -590,7 +590,7 @@ translations = {
         "match_saved": "Wedstrijd succesvol geregistreerd!",
         "match_history": "Geregistreerde Wedstrijdgeschiedenis",
         "global_comments": "Globale Weergave Notities & Opmerkingen",
-        "pairing_title": "Intelligente Koppelingsalgoritme",
+        "pairing_title": "Intelligent Koppelingsalgoritme",
         "pairing_desc": "Selecteer hieronder de spelers die beschikbaar zijn voor deze sessie. Het algoritme koppelt uitsluitend de geselecteerde spelers aan elkaar, met respect voor de rolbeperking (1 Links + 1 Rechts) en balancing:",
         "pairing_p1": "Gewicht 1.0: Algemene Coachevaluatie.",
         "pairing_p2": "Gewicht 0.5: Wederzijdse wil / voorkeur van spelers.",
@@ -717,12 +717,10 @@ if "authenticated_coach" not in st.session_state:
 if "authenticated_player" not in st.session_state:
     st.session_state.authenticated_player = None
 
-# Recupero dizionario lingua corrente per le mental skills dinamiche
 lang_dict = translations.get(st.session_state.language, translations["Italiano"])
 MENTAL_SKILLS = lang_dict["mental_list"]
 ALL_SKILLS = TECH_SKILLS + MENTAL_SKILLS
 
-# Lista giocatori iniziale (ordinata alfabeticamente per nome)
 if "squad_data" not in st.session_state:
     st.session_state.squad_data = [
         {"fname": "Alexander", "lname": "Wennstam", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1,
@@ -765,7 +763,6 @@ if "squad_data" not in st.session_state:
          "tech": [8, 6, 7, 7, 7, 5, 6], "mental": [7, 6, 8, 6, 7, 6, 7], "c_tech": [7, 5, 6, 6, 6, 4, 5], "c_mental": [6, 5, 7, 5, 6, 5, 6], "play_style": "offensive", "player_play_style": "offensive", "history": [], "coach_note": "", "partners": {"Alvaro Gomez": 12}, "comments": []}
     ]
 
-# Ordinamento alfabetico iniziale per nome (fname)
 st.session_state.squad_data = sorted(st.session_state.squad_data, key=lambda x: x['fname'])
 
 for p in st.session_state.squad_data:
@@ -1156,7 +1153,6 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         st.subheader(f"👥 {lang_dict['coach_tab_squad']}")
         st.markdown(lang_dict['squad_desc'])
         
-        # Ordinamento alfabetico della lista in base al nome (fname)
         st.session_state.squad_data = sorted(st.session_state.squad_data, key=lambda x: x['fname'])
         squad_players = st.session_state.squad_data
         
@@ -1192,7 +1188,6 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 pct_calc = int(round((new_pa / new_tr) * 100)) if new_tr > 0 else 0
                 st.markdown(f"<div style='padding-top: 8px; font-weight: bold; text-align: center; color: {'#2ecc71' if pct_calc >= 70 else '#e74c3c'};'>{pct_calc}%</div>", unsafe_allow_html=True)
             
-            # Salvataggio in tempo reale nello state se ci sono variazioni
             if p["side"] != new_side or p.get("hand") != new_hand or p.get("play_style") != new_st or p.get("trainings") != new_tr or p.get("participated") != new_pa:
                 p["side"] = new_side
                 p["hand"] = new_hand
@@ -1428,26 +1423,39 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 unmatched_l = [l for l in left_players if f"{l['fname']} {l['lname']}" not in matched_left]
                 unmatched_r = [r for r in right_players if f"{r['fname']} {r['lname']}" not in matched_right]
                 
-                st.markdown(f"### 🏆 {lang_dict['recommended_pairing']}")
+                st.session_state.final_pairs_cache = final_pairs
+                st.session_state.unmatched_cache = unmatched_l + unmatched_r
+
+        if "final_pairs_cache" in st.session_state and st.session_state.final_pairs_cache:
+            st.markdown(f"### 🏆 {lang_dict['recommended_pairing']}")
+            
+            pair_results_df = []
+            for idx, fp in enumerate(st.session_state.final_pairs_cache):
+                pair_results_df.append({
+                    "Pair #": idx + 1,
+                    "Left Player": fp["left"],
+                    "Right Player": fp["right"],
+                    "Coach Score": fp["coach_avg"],
+                    "Mutual Willingness": fp["willingness"],
+                    "Total Score": round(fp["score"], 2)
+                })
+            
+            df_pairs = pd.DataFrame(pair_results_df)
+            
+            # Tabella interattiva e modificabile dal coach
+            edited_pairs_df = st.data_editor(
+                df_pairs,
+                num_rows="dynamic",
+                key="editor_pairing_coppie",
+                use_container_width=True
+            )
+            
+            # Bottone di conferma della selezione
+            if st.button("✅ Conferma Selezione Pairing", type="primary"):
+                st.session_state.confirmed_pairing = edited_pairs_df.copy()
+                st.success("Pairing confermato e salvato con successo!")
                 
-                pair_results_df = []
-                for idx, fp in enumerate(final_pairs):
-                    pair_results_df.append({
-                        "Pair #": idx + 1,
-                        "Left Player": fp["left"],
-                        "Right Player": fp["right"],
-                        "Coach Score": fp["coach_avg"],
-                        "Mutual Willingness": fp["willingness"],
-                        "Total Score": round(fp["score"], 2)
-                    })
-                
-                if pair_results_df:
-                    df_pairs = pd.DataFrame(pair_results_df)
-                    st.markdown(df_pairs.to_html(escape=False, index=False, classes="custom-table"), unsafe_allow_html=True)
-                else:
-                    st.info("No pairs can be generated.")
-                    
-                if unmatched_l or unmatched_r:
-                    st.warning(f"⚠️ {lang_dict['unmatched_warn']}")
-                    un_names = [f"{p['fname']} {p['lname']}" for p in unmatched_l + unmatched_r]
-                    st.markdown("- " + "\n- ".join(un_names))
+            if "unmatched_cache" in st.session_state and st.session_state.unmatched_cache:
+                st.warning(f"⚠️ {lang_dict['unmatched_warn']}")
+                un_names = [f"{p['fname']} {p['lname']}" for p in st.session_state.unmatched_cache]
+                st.markdown("- " + "\n- ".join(un_names))
