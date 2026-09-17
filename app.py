@@ -57,6 +57,12 @@ st.markdown("""
     .element-container:has(button:contains("Logga ut från Tränarområde")) button,
     .element-container:has(button:contains("Verlaat Coachgebied")) button,
     .element-container:has(button:contains("Log ud fra Trænerområde")) button,
+    .element-container:has(button:contains("Esci")) button,
+    .element-container:has(button:contains("Logout")) button,
+    .element-container:has(button:contains("Salir")) button,
+    .element-container:has(button:contains("Logga ut")) button,
+    .element-container:has(button:contains("Uitloggen")) button,
+    .element-container:has(button:contains("Log ud")) button,
     .element-container:has(button:contains("Gestisci Rosa Giocatori")) button,
     .element-container:has(button:contains("Manage Squad")) button,
     .element-container:has(button:contains("Gestión de Plantilla")) button,
@@ -590,7 +596,7 @@ translations = {
         "coach_tab_matches": "Wedstrijdbeheer",
         "coach_tab_comments": "Alle Opmerkingen",
         "coach_tab_pairing": "Automatische Koppelindeling",
-        "squad_desc": "'Trainings' en 'Participated' worden automatisch gesynchroniseerd met de trainingskalender. Betrokkenheid (%) wordt in realtime herberekend.",
+        "squad_desc": "'Trainings' and 'Participated' worden automatisch gesynchroniseerd met de trainingskalender. Betrokkenheid (%) wordt in realtime herberekend.",
         "col_name": "Naam", "col_role": "Rol", "col_hand": "Hand", "col_style": "Stijl", "col_trainings": "Trainingen", "col_participated": "Deelgenomen", "col_commitment": "Betrokkenheid (%)",
         "work_groups": "Werkgroepen & Gerichte Verbetering",
         "work_groups_desc": "Automatische groepering van alle spelers op basis van veelvoorkomende zwakke punten gedetectererd in coachevaluaties (waarden ≤ 6).",
@@ -921,14 +927,16 @@ elif st.session_state.nav_mode == "Coach_Login":
 elif st.session_state.nav_mode == "Player_Dashboard":
     current_player = next((p for p in squad_players if p['fname'] == st.session_state.authenticated_player), None)
     
-    col_top1, col_top2 = st.columns([6, 1])
+    col_top1, col_top2 = st.columns([5, 2])
     with col_top1:
         st.title(f"👤 {current_player['fname']} {current_player['lname']} ({current_player['side']})")
     with col_top2:
-        if st.button(lang_dict['logout']):
+        st.markdown("<div style='text-align: right;'>", unsafe_allow_html=True)
+        if st.button(lang_dict['logout'], use_container_width=False):
             st.session_state.authenticated_player = None
             st.session_state.nav_mode = "Home"
             st.rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
             
     st.markdown("---")
     
@@ -1170,20 +1178,24 @@ elif st.session_state.nav_mode == "Player_Dashboard":
 
 # --- AREA ALLENATORE ---
 elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coach:
-    st.title(f"📋 {lang_dict['coach_dash_title']}")
-    
-    # --- BARRA SUPERIORE CON I DUE BOTTONI ROSSI ---
-    top_btn_col1, top_btn_col2, _ = st.columns([1.5, 1.5, 4])
-    with top_btn_col1:
-        if st.button(lang_dict['manage_roster_btn']):
+    # --- INTESTAZIONE E PULSANTI A DESTRA ---
+    col_title, col_btn_roster, col_btn_exit = st.columns([4, 1.8, 1.8])
+    with col_title:
+        st.title(f"📋 {lang_dict['coach_dash_title']}")
+    with col_btn_roster:
+        st.markdown("<div style='padding-top: 15px;'>", unsafe_allow_html=True)
+        if st.button(lang_dict['manage_roster_btn'], use_container_width=True):
             st.session_state.show_roster_modal = not st.session_state.show_roster_modal
             st.rerun()
-    with top_btn_col2:
-        if st.button(lang_dict['exit_coach']):
+        st.markdown("</div>", unsafe_allow_html=True)
+    with col_btn_exit:
+        st.markdown("<div style='padding-top: 15px;'>", unsafe_allow_html=True)
+        if st.button(lang_dict['exit_coach'], use_container_width=True):
             st.session_state.authenticated_coach = False
             st.session_state.show_roster_modal = False
             st.session_state.nav_mode = "Home"
             st.rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
             
     # --- PANNELLO A SCOMPARSA PER GESTIONE ROSA ---
     if st.session_state.show_roster_modal:
@@ -1257,7 +1269,6 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         st.session_state.squad_data = sorted(st.session_state.squad_data, key=lambda x: x['fname'])
         squad_players = st.session_state.squad_data
         
-        # Calcolo automatico di Trainings totale dal calendario salvato
         total_scheduled_trainings = len(st.session_state.planned_trainings)
         
         th_cols = st.columns([1.8, 1.2, 1.2, 1.4, 0.9, 0.9, 0.9])
@@ -1273,7 +1284,6 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         for idx, p in enumerate(squad_players):
             col_n, col_r, col_h, col_s, col_t, col_p, col_c = st.columns([1.8, 1.2, 1.2, 1.4, 0.9, 0.9, 0.9])
             
-            # Calcolo automatico delle partecipazioni reali basato sullo storico del calendario
             player_first_name = p['fname']
             participated_count = 0
             for session in st.session_state.planned_trainings:
@@ -1281,7 +1291,6 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 if player_first_name in attendees_str:
                     participated_count += 1
             
-            # Se ci sono allenamenti programmati, usiamo i valori automatici, altrimenti fallback sui valori base
             if total_scheduled_trainings > 0:
                 calc_trainings = total_scheduled_trainings
                 calc_participated = participated_count
