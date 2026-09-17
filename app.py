@@ -11,6 +11,41 @@ st.set_page_config(
     layout="wide"
 )
 
+# --- CUSTOM CSS: SFONDO BLU SCURO E TESTO BIANCO ---
+st.markdown("""
+    <style>
+    /* Sfondo generale dell'applicazione */
+    .stApp {
+        background-color: #0d1b2a;
+        color: #ffffff;
+    }
+    
+    /* Colore dei testi principali, intestazioni e label */
+    h1, h2, h3, h4, h5, h6, p, label, span, .stMarkdown, div[data-baseweb="select"] span {
+        color: #ffffff !important;
+    }
+    
+    /* Sidebar */
+    [data-testid="stSidebar"] {
+        background-color: #1b263b;
+        color: #ffffff;
+    }
+    [data-testid="stSidebar"] h1, [data-testid="stSidebar"] span, [data-testid="stSidebar"] label {
+        color: #ffffff !important;
+    }
+    
+    /* Tabelle ed editor */
+    dataframe, table {
+        color: #ffffff !important;
+    }
+    
+    /* Tabs */
+    .stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] p {
+        color: #ffffff !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 # --- TRADUZIONI (LINGUE) ---
 translations = {
     "Italiano": {
@@ -282,7 +317,14 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                 line_color='#1f77b4'
             ))
             fig_player.update_layout(
-                polar=dict(radialaxis=dict(visible=True, range=[0, 10])),
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                font=dict(color='white'),
+                polar=dict(
+                    bgcolor='rgba(0,0,0,0)',
+                    radialaxis=dict(visible=True, range=[0, 10], color='white', gridcolor='#334155'),
+                    angularaxis=dict(gridcolor='#334155')
+                ),
                 showlegend=False,
                 height=450,
                 margin=dict(l=40, r=40, t=20, b=20)
@@ -300,7 +342,14 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                 line_color='#ff7f0e'
             ))
             fig_coach.update_layout(
-                polar=dict(radialaxis=dict(visible=True, range=[0, 10])),
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                font=dict(color='white'),
+                polar=dict(
+                    bgcolor='rgba(0,0,0,0)',
+                    radialaxis=dict(visible=True, range=[0, 10], color='white', gridcolor='#334155'),
+                    angularaxis=dict(gridcolor='#334155')
+                ),
                 showlegend=False,
                 height=450,
                 margin=dict(l=40, r=40, t=20, b=20)
@@ -317,11 +366,11 @@ elif st.session_state.nav_mode == "Player_Dashboard":
             diff = p_v - c_v
             
             if diff > 0:
-                diff_display = f"<span style='color:green; font-weight:bold;'>+{diff}</span>"
+                diff_display = f"<span style='color:#2ecc71; font-weight:bold;'>+{diff}</span>"
             elif diff < 0:
-                diff_display = f"<span style='color:red; font-weight:bold;'>{diff}</span>"
+                diff_display = f"<span style='color:#e74c3c; font-weight:bold;'>{diff}</span>"
             else:
-                diff_display = "<span style='color:gray; font-weight:bold;'>0</span>"
+                diff_display = "<span style='color:#bdc3c7; font-weight:bold;'>0</span>"
                 
             diff_tech_rows.append({"Tecnica": skill, "Tu": p_v, "Coach": c_v, "Diff": diff_display})
 
@@ -332,11 +381,11 @@ elif st.session_state.nav_mode == "Player_Dashboard":
             diff = p_v - c_v
             
             if diff > 0:
-                diff_display = f"<span style='color:green; font-weight:bold;'>+{diff}</span>"
+                diff_display = f"<span style='color:#2ecc71; font-weight:bold;'>+{diff}</span>"
             elif diff < 0:
-                diff_display = f"<span style='color:red; font-weight:bold;'>{diff}</span>"
+                diff_display = f"<span style='color:#e74c3c; font-weight:bold;'>{diff}</span>"
             else:
-                diff_display = "<span style='color:gray; font-weight:bold;'>0</span>"
+                diff_display = "<span style='color:#bdc3c7; font-weight:bold;'>0</span>"
                 
             diff_mental_rows.append({"Mentale": skill, "Tu": p_v, "Coach": c_v, "Diff": diff_display})
 
