@@ -11,13 +11,18 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- CUSTOM CSS: SFONDO BLU SCURO, TESTO BIANCO E COLORI BOTTONI ---
+# --- CUSTOM CSS: SFONDO BLU SCURO, TESTO BIANCO, HEADER E BOTTONI PERSONALIZZATI ---
 st.markdown("""
     <style>
     /* Sfondo generale dell'applicazione */
     .stApp {
         background-color: #0d1b2a;
         color: #ffffff;
+    }
+    
+    /* Rimozione della barra bianca superiore (Header di Streamlit) e colorazione in blu scuro */
+    header[data-testid="stHeader"] {
+        background-color: #0d1b2a !important;
     }
     
     /* Colore dei testi principali, intestazioni e label */
@@ -34,86 +39,36 @@ st.markdown("""
         color: #ffffff !important;
     }
     
-    /* Pulsanti di uscita (Logout / Esci) in BLU */
-    div.stButton > button:nth-child(1) {
-        /* Regola generale o specifica per i pulsanti di logout */
-    }
-    
-    /* Forziamo il colore blu per i bottoni di uscita/logout */
-    button[kind="secondary"] {
-        background-color: #1e3a8a !important;
+    /* Pulsante specifico ACCEDI COME ALLENATORE (Rosso brillante nella Home) */
+    .element-container:has(button:contains("Allenatore")) button {
+        background-color: #dc2626 !important;
         color: white !important;
-        border: 1px solid #3b82f6 !important;
+        border-color: #b91c1c !important;
+    }
+    .element-container:has(button:contains("Allenatore")) button:hover {
+        background-color: #b91c1c !important;
+        color: white !important;
+    }
+
+    /* Tutti i bottoni Esci / Logout in Blu scuro */
+    .element-container:has(button:contains("Esci")) button,
+    .element-container:has(button:contains("Logout")) button {
+        background-color: #2563eb !important;
+        color: white !important;
+        border-color: #1d4ed8 !important;
+    }
+    .element-container:has(button:contains("Esci")) button:hover,
+    .element-container:has(button:contains("Logout")) button:hover {
+        background-color: #1d4ed8 !important;
+        color: white !important;
     }
     
-    /* Pulsante specifico ACCEDI COME ALLENATORE (Rosso) e LOGOUT/ESCI (Blu) tramite targeting avanzato */
-    </style>
-""", unsafe_allow_html=True)
-
-# CSS alternativo e robusto iniettato via componente per i bottoni specifici
-st.markdown("""
-    <style>
-    /* Pulsante Accedi come Allenatore (Rosso) */
-    div.row-widget.stButton:nth-of-type(2) button, 
-    div.stButton button {
-        /* Il CSS di Streamlit sui bottoni standard */
+    /* Tabs */
+    .stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] p {
+        color: #ffffff !important;
     }
     </style>
 """, unsafe_allow_html=True)
-
-# Per garantire al 100% i colori dei bottoni senza errori di selettore CSS puro, 
-# utilizziamo l'injection di stili mirati basati sul testo dei bottoni o sulle chiavi:
-st.markdown("""
-<style>
-/* Rendi rosso il bottone Accedi come Allenatore nella Home */
-div[data-testid="column"]:nth-of-type(2) div.stButton > button {
-    background-color: #dc2626 !important;
-    color: white !important;
-    border-color: #b91c1c !important;
-}
-div[data-testid="column"]:nth-of-type(2) div.stButton > button:hover {
-    background-color: #b91c1c !important;
-    color: white !important;
-}
-
-/* Rendi blu i bottoni di Logout / Esci */
-[data-testid="stSidebar"] div.stButton > button,
-div[data-testid="column"] div.stButton > button:has-text("Esci") {
-    background-color: #2563eb !important;
-    color: white !important;
-    border-color: #1d4ed8 !important;
-}
-</style>
-""", unsafe_allow_html=True)
-
-# Soluzione via codice Python per marcare i bottoni con i colori corretti (usando HTML/Markdown o stili inline dove possibile)
-# In Streamlit puro, coloriamo i bottoni chiave tramite selettori universali mirati:
-st.markdown("""
-<style>
-/* Pulsante Accedi come Allenatore (Rosso brillante) */
-.element-container:has(button:contains("Allenatore")) button {
-    background-color: #dc2626 !important;
-    color: white !important;
-}
-.element-container:has(button:contains("Allenatore")) button:hover {
-    background-color: #b91c1c !important;
-    color: white !important;
-}
-
-/* Tutti i bottoni Esci / Logout in Blu scuro/azzurro */
-.element-container:has(button:contains("Esci")) button,
-.element-container:has(button:contains("Logout")) button {
-    background-color: #2563eb !important;
-    color: white !important;
-}
-.element-container:has(button:contains("Esci")) button:hover,
-.element-container:has(button:contains("Logout")) button:hover {
-    background-color: #1d4ed8 !important;
-    color: white !important;
-}
-</style>
-""", unsafe_allow_html=True)
-
 
 # --- TRADUZIONI (LINGUE) ---
 translations = {
