@@ -168,7 +168,7 @@ translations = {
         "coach_tab_matches": "Gestione Partite",
         "coach_tab_comments": "Tutti i Commenti",
         "coach_tab_pairing": "Pairing Coppie Automatico",
-        "squad_desc": "Modifica direttamente qui sotto i dati della squadra. I cambiamenti si salvano in tempo reale e il Commitment (%) viene ricalcolato automaticamente.",
+        "squad_desc": "I campi 'Trainings' e 'Participated' sono sincronizzati automaticamente con il Calendario Allenamenti Pianificati. Il Commitment (%) viene ricalcolato in tempo reale.",
         "col_name": "Nome", "col_role": "Role", "col_hand": "Mano", "col_style": "Play Style", "col_trainings": "Trainings", "col_participated": "Participated", "col_commitment": "Commitment (%)",
         "work_groups": "Gruppi di Lavoro e Miglioramento Mirato",
         "work_groups_desc": "Raggruppamento automatico di tutti i giocatori in base alle carenze comuni rilevate nelle valutazioni del coach (valori ≤ 6).",
@@ -183,7 +183,7 @@ translations = {
         "mental_skills_coach": "Competenze Mentali (Coach)",
         "save_coach_eval": "Salva Voti, Profilo e Nota Coach",
         "training_title": "Pianificazione Allenamento & Focus Consigliato",
-        "training_desc": "Seleziona i giocatori presenti. Il sistema suggerisce le aree prioritarie. Il coach può modificarle, scegliere la data e confermare il salvataggio in calendario.",
+        "training_desc": "Seleziona i partecipanti. Il sistema suggerisce le aree prioritarie. Il coach può modificarle, scegliere la data e confermare il salvataggio in calendario.",
         "select_attendees": "Seleziona i partecipanti alla sessione:",
         "training_priorities": "🎯 Aree Prioritarie Consigliate dal Sistema",
         "training_no_attendees": "Seleziona almeno un giocatore per visualizzare il focus di allenamento.",
@@ -273,7 +273,7 @@ translations = {
         "coach_tab_matches": "Match Management",
         "coach_tab_comments": "All Comments",
         "coach_tab_pairing": "Automatic Pair Pairing",
-        "squad_desc": "Edit squad data directly below. Changes save in real time and Commitment (%) is automatically recalculated.",
+        "squad_desc": "'Trainings' and 'Participated' are automatically synced with the Planned Training Calendar. Commitment (%) is recalculated in real time.",
         "col_name": "Name", "col_role": "Role", "col_hand": "Hand", "col_style": "Play Style", "col_trainings": "Trainings", "col_participated": "Participated", "col_commitment": "Commitment (%)",
         "work_groups": "Work Groups & Targeted Improvement",
         "work_groups_desc": "Automatic grouping of all players based on common weaknesses identified in coach evaluations (values ≤ 6).",
@@ -378,7 +378,7 @@ translations = {
         "coach_tab_matches": "Gestión de Partidos",
         "coach_tab_comments": "Todos los Comentarios",
         "coach_tab_pairing": "Emparejamiento Automático de Parejas",
-        "squad_desc": "Modifica directamente los datos de la plantilla a continuación. Los cambios se guardan en tiempo real y el Compromiso (%) se recalcula automáticamente.",
+        "squad_desc": "'Trainings' y 'Participated' se sincronizan automáticamente con el Calendario de Entrenamientos. El Compromiso (%) se recalcula en tiempo real.",
         "col_name": "Nombre", "col_role": "Rol", "col_hand": "Mano", "col_style": "Estilo", "col_trainings": "Entrenamientos", "col_participated": "Participado", "col_commitment": "Compromiso (%)",
         "work_groups": "Grupos de Trabajo y Mejora Dirigida",
         "work_groups_desc": "Agrupación automática de todos los jugadores basada en carencias comunes detectadas en las evaluaciones del entrenador (valores ≤ 6).",
@@ -478,7 +478,7 @@ translations = {
         "coach_tab_matches": "Matchhantering",
         "coach_tab_comments": "Alla Kommentarer",
         "coach_tab_pairing": "Automatiskt Parval",
-        "squad_desc": "Redigera trupdata direkt nedanför. Ändringar sparas i realtid och Engagemang (%) räknas om automatiskt.",
+        "squad_desc": "'Trainings' och 'Participated' synkroniseras automatiskt med träningskalendern. Engagemang (%) räknas om i realtid.",
         "col_name": "Namn", "col_role": "Roll", "col_hand": "Hand", "col_style": "Spelstil", "col_trainings": "Träningar", "col_participated": "Deltagit", "col_commitment": "Engagemang (%)",
         "work_groups": "Arbetsgrupper & Riktad Förbättring",
         "work_groups_desc": "Automatisk gruppering av alla spelare baserat på vanliga svagheter identifierade i coachbedömningar (värden ≤ 6).",
@@ -512,7 +512,7 @@ translations = {
         "select_available_players": "Välj tillgängliga spelare idag:",
         "run_pairing": "Generera Optimala Par med Tillgängliga",
         "pairing_err": "För att bilda par behöver du minst en vänsterspelare och en högerspelare bland de valda!",
-        "recommended_pairing": "Rekommenderat Parresultat (Topp 5 Lag):",
+        "recommended_pairing": "Rekommenderat Parresultat (Top 5 Lag):",
         "unmatched_warn": "Spelare som valdes men utelämnades denna omgång på grund av numerisk obalans mellan Höger och Vänster:"
     },
     "Nederlands": {
@@ -578,7 +578,7 @@ translations = {
         "coach_tab_matches": "Wedstrijdbeheer",
         "coach_tab_comments": "Alle Opmerkingen",
         "coach_tab_pairing": "Automatische Koppelindeling",
-        "squad_desc": "Bewerk selectiegegevens direct hieronder. Wijzigingen worden in realtime opgeslagen en Betrokkenheid (%) wordt automatisch herberekend.",
+        "squad_desc": "'Trainings' en 'Participated' worden automatisch gesynchroniseerd met de trainingskalender. Betrokkenheid (%) wordt in realtime herberekend.",
         "col_name": "Naam", "col_role": "Rol", "col_hand": "Hand", "col_style": "Stijl", "col_trainings": "Trainingen", "col_participated": "Deelgenomen", "col_commitment": "Betrokkenheid (%)",
         "work_groups": "Werkgroepen & Gerichte Verbetering",
         "work_groups_desc": "Automatische groepering van alle spelers op basis van veelvoorkomende zwakke punten gedetectererd in coachevaluaties (waarden ≤ 6).",
@@ -678,7 +678,7 @@ translations = {
         "coach_tab_matches": "Kampstyring",
         "coach_tab_comments": "Alle Kommentarer",
         "coach_tab_pairing": "Automatisk Makkerparring",
-        "squad_desc": "Rediger trupdata direkte nedenfor. Ændringer gemmes i realtid og Engagement (%) genberegnes automatisk.",
+        "squad_desc": "'Trainings' og 'Participated' synkroniseres automatisk med træningskalenderen. Engagement (%) genberegnes i realtid.",
         "col_name": "Navn", "col_role": "Rolle", "col_hand": "Hånd", "col_style": "Stil", "col_trainings": "Träninger", "col_participated": "Deltaget", "col_commitment": "Engagement (%)",
         "work_groups": "Arbejdsgrupper & Målrettet Forbedring",
         "work_groups_desc": "Automatisk gruppering af alle spillere baseret på almindelige svagheder fundet i trænerevalueringer (værdier ≤ 6).",
@@ -1176,6 +1176,9 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         st.session_state.squad_data = sorted(st.session_state.squad_data, key=lambda x: x['fname'])
         squad_players = st.session_state.squad_data
         
+        # Calcolo automatico di Trainings totale dal calendario salvato
+        total_scheduled_trainings = len(st.session_state.planned_trainings)
+        
         th_cols = st.columns([1.8, 1.2, 1.2, 1.4, 0.9, 0.9, 0.9])
         with th_cols[0]: st.markdown(lang_dict['col_name'])
         with th_cols[1]: st.markdown(lang_dict['col_role'])
@@ -1189,6 +1192,22 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         for idx, p in enumerate(squad_players):
             col_n, col_r, col_h, col_s, col_t, col_p, col_c = st.columns([1.8, 1.2, 1.2, 1.4, 0.9, 0.9, 0.9])
             
+            # Calcolo automatico delle partecipazioni reali basato sullo storico del calendario
+            player_first_name = p['fname']
+            participated_count = 0
+            for session in st.session_state.planned_trainings:
+                attendees_str = session.get("Partecipanti", "")
+                if player_first_name in attendees_str:
+                    participated_count += 1
+            
+            # Se ci sono allenamenti programmati, usiamo i valori automatici, altrimenti fallback sui valori base
+            if total_scheduled_trainings > 0:
+                calc_trainings = total_scheduled_trainings
+                calc_participated = participated_count
+            else:
+                calc_trainings = int(p.get("trainings", 1))
+                calc_participated = int(p.get("participated", 1))
+
             with col_n:
                 st.markdown(f"**{p['fname']} {p['lname']}**")
             with col_r:
@@ -1201,20 +1220,20 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 idx_st = styles_list.index(curr_st) if curr_st in styles_list else 2
                 new_st = st.selectbox("Style", styles_list, index=idx_st, key=f"style_{idx}", label_visibility="collapsed")
             with col_t:
-                new_tr = st.number_input("Trainings", min_value=0, max_value=50, value=int(p.get("trainings", 1)), key=f"tr_{idx}", label_visibility="collapsed")
+                # Mostriamo il valore calcolato automaticamente (disabilitato o informativo)
+                st.markdown(f"<div style='padding-top: 8px; text-align: center; font-weight: bold;'>{calc_trainings}</div>", unsafe_allow_html=True)
             with col_p:
-                new_pa = st.number_input("Participated", min_value=0, max_value=50, value=int(p.get("participated", 1)), key=f"pa_{idx}", label_visibility="collapsed")
+                st.markdown(f"<div style='padding-top: 8px; text-align: center; font-weight: bold;'>{calc_participated}</div>", unsafe_allow_html=True)
             with col_c:
-                pct_calc = int(round((new_pa / new_tr) * 100)) if new_tr > 0 else 0
+                pct_calc = int(round((calc_participated / calc_trainings) * 100)) if calc_trainings > 0 else 0
                 st.markdown(f"<div style='padding-top: 8px; font-weight: bold; text-align: center; color: {'#2ecc71' if pct_calc >= 70 else '#e74c3c'};'>{pct_calc}%</div>", unsafe_allow_html=True)
             
-            if p["side"] != new_side or p.get("hand") != new_hand or p.get("play_style") != new_st or p.get("trainings") != new_tr or p.get("participated") != new_pa:
-                p["side"] = new_side
-                p["hand"] = new_hand
-                p["play_style"] = new_st
-                p["trainings"] = new_tr
-                p["participated"] = new_pa
-                st.rerun()
+            # Aggiornamento dei dati in background
+            p["side"] = new_side
+            p["hand"] = new_hand
+            p["play_style"] = new_st
+            p["trainings"] = calc_trainings
+            p["participated"] = calc_participated
 
         st.markdown("---")
         st.subheader(f"🎯 {lang_dict['work_groups']}")
@@ -1371,6 +1390,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         "3° Priorità": coach_choice_p3
                     })
                     st.success(f"🎉 Allenamento salvato con successo per il giorno {training_date}!")
+                    st.rerun()
 
             # Visualizzazione dello Storico Calendario Allenamenti Pianificati
             st.markdown("---")
