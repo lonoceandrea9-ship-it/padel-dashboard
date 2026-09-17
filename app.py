@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Streamlit page configuration
 st.set_page_config(
@@ -497,11 +497,6 @@ translations = {
         "tech_skills_coach": "Tekniska Färdigheter (Coach)",
         "mental_skills_coach": "Mentala Färdigheter (Coach)",
         "save_coach_eval": "Spara Betyg, Profil och Coachanteckning",
-        "training_title": "Träningsplanering & Rekommenderat Fokus",
-        "training_desc": "Välj de spelare som deltar i dagens pass. Appen analyserar deras coachbetyg för att lyfta fram de områden där gruppen är svagast totalt.",
-        "select_attendees": "Välj deltagare till dagens pass:",
-        "training_priorities": "🎯 Rekommenderade Träningsprioriteringar för Gruppen",
-        "training_no_attendees": "Välj minst en spelare för att visa träningsfokus.",
         "match_mgmt": "Matchregistrering",
         "match_mgmt_desc": "Välj spelare för varje lag (varje lag kräver 1 Vänsterspelare och 1 Högerspelare).",
         "match_date": "Matchdatum",
@@ -522,7 +517,7 @@ translations = {
         "select_available_players": "Välj tillgängliga spelare idag:",
         "run_pairing": "Generera Optimala Par med Tillgängliga",
         "pairing_err": "För att bilda par behöver du minst en vänsterspelare och en högerspelare bland de valda!",
-        "recommended_pairing": "Rekommenderat Parresultat (Topp 5 Lag):",
+        "recommended_pairing": "Rekommenderat Parresultat (Top 5 Lag):",
         "unmatched_warn": "Spelare som valdes men utelämnades denna omgång på grund av numerisk obalans mellan Höger och Vänster:"
     },
     "Nederlands": {
@@ -602,11 +597,6 @@ translations = {
         "tech_skills_coach": "Technische Vaardigheden (Coach)",
         "mental_skills_coach": "Mentale Vaardigheden (Coach)",
         "save_coach_eval": "Cijfers, Profiel en Coachnotitie Opslaan",
-        "training_title": "Trainingsplanning & Aanbevolen Focus",
-        "training_desc": "Selecteer de spelers die deelnemen aan de sessie van vandaag. De app analyseert hun coachcijfers om te markeren waar de groep over het algemeen het zwakst is.",
-        "select_attendees": "Selecteer de aanwezigen voor de sessie van vandaag:",
-        "training_priorities": "🎯 Aanbevolen Trainingsprioriteiten voor de Groep",
-        "training_no_attendees": "Selecteer ten minste één speler om de trainingsfocus te bekijken.",
         "match_mgmt": "Wedstrijdregistratie",
         "match_mgmt_desc": "Selecteer spelers voor elk team (elk team vereist 1 Linkerspeler en 1 Rechterspeler).",
         "match_date": "Wedstrijddatum",
@@ -707,11 +697,6 @@ translations = {
         "tech_skills_coach": "Tekniske Færdigheder (Træner)",
         "mental_skills_coach": "Mentale Færdigheder (Træner)",
         "save_coach_eval": "Gem Karakterer, Profil og Trænernote",
-        "training_title": "Træningsplanlægning & Anbefalet Fokus",
-        "training_desc": "Vælg de spillere, der deltager i dagens session. Appen analyserer deres trænerkarakterer for at fremhæve de områder, hvor gruppen er svagest generelt.",
-        "select_attendees": "Vælg deltagere til dagens session:",
-        "training_priorities": "🎯 Anbefalede Træningsprioriteter for Gruppen",
-        "training_no_attendees": "Vælg venligst mindst én spiller for at se træningsfokus.",
         "match_mgmt": "Kampregistrering",
         "match_mgmt_desc": "Vælg spillere til hvert hold (hvert hold kræver 1 Venstrespiller og 1 Højrespiller).",
         "match_date": "Kampdato",
@@ -1357,10 +1342,13 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     st.metric(label="💡 3° Priorità", value=top_priorities[2][0], delta=f"Media gruppo: {round(top_priorities[2][1], 1)}/10", delta_color="inverse")
             
             st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown("#### 📊 Tabella Completa delle Medie del Gruppo Presente")
+            st.markdown("#### 📊 Top 5 Aree di Debolezza del Gruppo Presente")
+            
+            # Limitiamo rigorosamente ai primi 5 risultati
+            top_5_skills = sorted_skills[:5]
             
             training_table_data = []
-            for skill, avg_val in sorted_skills:
+            for skill, avg_val in top_5_skills:
                 cat_type = "Tecnica" if skill in TECH_SKILLS else "Mentale"
                 training_table_data.append({
                     "Competenza": skill,
@@ -1370,6 +1358,45 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 
             df_training = pd.DataFrame(training_table_data)
             st.markdown(df_training.to_html(escape=False, index=False, classes="custom-table"), unsafe_allow_html=True)
+            
+            st.markdown("---")
+            st.markdown("#### 📅 Calendario Programmazione Mercoledì (Fino a Gennaio 2027)")
+            st.markdown("Tabella riepilogativa con le date di tutti i mercoledì (dal prossimo fino a gennaio 2027) e le relative 3 priorità di allenamento basate sui partecipanti selezionati:")
+            
+            # Generazione automatica di tutti i mercoledì fino a gennaio 2027
+            # Data di partenza: oggi (17 settembre 2026) o prossimo mercoledì
+            start_date = datetime(2026, 9, 16) # Il primo mercoledì utile o corrente
+            current_day = datetime.now()
+            
+            # Troviamo il prossimo mercoledì a partire da oggi
+            days_ahead = 2 - current_day.weekday() # Mercoledì = 2
+            if days_ahead <= 0:
+                days_ahead += 7
+            next_wednesday = current_day + timedelta(days=days_ahead)
+            
+            end_date = datetime(2027, 1, 31) # Fine gennaio 2027
+            
+            wednesdays_list = []
+            curr_w = next_wednesday
+            while curr_w <= end_date:
+                wednesdays_list.append(curr_w.strftime("%Y-%m-%d"))
+                curr_w += timedelta(days=7)
+                
+            calendar_rows = []
+            for w_date in wednesdays_list:
+                p1 = top_priorities[0][0] if len(top_priorities) > 0 else "-"
+                p2 = top_priorities[1][0] if len(top_priorities) > 1 else "-"
+                p3 = top_priorities[2][0] if len(top_priorities) > 2 else "-"
+                
+                calendar_rows.append({
+                    "Data Mercoledì": w_date,
+                    "1° Priorità": p1,
+                    "2° Priorità": p2,
+                    "3° Priorità": p3
+                })
+                
+            df_calendar = pd.DataFrame(calendar_rows)
+            st.markdown(df_calendar.to_html(escape=False, index=False, classes="custom-table"), unsafe_allow_html=True)
             
         else:
             st.info(lang_dict['training_no_attendees'])
