@@ -128,6 +128,7 @@ translations = {
         "logout": "Esci",
         "tech_skills": "Competenze Tecniche",
         "mental_skills": "Attitudine e Tattica (Mentali)",
+        "mental_list": ["Attitudine positiva / Supporto partner", "Consistenza gioco", "Gestione errori", "Posizionamento", "Resistenza", "Intensità", "Coachability"],
         "partners_tab": "Ranking Partner",
         "history_tab": "Storico & Miglioramenti",
         "comments_tab": "Commenti & Feedback",
@@ -228,6 +229,7 @@ translations = {
         "logout": "Logout",
         "tech_skills": "Technical Skills",
         "mental_skills": "Attitude & Tactics (Mental)",
+        "mental_list": ["Positive Attitude / Partner Support", "Game Consistency", "Error Management", "Positioning", "Stamina", "Intensity", "Coachability"],
         "partners_tab": "Partner Ranking",
         "history_tab": "History & Improvements",
         "comments_tab": "Comments & Feedback",
@@ -328,6 +330,7 @@ translations = {
         "logout": "Salir",
         "tech_skills": "Habilidades Técnicas",
         "mental_skills": "Actitud y Táctica (Mentales)",
+        "mental_list": ["Actitud positiva / Apoyo al compañero", "Consistencia de juego", "Gestión de errores", "Posicionamiento", "Resistencia", "Intensidad", "Coachability"],
         "partners_tab": "Ranking de Compañeros",
         "history_tab": "Historial y Mejoras",
         "comments_tab": "Comentarios y Feedback",
@@ -428,6 +431,7 @@ translations = {
         "logout": "Logga ut",
         "tech_skills": "Tekniska färdigheter",
         "mental_skills": "Attityd & Taktik (Mentalt)",
+        "mental_list": ["Positiv attityd / Partnersupport", "Spelkonsistens", "Felhantering", "Positionering", "Uthållighet", "Intensitet", "Coachability"],
         "partners_tab": "Partnerranking",
         "history_tab": "Historik & Förbättringar",
         "comments_tab": "Kommentarer & Feedback",
@@ -528,6 +532,7 @@ translations = {
         "logout": "Uitloggen",
         "tech_skills": "Technische vaardigheden",
         "mental_skills": "Houding & Tactiek (Mentaal)",
+        "mental_list": ["Positieve houding / Partnersupport", "Spelconsistensie", "Foutenbeheer", "Positionering", "Uithoudingsvermogen", "Intensiteit", "Coachability"],
         "partners_tab": "Partner Ranking",
         "history_tab": "Geschiedenis & Verbeteringen",
         "comments_tab": "Opmerkingen & Feedback",
@@ -628,6 +633,7 @@ translations = {
         "logout": "Log ud",
         "tech_skills": "Tekniske færdigheder",
         "mental_skills": "Holdning & Taktik (Mentalt)",
+        "mental_list": ["Positiv holdning / Partnersupport", "Spelkonsistens", "Fejlhåndtering", "Positionering", "Utholdendhed", "Intensitet", "Coachability"],
         "partners_tab": "Partnerranking",
         "history_tab": "Historik & Forbedringer",
         "comments_tab": "Kommentarer & Feedback",
@@ -709,8 +715,6 @@ translations = {
 
 # --- LISTA DELLE SKILLS AGGIORNATE ---
 TECH_SKILLS = ["Volley", "Bandeja", "Remate", "Smash", "Bajada", "Chiquita", "Lob"]
-MENTAL_SKILLS = ["Attitudine positiva", "Supporto partner", "Gestione errori", "Posizionamento", "Resistenza", "Intensità", "Coachability"]
-ALL_SKILLS = TECH_SKILLS + MENTAL_SKILLS
 
 # --- INIZIALIZZAZIONE STATO ---
 if "language" not in st.session_state:
@@ -724,6 +728,11 @@ if "authenticated_coach" not in st.session_state:
 
 if "authenticated_player" not in st.session_state:
     st.session_state.authenticated_player = None
+
+# Recupero dizionario lingua corrente per le mental skills dinamiche
+lang_dict = translations.get(st.session_state.language, translations["Italiano"])
+MENTAL_SKILLS = lang_dict["mental_list"]
+ALL_SKILLS = TECH_SKILLS + MENTAL_SKILLS
 
 # Lista giocatori
 if "squad_data" not in st.session_state:
@@ -816,6 +825,8 @@ with st.sidebar:
             st.rerun()
 
 lang_dict = translations.get(st.session_state.language, translations["Italiano"])
+MENTAL_SKILLS = lang_dict["mental_list"]
+ALL_SKILLS = TECH_SKILLS + MENTAL_SKILLS
 
 # --- HOME SELECTION ---
 if st.session_state.nav_mode == "Home":
