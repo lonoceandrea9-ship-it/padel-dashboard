@@ -11,7 +11,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- CUSTOM CSS: SFONDO BLU SCURO, TESTO BIANCO, HEADER, BOTTONI E TABELLE PERSONALIZZATI ---
+# --- CUSTOM CSS: SFONDO BLU SCURO, TESTO BIANCO, HEADER, BOTTONI E TABELLE STILIZZATE ---
 st.markdown("""
     <style>
     /* Sfondo generale dell'applicazione */
@@ -52,7 +52,7 @@ st.markdown("""
         color: white !important;
     }
 
-    /* Tutti i bottoni Esci / Logout / Torna alla Home in Blu scuro (inclusi login giocatore/allenatore) */
+    /* Tutti i bottoni Esci / Logout / Torna alla Home in Blu scuro */
     .element-container:has(button:contains("Esci")) button,
     .element-container:has(button:contains("Logout")) button,
     .element-container:has(button:contains("Torna alla Home")) button,
@@ -62,7 +62,6 @@ st.markdown("""
         border-color: #1d4ed8 !important;
     }
     
-    /* Forza lo stile blu scuro per il bottone secondario/Torna alla Home nei form di login */
     div.stFormSubmitButton > button, 
     button[kind="secondary"] {
         background-color: #2563eb !important;
@@ -83,28 +82,36 @@ st.markdown("""
         color: #ffffff !important;
     }
 
-    /* Stile personalizzato per le tabelle / data_editor in tema scuro */
-    div[data-testid="stDataFrame"] > div, div[data-testid="stTable"] {
+    /* --- STILE TABELLE HTML PERSONALIZZATE IN TEMA SCURO --- */
+    .custom-table {
+        width: 100%;
+        border-collapse: collapse;
         background-color: #1b263b !important;
-        border: 1px solid #334155 !important;
-        border-radius: 8px;
-    }
-    
-    table {
         color: #ffffff !important;
-        background-color: #1b263b !important;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #334155;
+        margin-bottom: 20px;
     }
     
-    th {
+    .custom-table th {
         background-color: #0d1b2a !important;
         color: #ffffff !important;
+        padding: 12px;
+        text-align: left;
         border-bottom: 2px solid #334155 !important;
+        font-weight: 600;
     }
     
-    td {
+    .custom-table td {
         background-color: #1b263b !important;
         color: #ffffff !important;
+        padding: 10px 12px;
         border-bottom: 1px solid #334155 !important;
+    }
+    
+    .custom-table tr:hover {
+        background-color: #24344d !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -160,7 +167,7 @@ if "authenticated_coach" not in st.session_state:
 if "authenticated_player" not in st.session_state:
     st.session_state.authenticated_player = None
 
-# Lista giocatori con supporto per mano, stile di gioco e note coach
+# Lista giocatori
 if "squad_data" not in st.session_state:
     st.session_state.squad_data = [
         {"fname": "Álvaro", "lname": "Gomez", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1,
@@ -480,11 +487,11 @@ elif st.session_state.nav_mode == "Player_Dashboard":
         t_col1, t_col2 = st.columns(2)
         with t_col1:
             st.markdown("#### 🎾 Caratteristiche Tecniche")
-            st.markdown(pd.DataFrame(diff_tech_rows).to_html(escape=False, index=False), unsafe_allow_html=True)
+            st.markdown(pd.DataFrame(diff_tech_rows).to_html(escape=False, index=False, classes="custom-table"), unsafe_allow_html=True)
             
         with t_col2:
             st.markdown("#### 🧠 Caratteristiche Mentali")
-            st.markdown(pd.DataFrame(diff_mental_rows).to_html(escape=False, index=False), unsafe_allow_html=True)
+            st.markdown(pd.DataFrame(diff_mental_rows).to_html(escape=False, index=False, classes="custom-table"), unsafe_allow_html=True)
 
     with tab_partners:
         st.subheader("🏆 Gestione Ranking Partner (Fino a 5)")
@@ -514,7 +521,8 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                 
         st.markdown("### Classifica Attuale:")
         if current_player.get("partners"):
-            st.table(pd.DataFrame(list(current_player["partners"].items()), columns=["Compagno", "Match / Preferenza"]).sort_values(by="Match / Preferenza", ascending=False).reset_index(drop=True))
+            df_part = pd.DataFrame(list(current_player["partners"].items()), columns=["Compagno", "Match / Preferenza"]).sort_values(by="Match / Preferenza", ascending=False).reset_index(drop=True)
+            st.markdown(df_part.to_html(escape=False, index=False, classes="custom-table"), unsafe_allow_html=True)
         else:
             st.info("Nessun partner configurato.")
 
@@ -578,79 +586,40 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
     
     with coach_tab1:
         st.subheader("👥 Elenco Intero Giocatori, Ruoli e Presenze")
-        st.markdown("Modifica direttamente qui il **Role (Left/Right)**, la **Mano (Destro/Mancino)**, lo **Stile di Gioco (Play Style)**, i **Trainings** e i **Participated**. La colonna **Commitment (%)** si aggiorna in tempo reale.")
+        st.markdown("Modifica direttamente qui sotto i dati della squadra. I cambiamenti si salvano in tempo reale.")
         
-        df_summary_data = []
-        for p in squad_players:
-            t = int(p.get("trainings", 1))
-            part = int(p.get("participated", 1))
-            pct_val = int(round((part / t) * 100)) if t > 0 else 0
-            df_summary_data.append({
-                "Nome": p["fname"],
-                "Cognome": p["lname"],
-                "Role": p["side"],
-                "Mano": p.get("hand", "Destro"),
-                "Play Style": p.get("play_style", "equilibrated"),
-                "Trainings": t,
-                "Participated": part,
-                "Commitment (%)": f"{pct_val}%"
-            })
-        
-        df_editable = pd.DataFrame(df_summary_data)
-        
-        edited_df = st.data_editor(
-            df_editable,
-            column_config={
-                "Role": st.column_config.SelectboxColumn(
-                    "Role (Side)",
-                    options=["Left", "Right"],
-                    required=True
-                ),
-                "Mano": st.column_config.SelectboxColumn(
-                    "Mano",
-                    options=["Destro", "Mancino"],
-                    required=True
-                ),
-                "Play Style": st.column_config.SelectboxColumn(
-                    "Play Style",
-                    options=["offensive", "defensive", "equilibrated", "counterattack"],
-                    required=True
-                ),
-                "Trainings": st.column_config.NumberColumn("Trainings", min_value=0, max_value=50, step=1),
-                "Participated": st.column_config.NumberColumn("Participated", min_value=0, max_value=50, step=1),
-                "Commitment (%)": st.column_config.TextColumn("Commitment (%)", disabled=True)
-            },
-            hide_index=True,
-            use_container_width=True,
-            height=600,
-            key="coach_squad_editor"
-        )
-        
-        has_changed = False
-        for idx, row in edited_df.iterrows():
-            curr_t = int(row["Trainings"])
-            curr_p = int(row["Participated"])
-            curr_role = row["Role"]
-            curr_hand = row["Mano"]
-            curr_style = row["Play Style"]
-            
-            if (curr_t != squad_players[idx]["trainings"] or 
-                curr_p != squad_players[idx]["participated"] or 
-                curr_role != squad_players[idx]["side"] or
-                curr_hand != squad_players[idx].get("hand", "Destro") or
-                curr_style != squad_players[idx].get("play_style", "equilibrated")):
+        # Form di modifica rapida con selectbox e input nativi in stile scuro coerente
+        with st.form("squad_edit_form"):
+            updated_squad = []
+            for idx, p in enumerate(squad_players):
+                col_n, col_r, col_h, col_s, col_t, col_p = st.columns([2, 1.2, 1.2, 1.5, 1, 1])
                 
-                squad_players[idx]["side"] = curr_role
-                squad_players[idx]["hand"] = curr_hand
-                squad_players[idx]["play_style"] = curr_style
-                squad_players[idx]["trainings"] = curr_t
-                squad_players[idx]["participated"] = curr_p
-                calc_pct = int(round((curr_p / curr_t) * 100)) if curr_t > 0 else 0
-                squad_players[idx]["commitment"] = f"{calc_pct}%"
-                has_changed = True
-
-        if has_changed:
-            st.rerun()
+                with col_n:
+                    st.markdown(f"**{p['fname']} {p['lname']}**")
+                with col_r:
+                    new_side = st.selectbox("Role", ["Left", "Right"], index=0 if p["side"]=="Left" else 1, key=f"side_{idx}")
+                with col_h:
+                    new_hand = st.selectbox("Mano", ["Destro", "Mancino"], index=0 if p.get("hand","Destro")=="Destro" else 1, key=f"hand_{idx}")
+                with col_s:
+                    styles_list = ["offensive", "defensive", "equilibrated", "counterattack"]
+                    curr_st = p.get("play_style", "equilibrated")
+                    idx_st = styles_list.index(curr_st) if curr_st in styles_list else 2
+                    new_st = st.selectbox("Style", styles_list, index=idx_st, key=f"style_{idx}")
+                with col_t:
+                    new_tr = st.number_input("Trainings", min_value=0, max_value=50, value=int(p.get("trainings", 1)), key=f"tr_{idx}")
+                with col_p:
+                    new_pa = st.number_input("Participated", min_value=0, max_value=50, value=int(p.get("participated", 1)), key=f"pa_{idx}")
+                
+                p["side"] = new_side
+                p["hand"] = new_hand
+                p["play_style"] = new_st
+                p["trainings"] = new_tr
+                p["participated"] = new_pa
+            
+            st.markdown("---")
+            if st.form_submit_button("Salva Modifiche Squadra", type="primary"):
+                st.success("✅ Modifiche salvate con successo!")
+                st.rerun()
 
         st.markdown("---")
         st.subheader("🎯 Gruppi di Lavoro e Miglioramento Mirato")
@@ -779,7 +748,8 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     
         if st.session_state.match_results:
             st.markdown("### 📋 Storico Partite Registrate")
-            st.table(pd.DataFrame(st.session_state.match_results))
+            df_matches = pd.DataFrame(st.session_state.match_results)
+            st.markdown(df_matches.to_html(escape=False, index=False, classes="custom-table"), unsafe_allow_html=True)
 
     with coach_tab3:
         st.subheader("💬 Vista Globale Note & Commenti")
@@ -895,7 +865,8 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     })
                 
                 if pair_results_df:
-                    st.table(pd.DataFrame(pair_results_df))
+                    df_pairs = pd.DataFrame(pair_results_df)
+                    st.markdown(df_pairs.to_html(escape=False, index=False, classes="custom-table"), unsafe_allow_html=True)
                 else:
                     st.info("Nessuna coppia generabile con i giocatori selezionati.")
                     
