@@ -62,51 +62,51 @@ if "authenticated_coach" not in st.session_state:
 if "authenticated_player" not in st.session_state:
     st.session_state.authenticated_player = None
 
-# Lista completa e ufficiale di tutti i 19 giocatori
+# Lista completa e ufficiale di tutti i 19 giocatori con i dati esatti dell'immagine
 if "squad_data" not in st.session_state:
     st.session_state.squad_data = [
-        {"fname": "Álvaro", "lname": "Gomez", "side": "Left", "trainings": 4, "participated": 4,
+        {"fname": "Álvaro", "lname": "Gomez", "side": "Left", "trainings": 1, "participated": 1,
          "tech": [7, 7, 6, 7, 6, 6, 7], "mental": [8, 7, 7, 7, 8, 7], "c_tech": [6, 6, 5, 6, 5, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6], "history": [], "partners": {"Yannik Langeslag": 12, "Josu Usabiaga": 8}, "comments": []},
-        {"fname": "Yannik", "lname": "Langeslag", "side": "Left", "trainings": 4, "participated": 4,
+        {"fname": "Yannik", "lname": "Langeslag", "side": "Left", "trainings": 1, "participated": 1,
          "tech": [8, 6, 7, 7, 7, 5, 6], "mental": [7, 6, 8, 6, 7, 6], "c_tech": [7, 5, 6, 6, 6, 4, 5], "c_mental": [6, 5, 7, 5, 6, 5], "history": [], "partners": {"Álvaro Gomez": 12}, "comments": []},
-        {"fname": "Josu", "lname": "Usabiaga", "side": "Right", "trainings": 4, "participated": 3,
+        {"fname": "Josu", "lname": "Usabiaga", "side": "Right", "trainings": 1, "participated": 1,
          "tech": [6, 8, 7, 7, 6, 7, 7], "mental": [6, 8, 6, 8, 7, 7], "c_tech": [5, 7, 6, 6, 5, 6, 6], "c_mental": [5, 7, 5, 7, 6, 6], "history": [], "partners": {"Álvaro Gomez": 8}, "comments": []},
-        {"fname": "Benjamin", "lname": "Thyrell", "side": "Left", "trainings": 4, "participated": 4,
+        {"fname": "Benjamin", "lname": "Thyrell", "side": "Left", "trainings": 1, "participated": 1,
          "tech": [7, 7, 8, 6, 7, 6, 7], "mental": [8, 7, 7, 7, 8, 7], "c_tech": [6, 6, 7, 5, 6, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6], "history": [], "partners": {}, "comments": []},
-        {"fname": "Alexander", "lname": "Wennstam", "side": "Left", "trainings": 4, "participated": 4,
+        {"fname": "Alexander", "lname": "Wennstam", "side": "Left", "trainings": 1, "participated": 1,
          "tech": [8, 8, 7, 7, 8, 6, 7], "mental": [7, 7, 8, 8, 7, 7], "c_tech": [7, 7, 6, 6, 7, 5, 6], "c_mental": [6, 6, 7, 7, 6, 6], "history": [], "partners": {}, "comments": []},
-        {"fname": "Andrea", "lname": "Lonoce", "side": "Right", "trainings": 4, "participated": 4,
+        {"fname": "Andrea", "lname": "Lonoce", "side": "Right", "trainings": 1, "participated": 1,
          "tech": [8, 7, 8, 7, 9, 6, 8], "mental": [9, 7, 8, 8, 9, 7], "c_tech": [8, 7, 8, 7, 9, 6, 8], "c_mental": [9, 7, 8, 8, 9, 7], "history": [], "partners": {"Alexander Wennstam": 14}, "comments": []},
-        {"fname": "Mikkel", "lname": "Hoff", "side": "Right", "trainings": 4, "participated": 2,
+        {"fname": "Mikkel", "lname": "Hoff", "side": "Right", "trainings": 1, "participated": 1,
          "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5], "history": [], "partners": {}, "comments": []},
-        {"fname": "Pedro", "lname": "Rios", "side": "Right", "trainings": 4, "participated": 3,
+        {"fname": "Pedro", "lname": "Rios", "side": "Right", "trainings": 1, "participated": 1,
          "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7], "history": [], "partners": {}, "comments": []},
-        {"fname": "Hector", "lname": "Guerrero", "side": "Right", "trainings": 4, "participated": 4,
+        {"fname": "Hector", "lname": "Guerrero", "side": "Right", "trainings": 1, "participated": 1,
          "tech": [7, 7, 7, 7, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 6, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6], "history": [], "partners": {}, "comments": []},
-        {"fname": "Gonzalo", "lname": "Diez de Onate", "side": "Left", "trainings": 4, "participated": 2,
+        {"fname": "Gonzalo", "lname": "Diez de Onate", "side": "Left", "trainings": 1, "participated": 1,
          "tech": [8, 7, 8, 7, 8, 6, 7], "mental": [8, 7, 8, 8, 8, 7], "c_tech": [7, 6, 7, 6, 7, 5, 6], "c_mental": [7, 6, 7, 7, 7, 6], "history": [], "partners": {}, "comments": []},
-        {"fname": "Julio", "lname": "Morales", "side": "Right", "trainings": 4, "participated": 3,
+        {"fname": "Julio", "lname": "Morales", "side": "Right", "trainings": 1, "participated": 1,
          "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5], "history": [], "partners": {}, "comments": []},
-        {"fname": "Lars", "lname": "Mikkelsen", "side": "Left", "trainings": 4, "participated": 1,
+        {"fname": "Lars", "lname": "Mikkelsen", "side": "Left", "trainings": 1, "participated": 0,
          "tech": [7, 7, 7, 6, 8, 6, 7], "mental": [8, 7, 7, 7, 8, 7], "c_tech": [6, 6, 6, 5, 7, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6], "history": [], "partners": {}, "comments": []},
-        {"fname": "Joahn", "lname": "Lohman", "side": "Left", "trainings": 4, "participated": 1,
+        {"fname": "Joahn", "lname": "Lohman", "side": "Left", "trainings": 1, "participated": 0,
          "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5], "history": [], "partners": {}, "comments": []},
-        {"fname": "Nacho", "lname": "Saracho", "side": "Right", "trainings": 4, "participated": 2,
+        {"fname": "Nacho", "lname": "Saracho", "side": "Right", "trainings": 1, "participated": 0,
          "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7], "history": [], "partners": {}, "comments": []},
-        {"fname": "Peter", "lname": "Gustafsson", "side": "Left", "trainings": 4, "participated": 2,
+        {"fname": "Peter", "lname": "Gustafsson", "side": "Left", "trainings": 1, "participated": 0,
          "tech": [7, 7, 7, 6, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6], "history": [], "partners": {}, "comments": []},
-        {"fname": "Juanjo", "lname": "Lopez Benitez", "side": "Left", "trainings": 4, "participated": 2,
+        {"fname": "Juanjo", "lname": "Lopez Benitez", "side": "Left", "trainings": 1, "participated": 0,
          "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7], "history": [], "partners": {}, "comments": []},
-        {"fname": "Sascha", "lname": "Van De Bilt", "side": "Right", "trainings": 4, "participated": 1,
+        {"fname": "Sascha", "lname": "Van De Bilt", "side": "Right", "trainings": 1, "participated": 0,
          "tech": [7, 7, 7, 6, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6], "history": [], "partners": {}, "comments": []},
-        {"fname": "Fernando", "lname": "Oribe", "side": "Right", "trainings": 4, "participated": 1,
+        {"fname": "Fernando", "lname": "Oribe", "side": "Right", "trainings": 1, "participated": 0,
          "tech": [8, 7, 8, 7, 8, 6, 7], "mental": [8, 7, 8, 8, 8, 7], "c_tech": [7, 6, 7, 6, 7, 5, 6], "c_mental": [7, 6, 7, 7, 7, 6], "history": [], "partners": {}, "comments": []},
-        {"fname": "Doug", "lname": "Ramsay", "side": "Left", "trainings": 4, "participated": 1,
+        {"fname": "Doug", "lname": "Ramsay", "side": "Left", "trainings": 1, "participated": 0,
          "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5], "history": [], "partners": {}, "comments": []}
     ]
     for p in st.session_state.squad_data:
-        if "trainings" not in p: p["trainings"] = 4
-        if "participated" not in p: p["participated"] = 2
+        if "trainings" not in p: p["trainings"] = 1
+        if "participated" not in p: p["participated"] = 1
         if len(p["tech"]) != len(TECH_SKILLS): p["tech"] = [7] * len(TECH_SKILLS)
         if len(p["mental"]) != len(MENTAL_SKILLS): p["mental"] = [7] * len(MENTAL_SKILLS)
         if len(p["c_tech"]) != len(TECH_SKILLS): p["c_tech"] = [6] * len(TECH_SKILLS)
@@ -429,12 +429,12 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
     
     with coach_tab1:
         st.subheader("👥 Elenco Intero Giocatori, Parametri e Presenze")
-        st.markdown("Modifica direttamente qui sotto i **Trainings** e i **Participated** di tutti i giocatori della rosa. La percentuale di **Commitment** verrà calcolata automaticamente in base alle presenze.")
+        st.markdown("Modifica direttamente qui sotto i **Trainings** e i **Participated** di tutti i 19 giocatori. La percentuale di **Commitment** verrà calcolata automaticamente.")
         
         df_summary_data = []
         for p in squad_players:
-            t = p.get("trainings", 4)
-            part = p.get("participated", 2)
+            t = p.get("trainings", 1)
+            part = p.get("participated", 1)
             comm_val = f"{int((part / t) * 100)}%" if t > 0 else "0%"
             df_summary_data.append({
                 "Nome": p["fname"],
@@ -447,7 +447,6 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         
         df_editable = pd.DataFrame(df_summary_data)
         
-        # Mostriamo la tabella interattiva con altezza sufficiente per contenere tutti i 19 giocatori
         edited_df = st.data_editor(
             df_editable,
             column_config={
@@ -458,7 +457,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             },
             hide_index=True,
             use_container_width=True,
-            height=600,
+            height=650,
             key="coach_squad_editor"
         )
         
