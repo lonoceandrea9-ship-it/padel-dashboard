@@ -307,6 +307,11 @@ translations = {
         "tech_skills_coach": "Technical Skills (Coach)",
         "mental_skills_coach": "Mental Skills (Coach)",
         "save_coach_eval": "Save Grades, Profile and Coach Note",
+        "training_title": "Training & Focus",
+        "training_desc": "Select participants. The system suggests priority areas. The coach can modify them, choose the date, and confirm saving to the calendar.",
+        "select_attendees": "Select session attendees:",
+        "training_priorities": "🎯 System Recommended Priority Areas",
+        "training_no_attendees": "Select at least one player to view training focus.",
         "match_mgmt": "Match Registration",
         "match_mgmt_desc": "Select players for each team (each team requires 1 Left player and 1 Right player).",
         "match_date": "Match Date",
@@ -408,6 +413,11 @@ translations = {
         "tech_skills_coach": "Habilidades Técnicas (Entrenador)",
         "mental_skills_coach": "Habilidades Mentales (Entrenador)",
         "save_coach_eval": "Guardar Notas, Perfil y Nota del Entrenador",
+        "training_title": "Entrenamiento y Enfoque",
+        "training_desc": "Selecciona los participantes. El sistema sugiere áreas prioritarias. El entrenador puede modificarlas, elegir la fecha y confirmar el guardado en el calendario.",
+        "select_attendees": "Selecciona los participantes de la sesión:",
+        "training_priorities": "🎯 Áreas Prioritarias Recomendadas por el Sistema",
+        "training_no_attendees": "Selecciona al menos un jugador para ver el enfoque de entrenamiento.",
         "match_mgmt": "Registro de Partidos",
         "match_mgmt_desc": "Selecciona los jugadores para cada equipo (cada equipo requiere 1 jugador de Izquierda y 1 de Derecha).",
         "match_date": "Fecha del Partido",
@@ -509,6 +519,11 @@ translations = {
         "tech_skills_coach": "Tekniska Färdigheter (Coach)",
         "mental_skills_coach": "Mentala Färdigheter (Coach)",
         "save_coach_eval": "Spara Betyg, Profil och Coachanteckning",
+        "training_title": "Träning & Fokus",
+        "training_desc": "Välj deltagare. Systemet föreslår prioriterade områden. Coachen kan ändra dem, välja datum och bekräfta sparandet i kalendern.",
+        "select_attendees": "Välj mötesdeltagare:",
+        "training_priorities": "🎯 Systemets Rekommenderade Prioriterade Områden",
+        "training_no_attendees": "Välj minst en spelare för att se träningsfokus.",
         "match_mgmt": "Matchregistrering",
         "match_mgmt_desc": "Välj spelare för varje lag (varje lag kräver 1 Vänsterspelare och 1 Högerspelare).",
         "match_date": "Matchdatum",
@@ -610,6 +625,11 @@ translations = {
         "tech_skills_coach": "Technische Vaardigheden (Coach)",
         "mental_skills_coach": "Mentale Vaardigheden (Coach)",
         "save_coach_eval": "Cijfers, Profiel en Coachnotitie Opslaan",
+        "training_title": "Training & Focus",
+        "training_desc": "Selecteer deelnemers. Het systeem suggereert prioritaire gebieden. De coach kan deze wijzigen, de datum kiezen en het opslaan in de kalender bevestigen.",
+        "select_attendees": "Selecteer sessiedeelnemers:",
+        "training_priorities": "🎯 Door het systeem aanbevolen prioritaire gebieden",
+        "training_no_attendees": "Selecteer ten minste één speler om de trainingsfocus te bekijken.",
         "match_mgmt": "Wedstrijdregistratie",
         "match_mgmt_desc": "Selecteer spelers voor elk team (elk team vereist 1 Linkerspeler en 1 Rechterspeler).",
         "match_date": "Wedstrijddatum",
@@ -711,6 +731,11 @@ translations = {
         "tech_skills_coach": "Tekniske Færdigheder (Træner)",
         "mental_skills_coach": "Mentale Færdigheder (Træner)",
         "save_coach_eval": "Gem Karakterer, Profil og Trænernote",
+        "training_title": "Træning & Fokus",
+        "training_desc": "Vælg deltagere. Systemet foreslår prioriterede områder. Træneren kan ændre dem, vælge dato og bekræfte lagring i kalenderen.",
+        "select_attendees": "Vælg mødedeltagere:",
+        "training_priorities": "🎯 Systemets Anbefalede Prioriterede Områder",
+        "training_no_attendees": "Vælg mindst én spiller for at se træningsfokus.",
         "match_mgmt": "Kampregistrering",
         "match_mgmt_desc": "Vælg spillere til hvert hold (hvert hold kræver 1 Venstrespiller og 1 Højrespiller).",
         "match_date": "Kampdato",
@@ -736,7 +761,7 @@ translations = {
     }
 }
 
-# --- LISTE DELLE SKILLS ---
+# --- LISTA DELLE SKILLS ---
 TECH_SKILLS = ["Volley", "Bandeja", "Remate", "Smash", "Bajada", "Chiquita", "Lob"]
 
 # --- INIZIALIZZAZIONE STATO PROTETTA ---
@@ -763,7 +788,7 @@ if "match_results" not in st.session_state:
 
 # Caricamento sicuro di MENTAL_SKILLS basato sulla lingua attiva nello state
 lang_dict = translations.get(st.session_state.language, translations["Italiano"])
-MENTAL_SKILLS = lang_dict["mental_list"]
+MENTAL_SKILLS = lang_dict.get("mental_list", translations["Italiano"]["mental_list"])
 ALL_SKILLS = TECH_SKILLS + MENTAL_SKILLS
 
 if "squad_data" not in st.session_state:
@@ -842,78 +867,77 @@ with st.sidebar:
     st.markdown("---")
     if st.session_state.authenticated_coach:
         st.success("🔒 Coach Logged In")
-        if st.button(lang_dict["logout"]):
+        if st.button(lang_dict.get("logout", "Logout")):
             st.session_state.authenticated_coach = False
             st.session_state.nav_mode = "Home"
             st.rerun()
     elif st.session_state.authenticated_player:
         st.success(f"👤 Player: {st.session_state.authenticated_player}")
-        if st.button(lang_dict["logout"]):
+        if st.button(lang_dict.get("logout", "Logout")):
             st.session_state.authenticated_player = None
             st.session_state.nav_mode = "Home"
             st.rerun()
 
-# Ricarichiamo lang_dict e MENTAL_SKILLS anche qui per sicurezza dopo la sidebar
 lang_dict = translations.get(st.session_state.language, translations["Italiano"])
-MENTAL_SKILLS = lang_dict["mental_list"]
+MENTAL_SKILLS = lang_dict.get("mental_list", translations["Italiano"]["mental_list"])
 ALL_SKILLS = TECH_SKILLS + MENTAL_SKILLS
 
 # --- HOME SELECTION ---
 if st.session_state.nav_mode == "Home":
-    st.title(f"🎾 {lang_dict['welcome']}")
-    st.markdown(lang_dict['select_area'])
+    st.title(f"🎾 {lang_dict.get('welcome', 'Nac Team Performance App')}")
+    st.markdown(lang_dict.get('select_area', 'Select area:'))
     
     col_home1, col_home2 = st.columns(2)
     with col_home1:
-        st.markdown(f"### 👤 {lang_dict['player_area']}")
-        st.markdown(lang_dict['player_desc'])
-        if st.button(lang_dict['player_btn'], use_container_width=True, type="primary"):
+        st.markdown(f"### 👤 {lang_dict.get('player_area', 'Player Area')}")
+        st.markdown(lang_dict.get('player_desc', ''))
+        if st.button(lang_dict.get('player_btn', 'Player Login'), use_container_width=True, type="primary"):
             st.session_state.nav_mode = "Player_Login"
             st.rerun()
             
     with col_home2:
-        st.markdown(f"### 📋 {lang_dict['coach_area']}")
-        st.markdown(lang_dict['coach_desc'])
-        if st.button(lang_dict['coach_btn'], use_container_width=True, type="primary"):
+        st.markdown(f"### 📋 {lang_dict.get('coach_area', 'Coach Area')}")
+        st.markdown(lang_dict.get('coach_desc', ''))
+        if st.button(lang_dict.get('coach_btn', 'Coach Login'), use_container_width=True, type="primary"):
             st.session_state.nav_mode = "Coach_Login"
             st.rerun()
 
 # --- LOGIN GIOCATORE ---
 elif st.session_state.nav_mode == "Player_Login":
-    st.title(f"🔐 {lang_dict['login_player_title']}")
-    st.markdown(lang_dict['login_player_sub'])
+    st.title(f"🔐 {lang_dict.get('login_player_title', 'Player Login')}")
+    st.markdown(lang_dict.get('login_player_sub', ''))
     
     player_options = [f"{p['fname']} {p['lname']} ({p['side']})" for p in squad_players]
-    selected_player_str = st.selectbox(lang_dict['profile_select'], player_options)
+    selected_player_str = st.selectbox(lang_dict.get('profile_select', 'Select profile:'), player_options)
     selected_fname = selected_player_str.split(" ")[0]
     
-    player_pwd_input = st.text_input(lang_dict['pwd_label'], type="password")
+    player_pwd_input = st.text_input(lang_dict.get('pwd_label', 'Password'), type="password")
     
     col_pl1, col_pl2 = st.columns(2)
     with col_pl1:
-        if st.button(lang_dict['enter_card'], type="primary", use_container_width=True):
+        if st.button(lang_dict.get('enter_card', 'Enter'), type="primary", use_container_width=True):
             if player_pwd_input.strip().lower() == selected_fname.lower():
                 st.session_state.authenticated_player = selected_fname
                 st.session_state.nav_mode = "Player_Dashboard"
                 st.rerun()
             else:
-                st.error(f"❌ {lang_dict['wrong_pwd']}")
+                st.error(f"❌ {lang_dict.get('wrong_pwd', 'Wrong password')}")
     with col_pl2:
-        if st.button(lang_dict['back_home'], use_container_width=True):
+        if st.button(lang_dict.get('back_home', 'Back'), use_container_width=True):
             st.session_state.nav_mode = "Home"
             st.rerun()
 
 # --- LOGIN ALLENATORE ---
 elif st.session_state.nav_mode == "Coach_Login":
-    st.title(f"🔒 {lang_dict['coach_login_title']}")
-    st.markdown(lang_dict['coach_login_sub'])
+    st.title(f"🔒 {lang_dict.get('coach_login_title', 'Coach Login')}")
+    st.markdown(lang_dict.get('coach_login_sub', ''))
     
     COACH_PASSWORD = "padelcoach2026"
-    pwd_input = st.text_input(lang_dict['coach_pwd_label'], type="password")
+    pwd_input = st.text_input(lang_dict.get('coach_pwd_label', 'Password'), type="password")
     
     col_btn1, col_btn2 = st.columns(2)
     with col_btn1:
-        if st.button(lang_dict['verify_pwd'], type="primary", use_container_width=True):
+        if st.button(lang_dict.get('verify_pwd', 'Verify'), type="primary", use_container_width=True):
             if pwd_input == COACH_PASSWORD:
                 st.session_state.authenticated_coach = True
                 st.session_state.nav_mode = "Coach"
@@ -921,7 +945,7 @@ elif st.session_state.nav_mode == "Coach_Login":
             else:
                 st.error("❌ Password errata! Riprova.")
     with col_btn2:
-        if st.button(lang_dict['back_home'], use_container_width=True):
+        if st.button(lang_dict.get('back_home', 'Back'), use_container_width=True):
             st.session_state.nav_mode = "Home"
             st.rerun()
 
@@ -934,7 +958,7 @@ elif st.session_state.nav_mode == "Player_Dashboard":
         st.title(f"👤 {current_player['fname']} {current_player['lname']} ({current_player['side']})")
     with col_top2:
         st.markdown("<div style='text-align: right;'>", unsafe_allow_html=True)
-        if st.button(lang_dict['logout'], use_container_width=False):
+        if st.button(lang_dict.get('logout', 'Logout'), use_container_width=False):
             st.session_state.authenticated_player = None
             st.session_state.nav_mode = "Home"
             st.rerun()
@@ -943,15 +967,15 @@ elif st.session_state.nav_mode == "Player_Dashboard":
     st.markdown("---")
     
     tab_eval, tab_partners, tab_history, tab_comments = st.tabs([
-        f"📊 {lang_dict['eval_coach_tab']}", 
-        f"🏆 {lang_dict['partners_tab']}", 
-        f"📈 {lang_dict['history_tab']}", 
-        f"💬 {lang_dict['comments_tab']}"
+        f"📊 {lang_dict.get('eval_coach_tab', 'Evaluation')}", 
+        f"🏆 {lang_dict.get('partners_tab', 'Partners')}", 
+        f"📈 {lang_dict.get('history_tab', 'History')}", 
+        f"💬 {lang_dict.get('comments_tab', 'Comments')}"
     ])
     
     with tab_eval:
-        st.subheader(f"📊 {lang_dict['eval_coach_tab']}")
-        st.markdown(lang_dict['eval_desc'])
+        st.subheader(f"📊 {lang_dict.get('eval_coach_tab', 'Evaluation')}")
+        st.markdown(lang_dict.get('eval_desc', ''))
         
         style_options = ["Offensive", "Defensive", "Equilibrated", "Counterattack"]
         
@@ -961,7 +985,7 @@ elif st.session_state.nav_mode == "Player_Dashboard":
         new_mental_vals = []
         
         with col_eval_left:
-            st.markdown(f"**{lang_dict['tech_skills']}**")
+            st.markdown(f"**{lang_dict.get('tech_skills', 'Technical Skills')}**")
             for i, skill in enumerate(TECH_SKILLS):
                 c1, c2 = st.columns(2)
                 with c1:
@@ -971,7 +995,7 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                     st.slider(f"Coach - {skill}", 1, 10, int(current_player['c_tech'][i]), disabled=True, key=f"c_tech_view_{i}")
 
         with col_eval_right:
-            st.markdown(f"**{lang_dict['mental_skills']}**")
+            st.markdown(f"**{lang_dict.get('mental_skills', 'Mental Skills')}**")
             for i, skill in enumerate(MENTAL_SKILLS):
                 c1, c2 = st.columns(2)
                 with c1:
@@ -983,17 +1007,17 @@ elif st.session_state.nav_mode == "Player_Dashboard":
         st.markdown("---")
         current_p_style = current_player.get("player_play_style", "Equilibrated")
         if current_p_style not in style_options: current_p_style = "Equilibrated"
-        new_player_style = st.selectbox(lang_dict['style_select_lbl'], options=style_options, index=style_options.index(current_p_style))
+        new_player_style = st.selectbox(lang_dict.get('style_select_lbl', 'Play Style:'), options=style_options, index=style_options.index(current_p_style))
                 
-        if st.button(lang_dict['save_eval'], type="primary"):
+        if st.button(lang_dict.get('save_eval', 'Save'), type="primary"):
             current_player['tech'] = new_tech_vals
             current_player['mental'] = new_mental_vals
             current_player['player_play_style'] = new_player_style
-            st.success(lang_dict['eval_saved'])
+            st.success(lang_dict.get('eval_saved', 'Saved!'))
             st.rerun()
 
         st.markdown("---")
-        st.subheader(f"🕸️ {lang_dict['radar_title']}")
+        st.subheader(f"🕸️ {lang_dict.get('radar_title', 'Radar Charts')}")
         
         all_skills_labels = TECH_SKILLS + MENTAL_SKILLS
         player_full_vals = current_player['tech'] + current_player['mental']
@@ -1006,9 +1030,9 @@ elif st.session_state.nav_mode == "Player_Dashboard":
         radar_col1, radar_col2 = st.columns(2)
         
         with radar_col1:
-            st.markdown(f"### {lang_dict['player_radar_title']}")
+            st.markdown(f"### {lang_dict.get('player_radar_title', 'Player Radar')}")
             p_style_display = current_player.get("player_play_style", "Equilibrated")
-            st.markdown(f"**{lang_dict['play_style_lbl']}** {p_style_display}")
+            st.markdown(f"**{lang_dict.get('play_style_lbl', 'Play Style:')}** {p_style_display}")
             
             fig_player = go.Figure()
             fig_player.add_trace(go.Scatterpolar(
@@ -1034,9 +1058,9 @@ elif st.session_state.nav_mode == "Player_Dashboard":
             st.plotly_chart(fig_player, use_container_width=True)
             
         with radar_col2:
-            st.markdown(f"### {lang_dict['coach_radar_title']}")
+            st.markdown(f"### {lang_dict.get('coach_radar_title', 'Coach Radar')}")
             play_style_display = current_player.get("play_style", "Equilibrated")
-            st.markdown(f"**{lang_dict['play_style_lbl']}** {play_style_display}")
+            st.markdown(f"**{lang_dict.get('play_style_lbl', 'Play Style:')}** {play_style_display}")
             
             fig_coach = go.Figure()
             fig_coach.add_trace(go.Scatterpolar(
@@ -1062,7 +1086,7 @@ elif st.session_state.nav_mode == "Player_Dashboard":
             st.plotly_chart(fig_coach, use_container_width=True)
 
         st.markdown("---")
-        st.subheader(f"📋 {lang_dict['diff_tables']}")
+        st.subheader(f"📋 {lang_dict.get('diff_tables', 'Difference Tables')}")
         
         diff_tech_rows = []
         for i, skill in enumerate(TECH_SKILLS):
@@ -1096,15 +1120,15 @@ elif st.session_state.nav_mode == "Player_Dashboard":
 
         t_col1, t_col2 = st.columns(2)
         with t_col1:
-            st.markdown(f"#### 🎾 {lang_dict['tech_feat']}")
+            st.markdown(f"#### 🎾 {lang_dict.get('tech_feat', 'Technical Features')}")
             st.markdown(pd.DataFrame(diff_tech_rows).to_html(escape=False, index=False, classes="custom-table"), unsafe_allow_html=True)
             
         with t_col2:
-            st.markdown(f"#### 🧠 {lang_dict['mental_feat']}")
+            st.markdown(f"#### 🧠 {lang_dict.get('mental_feat', 'Mental Features')}")
             st.markdown(pd.DataFrame(diff_mental_rows).to_html(escape=False, index=False, classes="custom-table"), unsafe_allow_html=True)
 
     with tab_partners:
-        st.subheader(f"🏆 {lang_dict['partner_mgmt']}")
+        st.subheader(f"🏆 {lang_dict.get('partner_mgmt', 'Partner Management')}")
         all_colleagues = [f"{p['fname']} {p['lname']}" for p in squad_players if p['fname'] != current_player['fname']]
         current_partners = current_player.get("partners", {})
         
@@ -1124,44 +1148,44 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                 if p_sel:
                     new_partners_dict[p_sel] = p_score
                     
-            if st.form_submit_button(lang_dict['save_partners'], type="primary"):
+            if st.form_submit_button(lang_dict.get('save_partners', 'Save Partners'), type="primary"):
                 current_player["partners"] = new_partners_dict
-                st.success(lang_dict['partners_saved'])
+                st.success(lang_dict.get('partners_saved', 'Saved!'))
                 st.rerun()
                 
-        st.markdown(f"### {lang_dict['current_ranking']}")
+        st.markdown(f"### {lang_dict.get('current_ranking', 'Current Ranking:')}")
         if current_player.get("partners"):
             df_part = pd.DataFrame(list(current_player["partners"].items()), columns=["Compagno", "Match / Preferenza"]).sort_values(by="Match / Preferenza", ascending=False).reset_index(drop=True)
             st.markdown(df_part.to_html(escape=False, index=False, classes="custom-table"), unsafe_allow_html=True)
         else:
-            st.info(lang_dict['no_partners'])
+            st.info(lang_dict.get('no_partners', 'No partners.'))
 
     with tab_history:
-        st.subheader(f"📈 {lang_dict['history_title']}")
+        st.subheader(f"📈 {lang_dict.get('history_title', 'History')}")
         history_records = current_player.get("history", [])
         if history_records:
             for idx, hist in enumerate(history_records):
                 st.markdown(f"**Aggiornamento #{idx+1} ({hist.get('date', '')})**")
                 st.json(hist.get('values'))
         else:
-            st.info(lang_dict['no_history'])
+            st.info(lang_dict.get('no_history', 'No history.'))
 
     with tab_comments:
-        st.subheader(f"💬 {lang_dict['comments_tab']}")
+        st.subheader(f"💬 {lang_dict.get('comments_tab', 'Comments')}")
         
-        st.markdown(f"### 📋 {lang_dict['official_note']}")
+        st.markdown(f"### 📋 {lang_dict.get('official_note', 'Official Note')}")
         coach_note_val = current_player.get("coach_note", "")
         if coach_note_val.strip():
             st.info(coach_note_val)
         else:
-            st.markdown(f"*{lang_dict['no_coach_note']}*")
+            st.markdown(f"*{lang_dict.get('no_coach_note', 'No note.')}*")
             
         st.markdown("---")
-        st.subheader(f"💬 {lang_dict['peer_feedback']}")
+        st.subheader(f"💬 {lang_dict.get('peer_feedback', 'Peer Feedback')}")
         target_colleagues = [f"{p['fname']} {p['lname']}" for p in squad_players if p['fname'] != current_player['fname']]
-        selected_target = st.selectbox(lang_dict['select_partner_lbl'], target_colleagues)
-        comment_text = st.text_area(lang_dict['note_on_partner'])
-        if st.button(lang_dict['send_note']):
+        selected_target = st.selectbox(lang_dict.get('select_partner_lbl', 'Select partner:'), target_colleagues)
+        comment_text = st.text_area(lang_dict.get('note_on_partner', 'Note:'))
+        if st.button(lang_dict.get('send_note', 'Send')):
             if comment_text.strip():
                 target_p = next((p for p in squad_players if f"{p['fname']} {p['lname']}" == selected_target), None)
                 if target_p:
@@ -1170,11 +1194,11 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                         "text": comment_text,
                         "date": datetime.now().strftime("%Y-%m-%d %H:%M")
                     })
-                    st.success(lang_dict['note_sent'])
+                    st.success(lang_dict.get('note_sent', 'Sent!'))
             else:
-                st.warning(lang_dict['empty_note_warn'])
+                st.warning(lang_dict.get('empty_note_warn', 'Cannot be empty.'))
         
-        st.markdown(f"### {lang_dict['received_lbl']}")
+        st.markdown(f"### {lang_dict.get('received_lbl', 'Received:')}")
         for c in current_player.get("comments", []):
             st.info(f"**Da {c['from']}** ({c['date']}): {c['text']}")
 
@@ -1183,16 +1207,16 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
     # --- INTESTAZIONE E PULSANTI A DESTRA ---
     col_title, col_btn_roster, col_btn_exit = st.columns([4, 1.8, 1.8])
     with col_title:
-        st.title(f"📋 {lang_dict['coach_dash_title']}")
+        st.title(f"📋 {lang_dict.get('coach_dash_title', 'Coach Dashboard')}")
     with col_btn_roster:
         st.markdown("<div style='padding-top: 15px;'>", unsafe_allow_html=True)
-        if st.button(lang_dict['manage_roster_btn'], use_container_width=True):
+        if st.button(lang_dict.get('manage_roster_btn', 'Manage Squad'), use_container_width=True):
             st.session_state.show_roster_modal = not st.session_state.show_roster_modal
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
     with col_btn_exit:
         st.markdown("<div style='padding-top: 15px;'>", unsafe_allow_html=True)
-        if st.button(lang_dict['exit_coach'], use_container_width=True):
+        if st.button(lang_dict.get('exit_coach', 'Exit'), use_container_width=True):
             st.session_state.authenticated_coach = False
             st.session_state.show_roster_modal = False
             st.session_state.nav_mode = "Home"
@@ -1256,18 +1280,18 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         st.markdown("---")
         
     coach_tab1, coach_tab_evals, coach_tab_training, coach_tab2, coach_tab3, coach_tab_pairing = st.tabs([
-        f"👥 {lang_dict['coach_tab_squad']}", 
-        f"✏️ {lang_dict['coach_tab_evals']}",
-        f"🎾 {lang_dict['coach_tab_training']}",
-        f"📅 {lang_dict['coach_tab_matches']}", 
-        f"💬 {lang_dict['coach_tab_comments']}",
-        f"🤖 {lang_dict['coach_tab_pairing']}"
+        f"👥 {lang_dict.get('coach_tab_squad', 'Squad')}", 
+        f"✏️ {lang_dict.get('coach_tab_evals', 'Grades')}",
+        f"🎾 {lang_dict.get('coach_tab_training', 'Training')}",
+        f"📅 {lang_dict.get('coach_tab_matches', 'Matches')}", 
+        f"💬 {lang_dict.get('coach_tab_comments', 'Comments')}",
+        f"🤖 {lang_dict.get('coach_tab_pairing', 'Pairing')}"
     ])
     
     with coach_tab1:
-        st.subheader(f"👥 {lang_dict['coach_tab_squad']}")
+        st.subheader(f"👥 {lang_dict.get('coach_tab_squad', 'Squad Management & Attendance')}")
         st.markdown(f"Totale giocatori presenti: **{len(squad_players)}**")
-        st.markdown(lang_dict['squad_desc'])
+        st.markdown(lang_dict.get('squad_desc', ''))
         
         st.session_state.squad_data = sorted(st.session_state.squad_data, key=lambda x: x['fname'])
         squad_players = st.session_state.squad_data
@@ -1275,13 +1299,13 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         total_scheduled_trainings = len(st.session_state.planned_trainings)
         
         th_cols = st.columns([1.8, 1.2, 1.2, 1.4, 0.9, 0.9, 0.9])
-        with th_cols[0]: st.markdown(lang_dict['col_name'])
-        with th_cols[1]: st.markdown(lang_dict['col_role'])
-        with th_cols[2]: st.markdown(lang_dict['col_hand'])
-        with th_cols[3]: st.markdown(lang_dict['col_style'])
-        with th_cols[4]: st.markdown(lang_dict['col_trainings'])
-        with th_cols[5]: st.markdown(lang_dict['col_participated'])
-        with th_cols[6]: st.markdown(f"<div style='text-align: center;'>{lang_dict['col_commitment']}</div>", unsafe_allow_html=True)
+        with th_cols[0]: st.markdown(lang_dict.get('col_name', 'Name'))
+        with th_cols[1]: st.markdown(lang_dict.get('col_role', 'Role'))
+        with th_cols[2]: st.markdown(lang_dict.get('col_hand', 'Hand'))
+        with th_cols[3]: st.markdown(lang_dict.get('col_style', 'Style'))
+        with th_cols[4]: st.markdown(lang_dict.get('col_trainings', 'Trainings'))
+        with th_cols[5]: st.markdown(lang_dict.get('col_participated', 'Participated'))
+        with th_cols[6]: st.markdown(f"<div style='text-align: center;'>{lang_dict.get('col_commitment', 'Commitment (%)')}</div>", unsafe_allow_html=True)
         st.markdown("---")
 
         for idx, p in enumerate(squad_players):
@@ -1327,8 +1351,8 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             p["participated"] = calc_participated
 
         st.markdown("---")
-        st.subheader(f"🎯 {lang_dict['work_groups']}")
-        st.markdown(lang_dict['work_groups_desc'])
+        st.subheader(f"🎯 {lang_dict.get('work_groups', 'Work Groups')}")
+        st.markdown(lang_dict.get('work_groups_desc', ''))
         
         skill_groups = {skill: [] for skill in ALL_SKILLS}
         for p in squad_players:
@@ -1349,13 +1373,13 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                             st.markdown(f"- {m}")
                 col_idx += 1
         else:
-            st.info(lang_dict['no_critics'])
+            st.info(lang_dict.get('no_critics', 'No criticalities.'))
 
     with coach_tab_evals:
-        st.subheader(f"✏️ {lang_dict['coach_eval_title']}")
-        st.markdown(lang_dict['coach_eval_desc'])
+        st.subheader(f"✏️ {lang_dict.get('coach_eval_title', 'Coach Grades')}")
+        st.markdown(lang_dict.get('coach_eval_desc', ''))
         
-        selected_player_name = st.selectbox(lang_dict['select_player_eval'], [f"{p['fname']} {p['lname']}" for p in squad_players], key="coach_eval_select")
+        selected_player_name = st.selectbox(lang_dict.get('select_player_eval', 'Select player:'), [f"{p['fname']} {p['lname']}" for p in squad_players], key="coach_eval_select")
         p_obj = next((p for p in squad_players if f"{p['fname']} {p['lname']}" == selected_player_name), None)
         
         if p_obj:
@@ -1365,16 +1389,16 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 if current_style not in style_options:
                     current_style = "Equilibrated"
                 
-                st.markdown(f"### {lang_dict['coach_eval_sub_title']}")
+                st.markdown(f"### {lang_dict.get('coach_eval_sub_title', 'Coach Evaluation')}")
                 selected_style = st.selectbox(
-                    lang_dict['play_style_lbl'],
+                    lang_dict.get('play_style_lbl', 'Play Style:'),
                     options=style_options,
                     index=style_options.index(current_style)
                 )
                 
                 st.markdown("---")
-                st.markdown(f"📝 **{lang_dict['coach_note_lbl']}**")
-                new_coach_note = st.text_area(lang_dict['coach_note_placeholder'], value=p_obj.get("coach_note", ""), key="coach_note_input")
+                st.markdown(f"📝 **{lang_dict.get('coach_note_lbl', 'Coach Note')}**")
+                new_coach_note = st.text_area(lang_dict.get('coach_note_placeholder', 'Write note...'), value=p_obj.get("coach_note", ""), key="coach_note_input")
                 
                 st.markdown("---")
                 col_c_left, col_c_right = st.columns(2)
@@ -1383,18 +1407,18 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 c_mental_new = []
                 
                 with col_c_left:
-                    st.markdown(f"🎾 *{lang_dict['tech_skills_coach']}*")
+                    st.markdown(f"🎾 *{lang_dict.get('tech_skills_coach', 'Technical Skills')}*")
                     for idx, t_label in enumerate(TECH_SKILLS):
                         val = st.slider(f"Coach - {t_label}", 1, 10, int(p_obj['c_tech'][idx]), key=f"scoach_tech_{idx}")
                         c_tech_new.append(val)
                 
                 with col_c_right:
-                    st.markdown(f"🧠 *{lang_dict['mental_skills_coach']}*")
+                    st.markdown(f"🧠 *{lang_dict.get('mental_skills_coach', 'Mental Skills')}*")
                     for idx, m_label in enumerate(MENTAL_SKILLS):
                         val = st.slider(f"Coach - {m_label}", 1, 10, int(p_obj['c_mental'][idx]), key=f"scoach_mental_{idx}")
                         c_mental_new.append(val)
                         
-                if st.form_submit_button(lang_dict['save_coach_eval'], type="primary"):
+                if st.form_submit_button(lang_dict.get('save_coach_eval', 'Save Grades'), type="primary"):
                     p_obj.setdefault("history", []).append({
                         "date": datetime.now().strftime("%Y-%m-%d %H:%M"),
                         "values": c_tech_new + c_mental_new
@@ -1406,12 +1430,12 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     st.success(f"✅ {selected_player_name} updated successfully!")
 
     with coach_tab_training:
-        st.subheader(f"🎾 {lang_dict['training_title']}")
-        st.markdown(lang_dict['training_desc'])
+        st.subheader(f"🎾 {lang_dict.get('training_title', 'Training Planning & Focus')}")
+        st.markdown(lang_dict.get('training_desc', ''))
         
         all_player_names = [f"{p['fname']} {p['lname']}" for p in squad_players]
         selected_attendees_names = st.multiselect(
-            lang_dict['select_attendees'],
+            lang_dict.get('select_attendees', 'Select attendees:'),
             options=all_player_names,
             default=all_player_names,
             key="captain_attendees_select"
@@ -1432,7 +1456,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             top_priorities_system = [s[0] for s in sorted_skills[:3]]
             
             st.markdown("---")
-            st.markdown(f"### {lang_dict['training_priorities']}")
+            st.markdown(f"### {lang_dict.get('training_priorities', 'System Recommended Priority Areas')}")
             st.markdown("Il sistema ha analizzato i voti del gruppo presente e suggerisce le seguenti 3 priorità:")
             
             col_p1, col_p2, col_p3 = st.columns(3)
@@ -1501,40 +1525,40 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 st.info("Nessun allenamento ancora confermato e salvato nel calendario.")
             
         else:
-            st.info(lang_dict['training_no_attendees'])
+            st.info(lang_dict.get('training_no_attendees', 'Select at least one player.'))
 
     with coach_tab2:
-        st.subheader(f"📅 {lang_dict['match_mgmt']}")
-        st.markdown(lang_dict['match_mgmt_desc'])
+        st.subheader(f"📅 {lang_dict.get('match_mgmt', 'Match Management')}")
+        st.markdown(lang_dict.get('match_mgmt_desc', ''))
         
         left_list = [f"{p['fname']} {p['lname']}" for p in squad_players if p['side'] == "Left"]
         right_list = [f"{p['fname']} {p['lname']}" for p in squad_players if p['side'] == "Right"]
         
         with st.form("match_form"):
-            m_date = st.date_input(lang_dict['match_date'], datetime.now())
+            m_date = st.date_input(lang_dict.get('match_date', 'Match Date'), datetime.now())
             
-            st.markdown(f"#### 🔵 {lang_dict['team_a']}")
+            st.markdown(f"#### 🔵 {lang_dict.get('team_a', 'Team A')}")
             col_ta1, col_ta2 = st.columns(2)
             with col_ta1:
-                team_a_left = st.selectbox(f"{lang_dict['team_a']} - {lang_dict['left_role']}", left_list, key="ta_left")
+                team_a_left = st.selectbox(f"{lang_dict.get('team_a', 'Team A')} - {lang_dict.get('left_role', 'Left')}", left_list, key="ta_left")
             with col_ta2:
-                team_a_right = st.selectbox(f"{lang_dict['team_a']} - {lang_dict['right_role']}", right_list, key="ta_right")
+                team_a_right = st.selectbox(f"{lang_dict.get('team_a', 'Team A')} - {lang_dict.get('right_role', 'Right')}", right_list, key="ta_right")
                 
-            st.markdown(f"#### 🔴 {lang_dict['team_b']}")
+            st.markdown(f"#### 🔴 {lang_dict.get('team_b', 'Team B')}")
             col_tb1, col_tb2 = st.columns(2)
             with col_tb1:
-                team_b_left = st.selectbox(f"{lang_dict['team_b']} - {lang_dict['left_role']}", left_list, key="tb_left")
+                team_b_left = st.selectbox(f"{lang_dict.get('team_b', 'Team B')} - {lang_dict.get('left_role', 'Left')}", left_list, key="tb_left")
             with col_tb2:
-                team_b_right = st.selectbox(f"{lang_dict['team_b']} - {lang_dict['right_role']}", right_list, key="tb_right")
+                team_b_right = st.selectbox(f"{lang_dict.get('team_b', 'Team B')} - {lang_dict.get('right_role', 'Right')}", right_list, key="tb_right")
                 
-            score = st.text_input(lang_dict['score_lbl'])
+            score = st.text_input(lang_dict.get('score_lbl', 'Result'))
             
-            if st.form_submit_button(lang_dict['register_match'], type="primary"):
+            if st.form_submit_button(lang_dict.get('register_match', 'Register Match'), type="primary"):
                 team_a_players = {team_a_left, team_a_right}
                 team_b_players = {team_b_left, team_b_right}
                 
                 if len(team_a_players) < 2 or len(team_b_players) < 2:
-                    st.error(f"⚠️ {lang_dict['same_player_err']}")
+                    st.error(f"⚠️ {lang_dict.get('same_player_err', 'Same player error')}")
                 else:
                     team_a_str = f"{team_a_left} / {team_a_right}"
                     team_b_str = f"{team_b_left} / {team_b_right}"
@@ -1545,15 +1569,15 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         "Team B": team_b_str,
                         "Risultato": score
                     })
-                    st.success(f"✅ {lang_dict['match_saved']}")
+                    st.success(f"✅ {lang_dict.get('match_saved', 'Saved!')}")
                     
         if st.session_state.match_results:
-            st.markdown(f"### 📋 {lang_dict['match_history']}")
+            st.markdown(f"### 📋 {lang_dict.get('match_history', 'Match History')}")
             df_matches = pd.DataFrame(st.session_state.match_results)
             st.markdown(df_matches.to_html(escape=False, index=False, classes="custom-table"), unsafe_allow_html=True)
 
     with coach_tab3:
-        st.subheader(f"💬 {lang_dict['global_comments']}")
+        st.subheader(f"💬 {lang_dict.get('global_comments', 'Global Comments')}")
         for p in squad_players:
             st.markdown(f"#### 👤 {p['fname']} {p['lname']} (Coach Style: {p.get('play_style', 'Equilibrated')} | Player Style: {p.get('player_play_style', 'Equilibrated')})")
             if p.get("coach_note"):
@@ -1568,14 +1592,14 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             st.markdown("---")
 
     with coach_tab_pairing:
-        st.subheader(f"🤖 {lang_dict['pairing_title']}")
-        st.markdown(lang_dict['pairing_desc'])
-        st.markdown(f"- {lang_dict['pairing_p1']}")
-        st.markdown(f"- {lang_dict['pairing_p2']}")
+        st.subheader(f"🤖 {lang_dict.get('pairing_title', 'Pairing Algorithm')}")
+        st.markdown(lang_dict.get('pairing_desc', ''))
+        st.markdown(f"- {lang_dict.get('pairing_p1', '')}")
+        st.markdown(f"- {lang_dict.get('pairing_p2', '')}")
         
         all_player_names = [f"{p['fname']} {p['lname']} ({p['side']})" for p in squad_players]
         selected_available_str = st.multiselect(
-            lang_dict['select_available_players'],
+            lang_dict.get('select_available_players', 'Select available players:'),
             options=all_player_names,
             default=all_player_names
         )
@@ -1592,9 +1616,9 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         with col_info2:
             st.info(f"➡️ **Right available: {len(right_players)}**\n" + ("\n".join([f"- {p['fname']} {p['lname']}" for p in right_players]) if right_players else "None"))
         
-        if st.button(lang_dict['run_pairing'], type="primary"):
+        if st.button(lang_dict.get('run_pairing', 'Run Pairing'), type="primary"):
             if not left_players or not right_players:
-                st.error(f"⚠️ {lang_dict['pairing_err']}")
+                st.error(f"⚠️ {lang_dict.get('pairing_err', 'Error')}")
             else:
                 def get_coach_score(player):
                     all_c = player['c_tech'] + player['c_mental']
@@ -1657,7 +1681,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 st.session_state.unmatched_cache = unmatched_l + unmatched_r
 
         if "final_pairs_cache" in st.session_state and st.session_state.final_pairs_cache:
-            st.markdown(f"### 🏆 {lang_dict['recommended_pairing']}")
+            st.markdown(f"### 🏆 {lang_dict.get('recommended_pairing', 'Recommended Pairing')}")
             
             available_left_names = [f"{p['fname']} {p['lname']}" for p in left_players]
             available_right_names = [f"{p['fname']} {p['lname']}" for p in right_players]
@@ -1723,6 +1747,6 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 st.success("Pairing confermato e salvato con successo!")
                 
             if "unmatched_cache" in st.session_state and st.session_state.unmatched_cache:
-                st.warning(f"⚠️ {lang_dict['unmatched_warn']}")
+                st.warning(f"⚠️ {lang_dict.get('unmatched_warn', 'Unmatched warning')}")
                 un_names = [f"{p['fname']} {p['lname']}" for p in st.session_state.unmatched_cache]
                 st.markdown("- " + "\n- ".join(un_names))
