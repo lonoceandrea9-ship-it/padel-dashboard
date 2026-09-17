@@ -39,13 +39,15 @@ st.markdown("""
         color: #ffffff !important;
     }
     
-    /* Pulsante specifico ACCEDI COME ALLENATORE (Rosso brillante nella Home) */
-    .element-container:has(button:contains("Allenatore")) button {
+    /* Pulsanti specifici di accesso (Allenatore e Giocatore) in rosso brillante nella Home */
+    .element-container:has(button:contains("Allenatore")) button,
+    .element-container:has(button:contains("Giocatore")) button {
         background-color: #dc2626 !important;
         color: white !important;
         border-color: #b91c1c !important;
     }
-    .element-container:has(button:contains("Allenatore")) button:hover {
+    .element-container:has(button:contains("Allenatore")) button:hover,
+    .element-container:has(button:contains("Giocatore")) button:hover {
         background-color: #b91c1c !important;
         color: white !important;
     }
@@ -213,7 +215,7 @@ if st.session_state.nav_mode == "Home":
     with col_home2:
         st.markdown(f"### 📋 {lang_dict['coach_area']}")
         st.markdown(lang_dict['coach_desc'])
-        if st.button(lang_dict['coach_btn'], use_container_width=True):
+        if st.button(lang_dict['coach_btn'], use_container_width=True, type="primary"):
             st.session_state.nav_mode = "Coach_Login"
             st.rerun()
 
