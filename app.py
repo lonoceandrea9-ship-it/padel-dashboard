@@ -1254,7 +1254,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         st.markdown("---")
         
     coach_tab1, coach_tab_evals, coach_tab_training, coach_tab2, coach_tab3, coach_tab_pairing = st.tabs([
-        f"👥 {lang_dict['coach_tab_squad']} ({len(squad_players)} giocatori)", 
+        f"👥 {lang_dict['coach_tab_squad']}", 
         f"✏️ {lang_dict['coach_tab_evals']}",
         f"🎾 {lang_dict['coach_tab_training']}",
         f"📅 {lang_dict['coach_tab_matches']}", 
@@ -1263,7 +1263,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
     ])
     
     with coach_tab1:
-        st.subheader(f"👥 {lang_dict['coach_tab_squad']}")
+        st.subheader(f"👥 Gestione Squadra & Presenze ({len(squad_players)} giocatori)")
         st.markdown(lang_dict['squad_desc'])
         
         st.session_state.squad_data = sorted(st.session_state.squad_data, key=lambda x: x['fname'])
