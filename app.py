@@ -118,9 +118,9 @@ translations = {
     }
 }
 
-# --- LISTA DELLE 13 SKILLS RICHIESTE ---
+# --- LISTA DELLE SKILLS AGGIORNATE ---
 TECH_SKILLS = ["Volley", "Bandeja", "Remate", "Smash", "Bajada", "Chiquita", "Lob"]
-MENTAL_SKILLS = ["Attitudine positiva", "Supporto partner", "Gestione errori", "Posizionamento", "Resistenza", "Intensità"]
+MENTAL_SKILLS = ["Attitudine positiva", "Supporto partner", "Gestione errori", "Posizionamento", "Resistenza", "Intensità", "Coachability"]
 ALL_SKILLS = TECH_SKILLS + MENTAL_SKILLS
 
 # --- INIZIALIZZAZIONE STATO ---
@@ -136,47 +136,47 @@ if "authenticated_coach" not in st.session_state:
 if "authenticated_player" not in st.session_state:
     st.session_state.authenticated_player = None
 
-# Lista giocatori aggiornata
+# Lista giocatori aggiornata con le lunghezze corrette per le nuove skill
 if "squad_data" not in st.session_state:
     st.session_state.squad_data = [
         {"fname": "Álvaro", "lname": "Gomez", "side": "Left", "trainings": 1, "participated": 1,
-         "tech": [7, 7, 6, 7, 6, 6, 7], "mental": [8, 7, 7, 7, 8, 7], "c_tech": [6, 6, 5, 6, 5, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6], "history": [], "partners": {"Yannik Langeslag": 12, "Josu Usabiaga": 8}, "comments": []},
+         "tech": [7, 7, 6, 7, 6, 6, 7], "mental": [8, 7, 7, 7, 8, 7, 8], "c_tech": [6, 6, 5, 6, 5, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6, 7], "history": [], "partners": {"Yannik Langeslag": 12, "Josu Usabiaga": 8}, "comments": []},
         {"fname": "Yannik", "lname": "Langeslag", "side": "Left", "trainings": 1, "participated": 1,
-         "tech": [8, 6, 7, 7, 7, 5, 6], "mental": [7, 6, 8, 6, 7, 6], "c_tech": [7, 5, 6, 6, 6, 4, 5], "c_mental": [6, 5, 7, 5, 6, 5], "history": [], "partners": {"Álvaro Gomez": 12}, "comments": []},
+         "tech": [8, 6, 7, 7, 7, 5, 6], "mental": [7, 6, 8, 6, 7, 6, 7], "c_tech": [7, 5, 6, 6, 6, 4, 5], "c_mental": [6, 5, 7, 5, 6, 5, 6], "history": [], "partners": {"Álvaro Gomez": 12}, "comments": []},
         {"fname": "Josu", "lname": "Usabiaga", "side": "Right", "trainings": 1, "participated": 1,
-         "tech": [6, 8, 7, 7, 6, 7, 7], "mental": [6, 8, 6, 8, 7, 7], "c_tech": [5, 7, 6, 6, 5, 6, 6], "c_mental": [5, 7, 5, 7, 6, 6], "history": [], "partners": {"Álvaro Gomez": 8}, "comments": []},
+         "tech": [6, 8, 7, 7, 6, 7, 7], "mental": [6, 8, 6, 8, 7, 7, 8], "c_tech": [5, 7, 6, 6, 5, 6, 6], "c_mental": [5, 7, 5, 7, 6, 6, 7], "history": [], "partners": {"Álvaro Gomez": 8}, "comments": []},
         {"fname": "Benjamin", "lname": "Thyrell", "side": "Left", "trainings": 1, "participated": 1,
-         "tech": [7, 7, 8, 6, 7, 6, 7], "mental": [8, 7, 7, 7, 8, 7], "c_tech": [6, 6, 7, 5, 6, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6], "history": [], "partners": {}, "comments": []},
+         "tech": [7, 7, 8, 6, 7, 6, 7], "mental": [8, 7, 7, 7, 8, 7, 8], "c_tech": [6, 6, 7, 5, 6, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6, 7], "history": [], "partners": {}, "comments": []},
         {"fname": "Alexander", "lname": "Wennstam", "side": "Left", "trainings": 1, "participated": 1,
-         "tech": [8, 8, 7, 7, 8, 6, 7], "mental": [7, 7, 8, 8, 7, 7], "c_tech": [7, 7, 6, 6, 7, 5, 6], "c_mental": [6, 6, 7, 7, 6, 6], "history": [], "partners": {}, "comments": []},
+         "tech": [8, 8, 7, 7, 8, 6, 7], "mental": [7, 7, 8, 8, 7, 7, 8], "c_tech": [7, 7, 6, 6, 7, 5, 6], "c_mental": [6, 6, 7, 7, 6, 6, 7], "history": [], "partners": {}, "comments": []},
         {"fname": "Andrea", "lname": "Lonoce", "side": "Right", "trainings": 1, "participated": 1,
-         "tech": [8, 7, 8, 7, 9, 6, 8], "mental": [9, 7, 8, 8, 9, 7], "c_tech": [8, 7, 8, 7, 9, 6, 8], "c_mental": [9, 7, 8, 8, 9, 7], "history": [], "partners": {"Alexander Wennstam": 14}, "comments": []},
+         "tech": [8, 7, 8, 7, 9, 6, 8], "mental": [9, 7, 8, 8, 9, 7, 9], "c_tech": [8, 7, 8, 7, 9, 6, 8], "c_mental": [9, 7, 8, 8, 9, 7, 9], "history": [], "partners": {"Alexander Wennstam": 14}, "comments": []},
         {"fname": "Mikkel", "lname": "Hoff", "side": "Right", "trainings": 1, "participated": 1,
-         "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5], "history": [], "partners": {}, "comments": []},
+         "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "history": [], "partners": {}, "comments": []},
         {"fname": "Pedro", "lname": "Rios", "side": "Right", "trainings": 1, "participated": 1,
-         "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7], "history": [], "partners": {}, "comments": []},
+         "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7, 7], "history": [], "partners": {}, "comments": []},
         {"fname": "Hector", "lname": "Guerrero", "side": "Right", "trainings": 1, "participated": 1,
-         "tech": [7, 7, 7, 7, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 6, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6], "history": [], "partners": {}, "comments": []},
+         "tech": [7, 7, 7, 7, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 6, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6, 6], "history": [], "partners": {}, "comments": []},
         {"fname": "Gonzalo", "lname": "Diez de Onate", "side": "Left", "trainings": 1, "participated": 1,
-         "tech": [8, 7, 8, 7, 8, 6, 7], "mental": [8, 7, 8, 8, 8, 7], "c_tech": [7, 6, 7, 6, 7, 5, 6], "c_mental": [7, 6, 7, 7, 7, 6], "history": [], "partners": {}, "comments": []},
+         "tech": [8, 7, 8, 7, 8, 6, 7], "mental": [8, 7, 8, 8, 8, 7, 8], "c_tech": [7, 6, 7, 6, 7, 5, 6], "c_mental": [7, 6, 7, 7, 7, 6, 7], "history": [], "partners": {}, "comments": []},
         {"fname": "Julio", "lname": "Morales", "side": "Right", "trainings": 1, "participated": 1,
-         "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5], "history": [], "partners": {}, "comments": []},
+         "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "history": [], "partners": {}, "comments": []},
         {"fname": "Lars", "lname": "Mikkelsen", "side": "Left", "trainings": 1, "participated": 0,
-         "tech": [7, 7, 7, 6, 8, 6, 7], "mental": [8, 7, 7, 7, 8, 7], "c_tech": [6, 6, 6, 5, 7, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6], "history": [], "partners": {}, "comments": []},
+         "tech": [7, 7, 7, 6, 8, 6, 7], "mental": [8, 7, 7, 7, 8, 7, 8], "c_tech": [6, 6, 6, 5, 7, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6, 7], "history": [], "partners": {}, "comments": []},
         {"fname": "Jairo", "lname": "Lopez", "side": "Left", "trainings": 1, "participated": 0,
-         "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5], "history": [], "partners": {}, "comments": []},
+         "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "history": [], "partners": {}, "comments": []},
         {"fname": "Nacho", "lname": "Saracho", "side": "Right", "trainings": 1, "participated": 0,
-         "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7], "history": [], "partners": {}, "comments": []},
+         "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7, 7], "history": [], "partners": {}, "comments": []},
         {"fname": "Peter", "lname": "Gustafsson", "side": "Left", "trainings": 1, "participated": 0,
-         "tech": [7, 7, 7, 6, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6], "history": [], "partners": {}, "comments": []},
+         "tech": [7, 7, 7, 6, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6, 6], "history": [], "partners": {}, "comments": []},
         {"fname": "Juanjo", "lname": "Lopez Benitez", "side": "Left", "trainings": 1, "participated": 0,
-         "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7], "history": [], "partners": {}, "comments": []},
+         "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7, 7], "history": [], "partners": {}, "comments": []},
         {"fname": "Sascha", "lname": "Van De Bilt", "side": "Right", "trainings": 1, "participated": 0,
-         "tech": [7, 7, 7, 6, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6], "history": [], "partners": {}, "comments": []},
+         "tech": [7, 7, 7, 6, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6, 6], "history": [], "partners": {}, "comments": []},
         {"fname": "Fernando", "lname": "Oribe", "side": "Right", "trainings": 1, "participated": 0,
-         "tech": [8, 7, 8, 7, 8, 6, 7], "mental": [8, 7, 8, 8, 8, 7], "c_tech": [7, 6, 7, 6, 7, 5, 6], "c_mental": [7, 6, 7, 7, 7, 6], "history": [], "partners": {}, "comments": []},
+         "tech": [8, 7, 8, 7, 8, 6, 7], "mental": [8, 7, 8, 8, 8, 7, 8], "c_tech": [7, 6, 7, 6, 7, 5, 6], "c_mental": [7, 6, 7, 7, 7, 6, 7], "history": [], "partners": {}, "comments": []},
         {"fname": "Doug", "lname": "Ramsay", "side": "Left", "trainings": 1, "participated": 0,
-         "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5], "history": [], "partners": {}, "comments": []}
+         "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "history": [], "partners": {}, "comments": []}
     ]
     for p in st.session_state.squad_data:
         if "trainings" not in p: p["trainings"] = 1
@@ -303,7 +303,7 @@ elif st.session_state.nav_mode == "Player_Dashboard":
     
     with tab_eval:
         st.subheader("📊 Gestione e Confronto Valutazioni")
-        st.markdown("Regola i cursori per la tua autovalutazione. Sulla destra puoi consultare in sola lettura i valori assegnati dal coach.")
+        st.markdown("Regola i cursori per la tua autovalutazione. A sinistra trovi le competenze **Tecniche** e a destra quelle **Mentali**.")
         
         col_eval_left, col_eval_right = st.columns(2)
         
@@ -606,7 +606,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
 
     with coach_tab_evals:
         st.subheader("✏️ Gestione Voti Coach per Singolo Giocatore")
-        st.markdown("Seleziona un giocatore per aggiornare le sue valutazioni tecniche e mentali.")
+        st.markdown("Seleziona un giocatore per aggiornare le sue valutazioni. Le competenze **Tecniche** sono a sinistra e quelle **Mentali** a destra.")
         
         selected_player_name = st.selectbox("Seleziona giocatore da valutare:", [f"{p['fname']} {p['lname']}" for p in squad_players], key="coach_eval_select")
         p_obj = next((p for p in squad_players if f"{p['fname']} {p['lname']}" == selected_player_name), None)
