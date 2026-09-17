@@ -39,30 +39,30 @@ st.markdown("""
         color: #ffffff !important;
     }
     
-    /* Pulsanti specifici di accesso e ritorno alla Home in rosso brillante */
+    /* Pulsanti specifici di accesso (Allenatore / Giocatore) in rosso brillante */
     .element-container:has(button:contains("Allenatore")) button,
-    .element-container:has(button:contains("Giocatore")) button,
-    .element-container:has(button:contains("Torna alla Home")) button {
+    .element-container:has(button:contains("Giocatore")) button {
         background-color: #dc2626 !important;
         color: white !important;
         border-color: #b91c1c !important;
     }
     .element-container:has(button:contains("Allenatore")) button:hover,
-    .element-container:has(button:contains("Giocatore")) button:hover,
-    .element-container:has(button:contains("Torna alla Home")) button:hover {
+    .element-container:has(button:contains("Giocatore")) button:hover {
         background-color: #b91c1c !important;
         color: white !important;
     }
 
-    /* Tutti i bottoni Esci / Logout in Blu scuro */
+    /* Tutti i bottoni Esci / Logout / Torna alla Home in Blu scuro */
     .element-container:has(button:contains("Esci")) button,
-    .element-container:has(button:contains("Logout")) button {
+    .element-container:has(button:contains("Logout")) button,
+    .element-container:has(button:contains("Torna alla Home")) button {
         background-color: #2563eb !important;
         color: white !important;
         border-color: #1d4ed8 !important;
     }
     .element-container:has(button:contains("Esci")) button:hover,
-    .element-container:has(button:contains("Logout")) button:hover {
+    .element-container:has(button:contains("Logout")) button:hover,
+    .element-container:has(button:contains("Torna alla Home")) button:hover {
         background-color: #1d4ed8 !important;
         color: white !important;
     }
