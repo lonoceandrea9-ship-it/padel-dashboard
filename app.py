@@ -136,47 +136,47 @@ if "authenticated_coach" not in st.session_state:
 if "authenticated_player" not in st.session_state:
     st.session_state.authenticated_player = None
 
-# Lista giocatori con supporto per il profilo tattico del coach
+# Lista giocatori con supporto per il profilo tattico del giocatore e del coach
 if "squad_data" not in st.session_state:
     st.session_state.squad_data = [
         {"fname": "Álvaro", "lname": "Gomez", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1,
-         "tech": [7, 7, 6, 7, 6, 6, 7], "mental": [8, 7, 7, 7, 8, 7, 8], "c_tech": [6, 6, 5, 6, 5, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6, 7], "play_style": "equilibrated", "history": [], "coach_note": "", "partners": {"Yannik Langeslag": 12, "Josu Usabiaga": 8}, "comments": []},
+         "tech": [7, 7, 6, 7, 6, 6, 7], "mental": [8, 7, 7, 7, 8, 7, 8], "c_tech": [6, 6, 5, 6, 5, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6, 7], "play_style": "equilibrated", "player_play_style": "equilibrated", "history": [], "coach_note": "", "partners": {"Yannik Langeslag": 12, "Josu Usabiaga": 8}, "comments": []},
         {"fname": "Yannik", "lname": "Langeslag", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1,
-         "tech": [8, 6, 7, 7, 7, 5, 6], "mental": [7, 6, 8, 6, 7, 6, 7], "c_tech": [7, 5, 6, 6, 6, 4, 5], "c_mental": [6, 5, 7, 5, 6, 5, 6], "play_style": "offensive", "history": [], "coach_note": "", "partners": {"Álvaro Gomez": 12}, "comments": []},
+         "tech": [8, 6, 7, 7, 7, 5, 6], "mental": [7, 6, 8, 6, 7, 6, 7], "c_tech": [7, 5, 6, 6, 6, 4, 5], "c_mental": [6, 5, 7, 5, 6, 5, 6], "play_style": "offensive", "player_play_style": "offensive", "history": [], "coach_note": "", "partners": {"Álvaro Gomez": 12}, "comments": []},
         {"fname": "Josu", "lname": "Usabiaga", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1,
-         "tech": [6, 8, 7, 7, 6, 7, 7], "mental": [6, 8, 6, 8, 7, 7, 8], "c_tech": [5, 7, 6, 6, 5, 6, 6], "c_mental": [5, 7, 5, 7, 6, 6, 7], "play_style": "defensive", "history": [], "coach_note": "", "partners": {"Álvaro Gomez": 8}, "comments": []},
+         "tech": [6, 8, 7, 7, 6, 7, 7], "mental": [6, 8, 6, 8, 7, 7, 8], "c_tech": [5, 7, 6, 6, 5, 6, 6], "c_mental": [5, 7, 5, 7, 6, 6, 7], "play_style": "defensive", "player_play_style": "defensive", "history": [], "coach_note": "", "partners": {"Álvaro Gomez": 8}, "comments": []},
         {"fname": "Benjamin", "lname": "Thyrell", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1,
-         "tech": [7, 7, 8, 6, 7, 6, 7], "mental": [8, 7, 7, 7, 8, 7, 8], "c_tech": [6, 6, 7, 5, 6, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6, 7], "play_style": "counterattack", "history": [], "coach_note": "", "partners": {}, "comments": []},
+         "tech": [7, 7, 8, 6, 7, 6, 7], "mental": [8, 7, 7, 7, 8, 7, 8], "c_tech": [6, 6, 7, 5, 6, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6, 7], "play_style": "counterattack", "player_play_style": "counterattack", "history": [], "coach_note": "", "partners": {}, "comments": []},
         {"fname": "Alexander", "lname": "Wennstam", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1,
-         "tech": [8, 8, 7, 7, 8, 6, 7], "mental": [7, 7, 8, 8, 7, 7, 8], "c_tech": [7, 7, 6, 6, 7, 5, 6], "c_mental": [6, 6, 7, 7, 6, 6, 7], "play_style": "equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []},
+         "tech": [8, 8, 7, 7, 8, 6, 7], "mental": [7, 7, 8, 8, 7, 7, 8], "c_tech": [7, 7, 6, 6, 7, 5, 6], "c_mental": [6, 6, 7, 7, 6, 6, 7], "play_style": "equilibrated", "player_play_style": "equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []},
         {"fname": "Andrea", "lname": "Lonoce", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1,
-         "tech": [8, 7, 8, 7, 9, 6, 8], "mental": [9, 7, 8, 8, 9, 7, 9], "c_tech": [8, 7, 8, 7, 9, 6, 8], "c_mental": [9, 7, 8, 8, 9, 7, 9], "play_style": "offensive", "history": [], "coach_note": "", "partners": {"Alexander Wennstam": 14}, "comments": []},
+         "tech": [8, 7, 8, 7, 9, 6, 8], "mental": [9, 7, 8, 8, 9, 7, 9], "c_tech": [8, 7, 8, 7, 9, 6, 8], "c_mental": [9, 7, 8, 8, 9, 7, 9], "play_style": "offensive", "player_play_style": "offensive", "history": [], "coach_note": "", "partners": {"Alexander Wennstam": 14}, "comments": []},
         {"fname": "Mikkel", "lname": "Hoff", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1,
-         "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "play_style": "defensive", "history": [], "coach_note": "", "partners": {}, "comments": []},
+         "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "play_style": "defensive", "player_play_style": "defensive", "history": [], "coach_note": "", "partners": {}, "comments": []},
         {"fname": "Pedro", "lname": "Rios", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1,
-         "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7, 7], "play_style": "equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []},
+         "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7, 7], "play_style": "equilibrated", "player_play_style": "equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []},
         {"fname": "Hector", "lname": "Guerrero", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1,
-         "tech": [7, 7, 7, 7, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 6, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6, 6], "play_style": "counterattack", "history": [], "coach_note": "", "partners": {}, "comments": []},
+         "tech": [7, 7, 7, 7, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 6, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6, 6], "play_style": "counterattack", "player_play_style": "counterattack", "history": [], "coach_note": "", "partners": {}, "comments": []},
         {"fname": "Gonzalo", "lname": "Diez de Onate", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1,
-         "tech": [8, 7, 8, 7, 8, 6, 7], "mental": [8, 7, 8, 8, 8, 7, 8], "c_tech": [7, 6, 7, 6, 7, 5, 6], "c_mental": [7, 6, 7, 7, 7, 6, 7], "play_style": "equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []},
+         "tech": [8, 7, 8, 7, 8, 6, 7], "mental": [8, 7, 8, 8, 8, 7, 8], "c_tech": [7, 6, 7, 6, 7, 5, 6], "c_mental": [7, 6, 7, 7, 7, 6, 7], "play_style": "equilibrated", "player_play_style": "equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []},
         {"fname": "Julio", "lname": "Morales", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1,
-         "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "play_style": "offensive", "history": [], "coach_note": "", "partners": {}, "comments": []},
+         "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "play_style": "offensive", "player_play_style": "offensive", "history": [], "coach_note": "", "partners": {}, "comments": []},
         {"fname": "Lars", "lname": "Mikkelsen", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0,
-         "tech": [7, 7, 7, 6, 8, 6, 7], "mental": [8, 7, 7, 7, 8, 7, 8], "c_tech": [6, 6, 6, 5, 7, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6, 7], "play_style": "equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []},
+         "tech": [7, 7, 7, 6, 8, 6, 7], "mental": [8, 7, 7, 7, 8, 7, 8], "c_tech": [6, 6, 6, 5, 7, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6, 7], "play_style": "equilibrated", "player_play_style": "equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []},
         {"fname": "Jairo", "lname": "Lopez", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0,
-         "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "play_style": "defensive", "history": [], "coach_note": "", "partners": {}, "comments": []},
+         "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "play_style": "defensive", "player_play_style": "defensive", "history": [], "coach_note": "", "partners": {}, "comments": []},
         {"fname": "Nacho", "lname": "Saracho", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 0,
-         "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7, 7], "play_style": "counterattack", "history": [], "coach_note": "", "partners": {}, "comments": []},
+         "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7, 7], "play_style": "counterattack", "player_play_style": "counterattack", "history": [], "coach_note": "", "partners": {}, "comments": []},
         {"fname": "Peter", "lname": "Gustafsson", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0,
-         "tech": [7, 7, 7, 6, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6, 6], "play_style": "equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []},
+         "tech": [7, 7, 7, 6, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6, 6], "play_style": "equilibrated", "player_play_style": "equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []},
         {"fname": "Juanjo", "lname": "Lopez Benitez", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0,
-         "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7, 7], "play_style": "offensive", "history": [], "coach_note": "", "partners": {}, "comments": []},
+         "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7, 7], "play_style": "offensive", "player_play_style": "offensive", "history": [], "coach_note": "", "partners": {}, "comments": []},
         {"fname": "Sascha", "lname": "Van De Bilt", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 0,
-         "tech": [7, 7, 7, 6, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6, 6], "play_style": "defensive", "history": [], "coach_note": "", "partners": {}, "comments": []},
+         "tech": [7, 7, 7, 6, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6, 6], "play_style": "defensive", "player_play_style": "defensive", "history": [], "coach_note": "", "partners": {}, "comments": []},
         {"fname": "Fernando", "lname": "Oribe", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 0,
-         "tech": [8, 7, 8, 7, 8, 6, 7], "mental": [8, 7, 8, 8, 8, 7, 8], "c_tech": [7, 6, 7, 6, 7, 5, 6], "c_mental": [7, 6, 7, 7, 7, 6, 7], "play_style": "counterattack", "history": [], "coach_note": "", "partners": {}, "comments": []},
+         "tech": [8, 7, 8, 7, 8, 6, 7], "mental": [8, 7, 8, 8, 8, 7, 8], "c_tech": [7, 6, 7, 6, 7, 5, 6], "c_mental": [7, 6, 7, 7, 7, 6, 7], "play_style": "counterattack", "player_play_style": "counterattack", "history": [], "coach_note": "", "partners": {}, "comments": []},
         {"fname": "Doug", "lname": "Ramsay", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0,
-         "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "play_style": "equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []}
+         "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "play_style": "equilibrated", "player_play_style": "equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []}
     ]
 
 # Controllo e correzione automatica per sessioni salvate
@@ -184,6 +184,7 @@ for p in st.session_state.squad_data:
     if "hand" not in p: p["hand"] = "Mancino" if p.get("side") == "Left" else "Destro"
     if "coach_note" not in p: p["coach_note"] = ""
     if "play_style" not in p: p["play_style"] = "equilibrated"
+    if "player_play_style" not in p: p["player_play_style"] = p.get("play_style", "equilibrated")
     if "trainings" not in p: p["trainings"] = 1
     if "participated" not in p: p["participated"] = 1
     
@@ -309,7 +310,9 @@ elif st.session_state.nav_mode == "Player_Dashboard":
     
     with tab_eval:
         st.subheader("📊 Gestione e Confronto Valutazioni")
-        st.markdown("Regola i cursori per la tua autovalutazione. A sinistra trovi le competenze **Tecniche** e a destra quelle **Mentali**.")
+        st.markdown("Regola i cursori e seleziona il tuo stile di gioco per la tua autovalutazione. A sinistra trovi le competenze **Tecniche** e a destra quelle **Mentali**.")
+        
+        style_options = ["offensive", "defensive", "equilibrated", "counterattack"]
         
         col_eval_left, col_eval_right = st.columns(2)
         
@@ -336,9 +339,15 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                 with c2:
                     st.slider(f"Coach - {skill}", 1, 10, int(current_player['c_mental'][i]), disabled=True, key=f"c_mental_view_{i}")
                 
+        st.markdown("---")
+        current_p_style = current_player.get("player_play_style", "equilibrated")
+        if current_p_style not in style_options: current_p_style = "equilibrated"
+        new_player_style = st.selectbox("Seleziona il tuo Stile di Gioco (Autovalutazione):", options=style_options, index=style_options.index(current_p_style))
+                
         if st.button("Salva Autovalutazione", type="primary"):
             current_player['tech'] = new_tech_vals
             current_player['mental'] = new_mental_vals
+            current_player['player_play_style'] = new_player_style
             st.success("Autovalutazione salvata con successo!")
             st.rerun()
 
@@ -356,7 +365,10 @@ elif st.session_state.nav_mode == "Player_Dashboard":
         radar_col1, radar_col2 = st.columns(2)
         
         with radar_col1:
-            st.markdown("### 🫵 Autovalutazione Giocatore")
+            st.markdown("### Autovalutazione Giocatore")
+            p_style_display = current_player.get("player_play_style", "equilibrated").capitalize()
+            st.markdown(f"**Stile di Gioco:** {p_style_display}")
+            
             fig_player = go.Figure()
             fig_player.add_trace(go.Scatterpolar(
                 r=p_vals_radar,
@@ -375,8 +387,8 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                     angularaxis=dict(gridcolor='#334155')
                 ),
                 showlegend=False,
-                height=450,
-                margin=dict(l=40, r=40, t=20, b=20)
+                height=420,
+                margin=dict(l=40, r=40, t=10, b=20)
             )
             st.plotly_chart(fig_player, use_container_width=True)
             
@@ -643,7 +655,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             with st.form("coach_eval_form"):
                 st.markdown(f"**Modifica voti e profilo per: {selected_player_name}**")
                 
-                # Selezione dello Stile / Profilo di Gioco
+                # Selezione dello Stile / Profilo di Gioco (Coach)
                 style_options = ["offensive", "defensive", "equilibrated", "counterattack"]
                 current_style = p_obj.get("play_style", "equilibrated")
                 if current_style not in style_options:
@@ -740,7 +752,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
     with coach_tab3:
         st.subheader("💬 Vista Globale Note & Commenti")
         for p in squad_players:
-            st.markdown(f"#### 👤 {p['fname']} {p['lname']} (Stile: {p.get('play_style', 'equilibrated').capitalize()})")
+            st.markdown(f"#### 👤 {p['fname']} {p['lname']} (Stile Coach: {p.get('play_style', 'equilibrated').capitalize()} | Stile Player: {p.get('player_play_style', 'equilibrated').capitalize()})")
             if p.get("coach_note"):
                 st.markdown(f"**Nota Coach:** {p['coach_note']}")
             else:
