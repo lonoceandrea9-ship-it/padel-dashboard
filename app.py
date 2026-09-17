@@ -106,7 +106,7 @@ st.markdown("""
 # --- TRADUZIONI COMPLETE (6 LINGUE) ---
 translations = {
     "Italiano": {
-        "welcome": "Benvenuto nel Padel Performance Hub",
+        "welcome": "Nac Team Performance App",
         "select_area": "Seleziona la tua area di accesso per continuare:",
         "player_area": "Area Giocatore",
         "player_desc": "Accedi alla tua scheda personale protetta da password per visualizzare e aggiornare le tue valutazioni.",
@@ -205,7 +205,7 @@ translations = {
         "unmatched_warn": "Giocatori selezionati ma rimasti esclusi in questo turno per sbilanciamento numerico tra Destra e Sinistra:"
     },
     "English": {
-        "welcome": "Welcome to the Padel Performance Hub",
+        "welcome": "Nac Team Performance App",
         "select_area": "Select your access area to continue:",
         "player_area": "Player Area",
         "player_desc": "Access your password-protected personal card to view and update your evaluations.",
@@ -304,7 +304,7 @@ translations = {
         "unmatched_warn": "Selected players left out in this round due to numerical imbalance between Right and Left:"
     },
     "Español": {
-        "welcome": "Bienvenido al Padel Performance Hub",
+        "welcome": "Nac Team Performance App",
         "select_area": "Selecciona tu área de acceso para continuar:",
         "player_area": "Área de Jugador",
         "player_desc": "Accede a tu ficha personal protegida con contraseña para ver y actualizar tus valoraciones.",
@@ -403,7 +403,7 @@ translations = {
         "unmatched_warn": "Jugadores seleccionados pero excluidos en esta ronda por desequilibrio numérico entre Derecha e Izquierda:"
     },
     "Svenska": {
-        "welcome": "Välkommen till Padel Performance Hub",
+        "welcome": "Nac Team Performance App",
         "select_area": "Välj ditt åtkomstområde för att fortsätta:",
         "player_area": "Spelarområde",
         "player_desc": "Gå till ditt lösenordsskyddade personliga kort för att visa och uppdatera dina utvärderingar.",
@@ -498,11 +498,11 @@ translations = {
         "select_available_players": "Välj tillgängliga spelare idag:",
         "run_pairing": "Generera Optimala Par med Tillgängliga",
         "pairing_err": "För att bilda par behöver du minst en vänsterspelare och en högerspelare bland de valda!",
-        "recommended_pairing": "Rekommenderat Parresultat (Top 5 Lag):",
+        "recommended_pairing": "Rekommenderat Parresultat (Topp 5 Lag):",
         "unmatched_warn": "Spelare som valdes men utelämnades denna omgång på grund av numerisk obalans mellan Höger och Vänster:"
     },
     "Nederlands": {
-        "welcome": "Welkom bij de Padel Performance Hub",
+        "welcome": "Nac Team Performance App",
         "select_area": "Selecteer je toegangsgebied om door te gaan:",
         "player_area": "Spelersgebied",
         "player_desc": "Ga naar je met een wachtwoord beveiligde persoonlijke kaart om je evaluaties te bekijken en bij te werken.",
@@ -601,7 +601,7 @@ translations = {
         "unmatched_warn": "Geselecteerde spelers weggelaten in deze ronde vanwege numeriek evenwicht tussen Rechts en Links:"
     },
     "Dansk": {
-        "welcome": "Velkommen til Padel Performance Hub",
+        "welcome": "Nac Team Performance App",
         "select_area": "Vælg dit adgangsområde for at fortsætte:",
         "player_area": "Spillerområde",
         "player_desc": "Gå til dit adgangskodebeskyttede personlige kort for at se og opdatere dine evalueringer.",
