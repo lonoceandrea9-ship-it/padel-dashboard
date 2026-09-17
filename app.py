@@ -287,11 +287,6 @@ translations = {
         "tech_skills_coach": "Technical Skills (Coach)",
         "mental_skills_coach": "Mental Skills (Coach)",
         "save_coach_eval": "Save Grades, Profile and Coach Note",
-        "training_title": "Training Planning & Recommended Focus",
-        "training_desc": "Select attendees. The system suggests priority areas. The coach can modify them, choose a date, and confirm saving to the calendar.",
-        "select_attendees": "Select attendees for the session:",
-        "training_priorities": "🎯 System Recommended Priority Areas",
-        "training_no_attendees": "Please select at least one player to view the training focus.",
         "match_mgmt": "Match Registration",
         "match_mgmt_desc": "Select players for each team (each team requires 1 Left player and 1 Right player).",
         "match_date": "Match Date",
@@ -1173,6 +1168,61 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         st.subheader(f"👥 {lang_dict['coach_tab_squad']}")
         st.markdown(lang_dict['squad_desc'])
         
+        # --- SEZIONE AGGIUNGI / ELIMINA GIOCATORE ---
+        with st.expander("➕ / 🗑️ Gestione Rosa Giocatori (Aggiungi o Rimuovi Giocatore)"):
+            col_add, col_del = st.columns(2)
+            
+            with col_add:
+                st.markdown("### Aggiungi Nuovo Giocatore")
+                with st.form("add_player_form"):
+                    new_fname = st.text_input("Nome")
+                    new_lname = st.text_input("Cognome")
+                    new_side = st.selectbox("Posizione / Ruolo", ["Left", "Right"])
+                    new_hand = st.selectbox("Mano", ["Destro", "Mancino"])
+                    new_style = st.selectbox("Stile di Gioco", ["Offensive", "Defensive", "Equilibrated", "Counterattack"])
+                    
+                    if st.form_submit_button("➕ Aggiungi Giocatore", type="primary"):
+                        if new_fname.strip() and new_lname.strip():
+                            # Controlliamo se esiste già
+                            exists = any(p['fname'].lower() == new_fname.strip().lower() and p['lname'].lower() == new_lname.strip().lower() for p in st.session_state.squad_data)
+                            if exists:
+                                st.error("Un giocatore con questo nome e cognome esiste già nella rosa!")
+                            else:
+                                st.session_state.squad_data.append({
+                                    "fname": new_fname.strip(),
+                                    "lname": new_lname.strip(),
+                                    "side": new_side,
+                                    "hand": new_hand,
+                                    "trainings": 1,
+                                    "participated": 1,
+                                    "tech": [7] * len(TECH_SKILLS),
+                                    "mental": [7] * len(MENTAL_SKILLS),
+                                    "c_tech": [6] * len(TECH_SKILLS),
+                                    "c_mental": [6] * len(MENTAL_SKILLS),
+                                    "play_style": new_style,
+                                    "player_play_style": new_style,
+                                    "history": [],
+                                    "coach_note": "",
+                                    "partners": {},
+                                    "comments": []
+                                })
+                                st.success(f"Giocatore {new_fname} {new_lname} aggiunto con successo!")
+                                st.rerun()
+                        else:
+                            st.warning("Nome e Cognome non possono essere vuoti.")
+            
+            with col_del:
+                st.markdown("### Elimina Giocatore Esistente")
+                with st.form("delete_player_form"):
+                    player_to_delete = st.selectbox("Seleziona giocatore da rimuovere", [f"{p['fname']} {p['lname']}" for p in st.session_state.squad_data])
+                    
+                    if st.form_submit_button("🗑️ Rimuovi Giocatore", type="secondary"):
+                        st.session_state.squad_data = [p for p in st.session_state.squad_data if f"{p['fname']} {p['lname']}" != player_to_delete]
+                        st.success(f"Giocatore {player_to_delete} rimosso con successo!")
+                        st.rerun()
+
+        st.markdown("---")
+        
         st.session_state.squad_data = sorted(st.session_state.squad_data, key=lambda x: x['fname'])
         squad_players = st.session_state.squad_data
         
@@ -1220,7 +1270,6 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 idx_st = styles_list.index(curr_st) if curr_st in styles_list else 2
                 new_st = st.selectbox("Style", styles_list, index=idx_st, key=f"style_{idx}", label_visibility="collapsed")
             with col_t:
-                # Mostriamo il valore calcolato automaticamente (disabilitato o informativo)
                 st.markdown(f"<div style='padding-top: 8px; text-align: center; font-weight: bold;'>{calc_trainings}</div>", unsafe_allow_html=True)
             with col_p:
                 st.markdown(f"<div style='padding-top: 8px; text-align: center; font-weight: bold;'>{calc_participated}</div>", unsafe_allow_html=True)
@@ -1329,7 +1378,6 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         if selected_attendees_names:
             attending_players = [p for p in squad_players if f"{p['fname']} {p['lname']}" in selected_attendees_names]
             
-            # Calcolo delle medie del gruppo per ogni skill (coach grades)
             skill_averages = {}
             for idx, skill in enumerate(ALL_SKILLS):
                 vals = []
@@ -1338,7 +1386,6 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     vals.append(p_vals[idx])
                 skill_averages[skill] = sum(vals) / len(vals) if vals else 0.0
                 
-            # Ordiniamo le skill dalla media più bassa alla più alta
             sorted_skills = sorted(skill_averages.items(), key=lambda x: x[1])
             top_priorities_system = [s[0] for s in sorted_skills[:3]]
             
@@ -1381,7 +1428,6 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 submit_training = st.form_submit_button("✅ Conferma e Salva nel Calendario", type="primary")
                 
                 if submit_training:
-                    # Salvataggio nella lista in session_state
                     st.session_state.planned_trainings.append({
                         "Data": str(training_date),
                         "Partecipanti": ", ".join([p.split(" ")[0] for p in selected_attendees_names]),
@@ -1392,7 +1438,6 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     st.success(f"🎉 Allenamento salvato con successo per il giorno {training_date}!")
                     st.rerun()
 
-            # Visualizzazione dello Storico Calendario Allenamenti Pianificati
             st.markdown("---")
             st.markdown("### 📅 Storico Calendario Allenamenti Pianificati")
             if st.session_state.planned_trainings:
@@ -1549,7 +1594,6 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         matched_left.add(item["left"])
                         matched_right.add(item["right"])
                 
-                # Limitiamo rigorosamente ai primi 5 team
                 final_pairs = final_pairs[:5]
                 
                 unmatched_l = [l for l in left_players if f"{l['fname']} {l['lname']}" not in matched_left]
@@ -1561,14 +1605,12 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         if "final_pairs_cache" in st.session_state and st.session_state.final_pairs_cache:
             st.markdown(f"### 🏆 {lang_dict['recommended_pairing']}")
             
-            # Liste dei nomi disponibili per i menu a tendina
             available_left_names = [f"{p['fname']} {p['lname']}" for p in left_players]
             available_right_names = [f"{p['fname']} {p['lname']}" for p in right_players]
             
             selected_lefts = []
             selected_rights = []
             
-            # Intestazione della tabella personalizzata in blu scuro coerente
             st.markdown("""
                 <table class="custom-table">
                     <tr>
@@ -1584,7 +1626,6 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             
             new_confirmed_pairs = []
             
-            # Generazione delle righe (massimo 5 team) con selectbox dinamici
             for idx, fp in enumerate(st.session_state.final_pairs_cache):
                 c_pair, c_left, c_right, c_cs, c_mw, c_ts = st.columns([1, 3, 3, 1, 1, 1])
                 
@@ -1623,7 +1664,6 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             
             st.markdown("<br>", unsafe_allow_html=True)
             
-            # Bottone di conferma della selezione
             if st.button("✅ Conferma Selezione Pairing", type="primary"):
                 st.session_state.confirmed_pairing = pd.DataFrame(new_confirmed_pairs)
                 st.success("Pairing confermato e salvato con successo!")
