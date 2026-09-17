@@ -589,6 +589,17 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         st.markdown("Modifica direttamente qui sotto i dati della squadra. I cambiamenti si salvano in tempo reale e il **Commitment (%)** viene ricalcolato automaticamente.")
         
         with st.form("squad_edit_form"):
+            # --- TITOLI DELLE COLONNE ---
+            th_cols = st.columns([1.8, 1.2, 1.2, 1.4, 0.9, 0.9, 0.9])
+            with th_cols[0]: st.markdown("**Nome**")
+            with th_cols[1]: st.markdown("**Role**")
+            with th_cols[2]: st.markdown("**Mano**")
+            with th_cols[3]: st.markdown("**Play Style**")
+            with th_cols[4]: st.markdown("**Trainings**")
+            with th_cols[5]: st.markdown("**Participated**")
+            with th_cols[6]: st.markdown("**Commitment (%)**")
+            st.markdown("---")
+
             updated_squad = []
             for idx, p in enumerate(squad_players):
                 col_n, col_r, col_h, col_s, col_t, col_p, col_c = st.columns([1.8, 1.2, 1.2, 1.4, 0.9, 0.9, 0.9])
@@ -596,21 +607,21 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 with col_n:
                     st.markdown(f"**{p['fname']} {p['lname']}**")
                 with col_r:
-                    new_side = st.selectbox("Role", ["Left", "Right"], index=0 if p["side"]=="Left" else 1, key=f"side_{idx}")
+                    new_side = st.selectbox("Role", ["Left", "Right"], index=0 if p["side"]=="Left" else 1, key=f"side_{idx}", label_visibility="collapsed")
                 with col_h:
-                    new_hand = st.selectbox("Mano", ["Destro", "Mancino"], index=0 if p.get("hand","Destro")=="Destro" else 1, key=f"hand_{idx}")
+                    new_hand = st.selectbox("Mano", ["Destro", "Mancino"], index=0 if p.get("hand","Destro")=="Destro" else 1, key=f"hand_{idx}", label_visibility="collapsed")
                 with col_s:
                     styles_list = ["offensive", "defensive", "equilibrated", "counterattack"]
                     curr_st = p.get("play_style", "equilibrated")
                     idx_st = styles_list.index(curr_st) if curr_st in styles_list else 2
-                    new_st = st.selectbox("Style", styles_list, index=idx_st, key=f"style_{idx}")
+                    new_st = st.selectbox("Style", styles_list, index=idx_st, key=f"style_{idx}", label_visibility="collapsed")
                 with col_t:
-                    new_tr = st.number_input("Trainings", min_value=0, max_value=50, value=int(p.get("trainings", 1)), key=f"tr_{idx}")
+                    new_tr = st.number_input("Trainings", min_value=0, max_value=50, value=int(p.get("trainings", 1)), key=f"tr_{idx}", label_visibility="collapsed")
                 with col_p:
-                    new_pa = st.number_input("Participated", min_value=0, max_value=50, value=int(p.get("participated", 1)), key=f"pa_{idx}")
+                    new_pa = st.number_input("Participated", min_value=0, max_value=50, value=int(p.get("participated", 1)), key=f"pa_{idx}", label_visibility="collapsed")
                 with col_c:
                     pct_calc = int(round((new_pa / new_tr) * 100)) if new_tr > 0 else 0
-                    st.markdown(f"<div style='padding-top: 28px; font-weight: bold; color: {'#2ecc71' if pct_calc >= 70 else '#e74c3c'};'>{pct_calc}%</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='padding-top: 8px; font-weight: bold; color: {'#2ecc71' if pct_calc >= 70 else '#e74c3c'};'>{pct_calc}%</div>", unsafe_allow_html=True)
                 
                 p["side"] = new_side
                 p["hand"] = new_hand
