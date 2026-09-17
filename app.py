@@ -201,48 +201,36 @@ elif st.session_state.nav_mode == "Player_Dashboard":
     ])
     
     with tab_eval:
-        st.subheader("📊 Confronto Diretto: Autovalutazione vs Valutazione Coach")
-        st.markdown("Modifica qui sotto i tuoi valori personali. I valori assegnati dal coach sono protetti e visibili in sola consultazione.")
+        st.subheader("📊 Gestione e Confronto Valutazioni")
+        st.markdown("Regola i cursori per la tua autovalutazione. Sulla destra puoi consultare in sola lettura i valori assegnati dal coach.")
         
-        col_self, col_coach_view = st.columns(2)
-        
-        # 1. AUTOVALUTAZIONE (Modificabile dall'utente)
-        with col_self:
-            st.markdown("### 🫵 La tua Autovalutazione")
-            st.markdown("*(Modificabile)*")
-            
-            st.markdown(f"**{lang_dict['tech_skills']}**")
-            new_tech_vals = []
-            for i, skill in enumerate(TECH_SKILLS):
+        # Unica tabella/blocco unificato per evitare ripetizioni
+        st.markdown(f"**{lang_dict['tech_skills']}**")
+        new_tech_vals = []
+        for i, skill in enumerate(TECH_SKILLS):
+            c1, c2 = st.columns(2)
+            with c1:
                 val = st.slider(f"Tu - {skill}", 1, 10, int(current_player['tech'][i]), key=f"p_tech_{i}")
                 new_tech_vals.append(val)
-                
-            st.markdown(f"**{lang_dict['mental_skills']}**")
-            new_mental_vals = []
-            for i, skill in enumerate(MENTAL_SKILLS):
+            with c2:
+                st.slider(f"Coach - {skill}", 1, 10, int(current_player['c_tech'][i]), disabled=True, key=f"c_tech_view_{i}")
+
+        st.markdown("---")
+        st.markdown(f"**{lang_dict['mental_skills']}**")
+        new_mental_vals = []
+        for i, skill in enumerate(MENTAL_SKILLS):
+            c1, c2 = st.columns(2)
+            with c1:
                 val = st.slider(f"Tu - {skill}", 1, 10, int(current_player['mental'][i]), key=f"p_mental_{i}")
                 new_mental_vals.append(val)
+            with c2:
+                st.slider(f"Coach - {skill}", 1, 10, int(current_player['c_mental'][i]), disabled=True, key=f"c_mental_view_{i}")
                 
-            if st.button("Salva Autovalutazione", type="primary"):
-                current_player['tech'] = new_tech_vals
-                current_player['mental'] = new_mental_vals
-                st.success("Autovalutazione salvata con successo!")
-                st.rerun()
-
-        # 2. VALUTAZIONE COACH (Sola lettura per il giocatore)
-        with col_coach_view:
-            st.markdown("### 📋 Valutazione del Coach")
-            st.markdown("*(Sola consultazione)*")
-            
-            st.markdown(f"**{lang_dict['tech_skills']}**")
-            for i, skill in enumerate(TECH_SKILLS):
-                c_val = current_player['c_tech'][i]
-                st.slider(f"Coach - {skill}", 1, 10, int(c_val), disabled=True, key=f"c_tech_view_{i}")
-                
-            st.markdown(f"**{lang_dict['mental_skills']}**")
-            for i, skill in enumerate(MENTAL_SKILLS):
-                c_val = current_player['c_mental'][i]
-                st.slider(f"Coach - {skill}", 1, 10, int(c_val), disabled=True, key=f"c_mental_view_{i}")
+        if st.button("Salva Autovalutazione", type="primary"):
+            current_player['tech'] = new_tech_vals
+            current_player['mental'] = new_mental_vals
+            st.success("Autovalutazione salvata con successo!")
+            st.rerun()
 
         st.markdown("---")
         st.subheader("🕸️ Grafico a Tela di Ragno (Radar Chart)")
@@ -289,7 +277,15 @@ elif st.session_state.nav_mode == "Player_Dashboard":
             p_v = player_full_vals[i]
             c_v = coach_full_vals[i]
             diff = p_v - c_v
-            diff_display = f"<span style='color:red; font-weight:bold;'>{diff} (Discrepanza)</span>" if diff != 0 else f"<span style='color:green; font-weight:bold;'>0 (Allineati)</span>"
+            
+            # Formattazione richiesta: - in rosso per differenze negative, + in verde per positive, 0 se pari
+            if diff > 0:
+                diff_display = f"<span style='color:green; font-weight:bold;'>+{diff}</span>"
+            elif diff < 0:
+                diff_display = f"<span style='color:red; font-weight:bold;'>{diff}</span>"
+            else:
+                diff_display = "<span style='color:gray; font-weight:bold;'>0</span>"
+                
             diff_rows.append({
                 "Competenza": skill,
                 "Tuo Valore": p_v,
