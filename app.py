@@ -39,7 +39,7 @@ st.markdown("""
         color: #ffffff !important;
     }
     
-    /* Pulsanti specifici di accesso in rosso brillante */
+    /* Pulsanti specifici di accesso e gestione in rosso brillante */
     .element-container:has(button:contains("Allenatore")) button,
     .element-container:has(button:contains("Giocatore")) button,
     .element-container:has(button:contains("Coach")) button,
@@ -50,7 +50,19 @@ st.markdown("""
     .element-container:has(button:contains("Spelare")) button,
     .element-container:has(button:contains("Speler")) button,
     .element-container:has(button:contains("Træner")) button,
-    .element-container:has(button:contains("Spiller")) button {
+    .element-container:has(button:contains("Spiller")) button,
+    .element-container:has(button:contains("Esci da Area Allenatore")) button,
+    .element-container:has(button:contains("Exit Coach Area")) button,
+    .element-container:has(button:contains("Salir del Área de Entrenador")) button,
+    .element-container:has(button:contains("Logga ut från Tränarområde")) button,
+    .element-container:has(button:contains("Verlaat Coachgebied")) button,
+    .element-container:has(button:contains("Log ud fra Trænerområde")) button,
+    .element-container:has(button:contains("Gestisci Rosa Giocatori")) button,
+    .element-container:has(button:contains("Manage Squad")) button,
+    .element-container:has(button:contains("Gestión de Plantilla")) button,
+    .element-container:has(button:contains("Trupphantering")) button,
+    .element-container:has(button:contains("Selectiebeheer")) button,
+    .element-container:has(button:contains("Trupstyring")) button {
         background-color: #dc2626 !important;
         color: white !important;
         border-color: #b91c1c !important;
@@ -162,6 +174,7 @@ translations = {
         "received_lbl": "Ricevuti:",
         "coach_dash_title": "Dashboard Allenatore",
         "exit_coach": "Esci da Area Allenatore",
+        "manage_roster_btn": "Gestisci Rosa Giocatori",
         "coach_tab_squad": "Gestione Squadra & Presenze",
         "coach_tab_evals": "Gestione Voti Coach",
         "coach_tab_training": "Allenamenti & Focus",
@@ -267,6 +280,7 @@ translations = {
         "received_lbl": "Received:",
         "coach_dash_title": "Coach Dashboard",
         "exit_coach": "Exit Coach Area",
+        "manage_roster_btn": "Manage Squad",
         "coach_tab_squad": "Squad Management & Attendance",
         "coach_tab_evals": "Coach Grades Management",
         "coach_tab_training": "Training & Focus",
@@ -367,6 +381,7 @@ translations = {
         "received_lbl": "Recibidos:",
         "coach_dash_title": "Dashboard de Entrenador",
         "exit_coach": "Salir del Área de Entrenador",
+        "manage_roster_btn": "Gestión de Plantilla",
         "coach_tab_squad": "Gestión de Plantilla y Asistencia",
         "coach_tab_evals": "Gestión de Notas del Entrenador",
         "coach_tab_training": "Entrenamiento y Enfoque",
@@ -467,6 +482,7 @@ translations = {
         "received_lbl": "Mottagna:",
         "coach_dash_title": "Coachdashboard",
         "exit_coach": "Logga ut från Tränarområde",
+        "manage_roster_btn": "Trupphantering",
         "coach_tab_squad": "Trupphantering & Närvaro",
         "coach_tab_evals": "Coachbetygshantering",
         "coach_tab_training": "Träning & Fokus",
@@ -567,6 +583,7 @@ translations = {
         "received_lbl": "Ontvangen:",
         "coach_dash_title": "Coach Dashboard",
         "exit_coach": "Verlaat Coachgebied",
+        "manage_roster_btn": "Selectiebeheer",
         "coach_tab_squad": "Selectiebeheer & Aanwezigheid",
         "coach_tab_evals": "Coach Cijfers Beheer",
         "coach_tab_training": "Training & Focus",
@@ -667,6 +684,7 @@ translations = {
         "received_lbl": "Modtagne:",
         "coach_dash_title": "Træner Dashboard",
         "exit_coach": "Log ud fra Trænerområde",
+        "manage_roster_btn": "Trupstyring",
         "coach_tab_squad": "Trupstyring & Fremmøde",
         "coach_tab_evals": "Trænerkarakterer Håndtering",
         "coach_tab_training": "Træning & Fokus",
@@ -730,6 +748,9 @@ if "authenticated_player" not in st.session_state:
 
 if "planned_trainings" not in st.session_state:
     st.session_state.planned_trainings = []
+
+if "show_roster_modal" not in st.session_state:
+    st.session_state.show_roster_modal = False
 
 lang_dict = translations.get(st.session_state.language, translations["Italiano"])
 MENTAL_SKILLS = lang_dict["mental_list"]
@@ -1150,31 +1171,30 @@ elif st.session_state.nav_mode == "Player_Dashboard":
 # --- AREA ALLENATORE ---
 elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coach:
     st.title(f"📋 {lang_dict['coach_dash_title']}")
-    if st.button(lang_dict['exit_coach']):
-        st.session_state.authenticated_coach = False
-        st.session_state.nav_mode = "Home"
-        st.rerun()
-        
-    coach_tab1, coach_tab_evals, coach_tab_training, coach_tab2, coach_tab3, coach_tab_pairing = st.tabs([
-        f"👥 {lang_dict['coach_tab_squad']}", 
-        f"✏️ {lang_dict['coach_tab_evals']}",
-        f"🎾 {lang_dict['coach_tab_training']}",
-        f"📅 {lang_dict['coach_tab_matches']}", 
-        f"💬 {lang_dict['coach_tab_comments']}",
-        f"🤖 {lang_dict['coach_tab_pairing']}"
-    ])
     
-    with coach_tab1:
-        st.subheader(f"👥 {lang_dict['coach_tab_squad']}")
-        st.markdown(lang_dict['squad_desc'])
-        
-        # --- SEZIONE AGGIUNGI / ELIMINA GIOCATORE ---
-        with st.expander("➕ / 🗑️ Gestione Rosa Giocatori (Aggiungi o Rimuovi Giocatore)"):
-            col_add, col_del = st.columns(2)
+    # --- BARRA SUPERIORE CON I DUE BOTTONI ROSSI ---
+    top_btn_col1, top_btn_col2, _ = st.columns([1.5, 1.5, 4])
+    with top_btn_col1:
+        if st.button(lang_dict['manage_roster_btn']):
+            st.session_state.show_roster_modal = not st.session_state.show_roster_modal
+            st.rerun()
+    with top_btn_col2:
+        if st.button(lang_dict['exit_coach']):
+            st.session_state.authenticated_coach = False
+            st.session_state.show_roster_modal = False
+            st.session_state.nav_mode = "Home"
+            st.rerun()
             
-            with col_add:
-                st.markdown("### Aggiungi Nuovo Giocatore")
-                with st.form("add_player_form"):
+    # --- PANNELLO A SCOMPARSA PER GESTIONE ROSA ---
+    if st.session_state.show_roster_modal:
+        st.markdown("---")
+        st.markdown("### 👥 Pannello Gestione Rosa Giocatori (Aggiungi o Rimuovi)")
+        with st.container():
+            col_add_m, col_del_m = st.columns(2)
+            
+            with col_add_m:
+                st.markdown("#### Aggiungi Nuovo Giocatore")
+                with st.form("modal_add_player_form"):
                     new_fname = st.text_input("Nome")
                     new_lname = st.text_input("Cognome")
                     new_side = st.selectbox("Posizione / Ruolo", ["Left", "Right"])
@@ -1183,7 +1203,6 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     
                     if st.form_submit_button("➕ Aggiungi Giocatore", type="primary"):
                         if new_fname.strip() and new_lname.strip():
-                            # Controlliamo se esiste già
                             exists = any(p['fname'].lower() == new_fname.strip().lower() and p['lname'].lower() == new_lname.strip().lower() for p in st.session_state.squad_data)
                             if exists:
                                 st.error("Un giocatore con questo nome e cognome esiste già nella rosa!")
@@ -1211,17 +1230,29 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         else:
                             st.warning("Nome e Cognome non possono essere vuoti.")
             
-            with col_del:
-                st.markdown("### Elimina Giocatore Esistente")
-                with st.form("delete_player_form"):
+            with col_del_m:
+                st.markdown("#### Elimina Giocatore Esistente")
+                with st.form("modal_delete_player_form"):
                     player_to_delete = st.selectbox("Seleziona giocatore da rimuovere", [f"{p['fname']} {p['lname']}" for p in st.session_state.squad_data])
                     
                     if st.form_submit_button("🗑️ Rimuovi Giocatore", type="secondary"):
                         st.session_state.squad_data = [p for p in st.session_state.squad_data if f"{p['fname']} {p['lname']}" != player_to_delete]
                         st.success(f"Giocatore {player_to_delete} rimosso con successo!")
                         st.rerun()
-
         st.markdown("---")
+        
+    coach_tab1, coach_tab_evals, coach_tab_training, coach_tab2, coach_tab3, coach_tab_pairing = st.tabs([
+        f"👥 {lang_dict['coach_tab_squad']}", 
+        f"✏️ {lang_dict['coach_tab_evals']}",
+        f"🎾 {lang_dict['coach_tab_training']}",
+        f"📅 {lang_dict['coach_tab_matches']}", 
+        f"💬 {lang_dict['coach_tab_comments']}",
+        f"🤖 {lang_dict['coach_tab_pairing']}"
+    ])
+    
+    with coach_tab1:
+        st.subheader(f"👥 {lang_dict['coach_tab_squad']}")
+        st.markdown(lang_dict['squad_desc'])
         
         st.session_state.squad_data = sorted(st.session_state.squad_data, key=lambda x: x['fname'])
         squad_players = st.session_state.squad_data
@@ -1277,7 +1308,6 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 pct_calc = int(round((calc_participated / calc_trainings) * 100)) if calc_trainings > 0 else 0
                 st.markdown(f"<div style='padding-top: 8px; font-weight: bold; text-align: center; color: {'#2ecc71' if pct_calc >= 70 else '#e74c3c'};'>{pct_calc}%</div>", unsafe_allow_html=True)
             
-            # Aggiornamento dei dati in background
             p["side"] = new_side
             p["hand"] = new_hand
             p["play_style"] = new_st
