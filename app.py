@@ -429,7 +429,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
     
     with coach_tab1:
         st.subheader("👥 Elenco Intero Giocatori, Parametri e Presenze")
-        st.markdown("Modifica direttamente qui sotto i **Trainings** e i **Participated** dei giocatori. La percentuale di **Commitment** verrà calcolata automaticamente in base alle partecipazioni sui training.")
+        st.markdown("Modifica direttamente qui sotto i **Trainings** e i **Participated** di tutti i giocatori della rosa. La percentuale di **Commitment** verrà calcolata automaticamente in base alle presenze.")
         
         df_summary_data = []
         for p in squad_players:
@@ -447,6 +447,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         
         df_editable = pd.DataFrame(df_summary_data)
         
+        # Mostriamo la tabella interattiva con altezza sufficiente per contenere tutti i 19 giocatori
         edited_df = st.data_editor(
             df_editable,
             column_config={
@@ -457,6 +458,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             },
             hide_index=True,
             use_container_width=True,
+            height=600,
             key="coach_squad_editor"
         )
         
@@ -467,23 +469,20 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 t_val = int(row["Trainings"])
                 p_val = int(row["Participated"])
                 squad_players[idx]["commitment"] = f"{int((p_val / t_val) * 100)}%" if t_val > 0 else "0%"
-            st.success("Presenze e Training aggiornati con successo!")
+            st.success("Presenze e Training aggiornati con successo per tutta la squadra!")
             st.rerun()
 
         st.markdown("---")
         st.subheader("🎯 Gruppi di Lavoro e Miglioramento Mirato")
-        st.markdown("Raggruppamento automatico dei giocatori in base alle carenze comuni rilevate nelle valutazioni del coach (valori ≤ 6).")
+        st.markdown("Raggruppamento automatico di tutti i giocatori in base alle carenze comuni rilevate nelle valutazioni del coach (valori ≤ 6).")
         
-        # Logica di raggruppamento in base ai voti del coach (c_tech + c_mental)
         skill_groups = {skill: [] for skill in ALL_SKILLS}
         for p in squad_players:
             p_coach_vals = p['c_tech'] + p['c_mental']
             for i, skill in enumerate(ALL_SKILLS):
-                # Se il voto del coach è minore o uguale a 6, il giocatore viene inserito nel gruppo di miglioramento per quella skill
                 if p_coach_vals[i] <= 6:
                     skill_groups[skill].append(f"{p['fname']} {p['lname']} (Voto: {p_coach_vals[i]})")
                     
-        # Mostriamo solo le skill che hanno giocatori assegnati
         active_groups = {k: v for k, v in skill_groups.items() if len(v) > 0}
         
         if active_groups:
