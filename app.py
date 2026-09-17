@@ -560,33 +560,44 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             if p.get("comments"):
                 st.markdown(f"#### {p['fname']} {p['lname']}")
                 for c in p["comments"]:
-                    st.markdown(f"- *Da {c['from']}* : {c['text']}")
+                    st.markdown(f"- *Da {c['from']}*: {c['text']}")
 
     with coach_tab_pairing:
         st.subheader("🤖 Algoritmo Intelligente di Pairing per Coppie")
-        st.markdown("Questo strumento genera le coppie ideali accoppiando **sempre un giocatore di Sinistra (Left) e uno di Destra (Right)**. L'affinità viene calcolata sommando:")
-        st.markdown("- **Peso 1.0**: Valutazione complessiva data dal Coach (media di tecniche e mentali).")
-        st.markdown("- **Peso 0.5**: Volontà / preferenza espressa dai giocatori reciprocatamente nei loro ranking partner.")
+        st.markdown("Seleziona qui sotto i giocatori **disponibili per questa sessione**. L'algoritmo abbinerà esclusivamente tra loro i giocatori selezionati, rispettando il vincolo di ruolo (**1 Sinistra + 1 Destra**) e bilanciando:**")
+        st.markdown("- **Peso 1.0**: Valutazione complessiva del Coach.")
+        st.markdown("- **Peso 0.5**: Volontà / preferenza reciproca dei giocatori.")
         
-        # Filtriamo i giocatori disponibili (consideriamo chi ha almeno partecipato a 1 allenamento o basandoci sulla presenza)
-        available_players = squad_players.copy()
+        # Menu interattivo con multiselect per scegliere i giocatori disponibili
+        all_player_names = [f"{p['fname']} {p['lname']} ({p['side']})" for p in squad_players]
+        # Di default selezioniamo tutti i giocatori
+        selected_available_str = st.multiselect(
+            "Seleziona i giocatori disponibili oggi:",
+            options=all_player_names,
+            default=all_player_names
+        )
+        
+        # Filtriamo gli oggetti dei giocatori basandoci sulla selezione
+        selected_names_only = [s.split(" (")[0] for s in selected_available_str]
+        available_players = [p for p in squad_players if f"{p['fname']} {p['lname']}" in selected_names_only]
         
         left_players = [p for p in available_players if p["side"] == "Left"]
         right_players = [p for p in available_players if p["side"] == "Right"]
         
-        st.markdown(f"**Giocatori di Sinistra disponibili ({len(left_players)}):** " + ", ".join([f"{p['fname']} {p['lname']}" for p in left_players]))
-        st.markdown(f"**Giocatori di Destra disponibili ({len(right_players)}):** " + ", ".join([f"{p['fname']} {p['lname']}" for p in right_players]))
+        col_info1, col_info2 = st.columns(2)
+        with col_info1:
+            st.info(f"⬅️ **Sinistra (Left) disponibili: {len(left_players)}**\n" + ("\n".join([f"- {p['fname']} {p['lname']}" for p in left_players]) if left_players else "Nessuno"))
+        with col_info2:
+            st.info(f"➡️ **Destra (Right) disponibili: {len(right_players)}**\n" + ("\n".join([f"- {p['fname']} {p['lname']}" for p in right_players]) if right_players else "Nessuno"))
         
-        if st.button("🚀 Genera Coppie Ottimali", type="primary"):
+        if st.button("🚀 Genera Coppie Ottimali con i Disponibili", type="primary"):
             if not left_players or not right_players:
-                st.error("Servono sia giocatori di sinistra che di destra per formare le coppie!")
+                st.error("⚠️ Per formare le coppie servono almeno un giocatore di sinistra e un giocatore di destra tra i selezionati!")
             else:
-                # Funzione di utilità per calcolare il punteggio del coach (da 1 a 10)
                 def get_coach_score(player):
                     all_c = player['c_tech'] + player['c_mental']
                     return sum(all_c) / len(all_c) if all_c else 5.0
 
-                # Creiamo una matrice di affinità tra tutti i Left e tutti i Right
                 pairs_matrix = []
                 for l_p in left_players:
                     l_name = f"{l_p['fname']} {l_p['lname']}"
@@ -598,27 +609,23 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         r_coach_val = get_coach_score(r_p)
                         r_partners = r_p.get("partners", {})
                         
-                        # Media del valore del coach per la coppia (Peso 1.0)
                         coach_affinity = (l_coach_val + r_coach_val) / 2.0
                         
-                        # Volontà reciproca (Peso 0.5)
-                        # Cerchiamo se l'uno ha votato l'altro nei partner
                         vol_l_to_r = l_partners.get(r_name, 0)
                         vol_r_to_l = r_partners.get(l_name, 0)
-                        # Normalizziamo la volontà in scala 1-10 (supponendo max 50 o valori inseriti)
-                        # Se inseriti come match/preferenza, facciamo una media normalizzata o diretta
+                        
                         vol_score = 0.0
                         count_vol = 0
                         if vol_l_to_r > 0:
-                            vol_score += min(vol_l_to_r / 5.0, 10.0) # Adattamento scala
+                            vol_score += min(vol_l_to_r / 5.0, 10.0)
                             count_vol += 1
                         if vol_r_to_l > 0:
                             vol_score += min(vol_r_to_l / 5.0, 10.0)
                             count_vol += 1
                         
-                        willingness_affinity = (vol_score / count_vol) if count_vol > 0 else 5.0 # Default neutro 5 se non votati
+                        willingness_affinity = (vol_score / count_vol) if count_vol > 0 else 5.0
                         
-                        # Punteggio Totale ponderato: 1.0 * Coach + 0.5 * Volontà
+                        # Calcolo finale con i pesi richiesti (Coach = 1.0, Volontà = 0.5)
                         total_score = (1.0 * coach_affinity) + (0.5 * willingness_affinity)
                         
                         pairs_matrix.append({
@@ -629,10 +636,8 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                             "willingness": round(willingness_affinity, 2)
                         })
                 
-                # Ordinamento per punteggio decrescente
                 pairs_matrix = sorted(pairs_matrix, key=lambda x: x["score"], reverse=True)
                 
-                # Algoritmo greedy per l'assegnazione univoca (senza ripetere i giocatori se possibile)
                 matched_left = set()
                 matched_right = set()
                 final_pairs = []
@@ -643,7 +648,6 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         matched_left.add(item["left"])
                         matched_right.add(item["right"])
                 
-                # Gestione eventuali giocatori rimasti esclusi se i numeri non sono perfettamente bilanciati
                 unmatched_l = [l for l in left_players if f"{l['fname']} {l['lname']}" not in matched_left]
                 unmatched_r = [r for r in right_players if f"{r['fname']} {r['lname']}" not in matched_right]
                 
@@ -663,9 +667,9 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 if pair_results_df:
                     st.table(pd.DataFrame(pair_results_df))
                 else:
-                    st.info("Nessuna coppia generabile con i filtri attuali.")
+                    st.info("Nessuna coppia generabile con i giocatori selezionati.")
                     
                 if unmatched_l or unmatched_r:
-                    st.warning("⚠️ Giocatori non abbinati in questo turno per sbilanciamento numerico Left/Right:")
+                    st.warning("⚠️ Giocatori selezionati ma rimasti esclusi in questo turno per sbilanciamento numerico tra Destra e Sinistra:")
                     un_names = [f"{p['fname']} {p['lname']}" for p in unmatched_l + unmatched_r]
                     st.markdown("- " + "\n- ".join(un_names))
