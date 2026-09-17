@@ -201,7 +201,7 @@ translations = {
         "select_available_players": "Seleziona i giocatori disponibili oggi:",
         "run_pairing": "Genera Coppie Ottimali con i Disponibili",
         "pairing_err": "Per formare le coppie servono almeno un giocatore di sinistra e un giocatore di destra tra i selezionati!",
-        "recommended_pairing": "Risultato Pairing Consigliato:",
+        "recommended_pairing": "Risultato Pairing Consigliato (Top 5 Team):",
         "unmatched_warn": "Giocatori selezionati ma rimasti esclusi in questo turno per sbilanciamento numerico tra Destra e Sinistra:"
     },
     "English": {
@@ -300,7 +300,7 @@ translations = {
         "select_available_players": "Select available players today:",
         "run_pairing": "Generate Optimal Pairs with Available",
         "pairing_err": "To form pairs you need at least one left player and one right player among the selected ones!",
-        "recommended_pairing": "Recommended Pairing Result:",
+        "recommended_pairing": "Recommended Pairing Result (Top 5 Teams):",
         "unmatched_warn": "Selected players left out in this round due to numerical imbalance between Right and Left:"
     },
     "Español": {
@@ -399,7 +399,7 @@ translations = {
         "select_available_players": "Selecciona los jugadores disponibles hoy:",
         "run_pairing": "Generar Parejas Óptimas con los Disponibles",
         "pairing_err": "¡Para formar parejas se necesita al menos un jugador de izquierda y un jugador de derecha entre los seleccionados!",
-        "recommended_pairing": "Resultado de Emparejamiento Recomendado:",
+        "recommended_pairing": "Resultado de Emparejamiento Recomendado (Top 5 Equipos):",
         "unmatched_warn": "Jugadores seleccionados pero excluidos en esta ronda por desequilibrio numérico entre Derecha e Izquierda:"
     },
     "Svenska": {
@@ -498,7 +498,7 @@ translations = {
         "select_available_players": "Välj tillgängliga spelare idag:",
         "run_pairing": "Generera Optimala Par med Tillgängliga",
         "pairing_err": "För att bilda par behöver du minst en vänsterspelare och en högerspelare bland de valda!",
-        "recommended_pairing": "Rekommenderat Parresultat:",
+        "recommended_pairing": "Rekommenderat Parresultat (Topp 5 Lag):",
         "unmatched_warn": "Spelare som valdes men utelämnades denna omgång på grund av numerisk obalans mellan Höger och Vänster:"
     },
     "Nederlands": {
@@ -597,7 +597,7 @@ translations = {
         "select_available_players": "Selecteer beschikbare spelers vandaag:",
         "run_pairing": "Genereer Optimale Koppels met Beschikbaren",
         "pairing_err": "Om koppels te vormen heb je minimaal één linkerspeler en één rechterspeler nodig onder de geselecteerden!",
-        "recommended_pairing": "Aanbevolen Koppeling Resultaat:",
+        "recommended_pairing": "Aanbevolen Koppeling Resultaat (Top 5 Teams):",
         "unmatched_warn": "Geselecteerde spelers weggelaten in deze ronde vanwege numeriek evenwicht tussen Rechts en Links:"
     },
     "Dansk": {
@@ -685,7 +685,7 @@ translations = {
         "right_role": "Højre (Right)",
         "score_lbl": "Resultat (f.eks. 6-4, 6-2)",
         "register_match": "Registrer Kamp",
-        "same_player_err": "Inden for det samme hold kan du ikke vælge den samme spiller to gånger!",
+        "same_player_err": "Inden for det samme hold kan du ikke vælge den samme spiller to gange!",
         "match_saved": "Kamp registreret!",
         "match_history": "Registreret Kamphistorik",
         "global_comments": "Global Oversigt over Noter & Kommentarer",
@@ -694,9 +694,9 @@ translations = {
         "pairing_p1": "Vægt 1.0: Overordnede Trænerevaluering.",
         "pairing_p2": "Vægt 0.5: Spillernes gensidige vilje / præference.",
         "select_available_players": "Vælg tilgængelige spillere i dag:",
-        "run_pairing": "Generer Optimal Par med Tilgængelige",
+        "run_pairing": "Generer Optimale Par med Tilgængelige",
         "pairing_err": "For at danne par skal du bruge mindst én venstrespiller og én højrespiller blandt de valgte!",
-        "recommended_pairing": "Anbefalet Parringsresultat:",
+        "recommended_pairing": "Anbefalet Parringsresultat (Top 5 Hold):",
         "unmatched_warn": "Spillere valgt men udeladt i denne runde på grund af numerisk ubalance mellem Højre og Venstre:"
     }
 }
@@ -1420,6 +1420,9 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         matched_left.add(item["left"])
                         matched_right.add(item["right"])
                 
+                # Limitiamo rigorosamente ai primi 5 team
+                final_pairs = final_pairs[:5]
+                
                 unmatched_l = [l for l in left_players if f"{l['fname']} {l['lname']}" not in matched_left]
                 unmatched_r = [r for r in right_players if f"{r['fname']} {r['lname']}" not in matched_right]
                 
@@ -1433,21 +1436,8 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             available_left_names = [f"{p['fname']} {p['lname']}" for p in left_players]
             available_right_names = [f"{p['fname']} {p['lname']}" for p in right_players]
             
-            # Tracciamo i giocatori già selezionati per escluderli dagli altri menu
             selected_lefts = []
             selected_rights = []
-            
-            # Prima passata per raccogliere i valori attuali dallo state o dalla cache
-            temp_edited_pairs = []
-            for idx, fp in enumerate(st.session_state.final_pairs_cache):
-                temp_edited_pairs.append({
-                    "Pair #": idx + 1,
-                    "Left Player": fp["left"],
-                    "Right Player": fp["right"],
-                    "Coach Score": fp["coach_avg"],
-                    "Mutual Willingness": fp["willingness"],
-                    "Total Score": round(fp["score"], 2)
-                })
             
             # Intestazione della tabella personalizzata in blu scuro coerente
             st.markdown("""
@@ -1465,7 +1455,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             
             new_confirmed_pairs = []
             
-            # Generazione delle righe con selectbox dinamici che escludono i già selezionati
+            # Generazione delle righe (massimo 5 team) con selectbox dinamici
             for idx, fp in enumerate(st.session_state.final_pairs_cache):
                 c_pair, c_left, c_right, c_cs, c_mw, c_ts = st.columns([1, 3, 3, 1, 1, 1])
                 
@@ -1474,7 +1464,6 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 
                 with c_left:
                     current_l = fp["left"]
-                    # Opzioni disponibili per la sinistra: quelli non ancora scelti altrove + il corrente
                     options_l = [current_l] + [name for name in available_left_names if name not in selected_lefts and name != current_l]
                     idx_l = options_l.index(current_l) if current_l in options_l else 0
                     chosen_l = st.selectbox(f"Left {idx+1}", options=options_l, index=idx_l, key=f"edit_left_{idx}", label_visibility="collapsed")
@@ -1482,7 +1471,6 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 
                 with c_right:
                     current_r = fp["right"]
-                    # Opzioni disponibili per la destra: quelli non ancora scelti altrove + il corrente
                     options_r = [current_r] + [name for name in available_right_names if name not in selected_rights and name != current_r]
                     idx_r = options_r.index(current_r) if current_r in options_r else 0
                     chosen_r = st.selectbox(f"Right {idx+1}", options=options_r, index=idx_r, key=f"edit_right_{idx}", label_visibility="collapsed")
