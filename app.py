@@ -578,7 +578,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
     
     with coach_tab1:
         st.subheader("👥 Elenco Intero Giocatori, Ruoli e Presenze")
-        st.markdown("Modifica il **Role (Left/Right)**, la **Mano (Destro/Mancino)**, i **Trainings** e i **Participated**. La colonna **Commitment (%)** si ricalcola e si aggiorna **in tempo reale** non appena modifichi i valori.")
+        st.markdown("Modifica direttamente qui il **Role (Left/Right)**, la **Mano (Destro/Mancino)**, lo **Stile di Gioco (Play Style)**, i **Trainings** e i **Participated**. La colonna **Commitment (%)** si aggiorna in tempo reale.")
         
         df_summary_data = []
         for p in squad_players:
@@ -590,6 +590,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 "Cognome": p["lname"],
                 "Role": p["side"],
                 "Mano": p.get("hand", "Destro"),
+                "Play Style": p.get("play_style", "equilibrated"),
                 "Trainings": t,
                 "Participated": part,
                 "Commitment (%)": f"{pct_val}%"
@@ -610,6 +611,11 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     options=["Destro", "Mancino"],
                     required=True
                 ),
+                "Play Style": st.column_config.SelectboxColumn(
+                    "Play Style",
+                    options=["offensive", "defensive", "equilibrated", "counterattack"],
+                    required=True
+                ),
                 "Trainings": st.column_config.NumberColumn("Trainings", min_value=0, max_value=50, step=1),
                 "Participated": st.column_config.NumberColumn("Participated", min_value=0, max_value=50, step=1),
                 "Commitment (%)": st.column_config.TextColumn("Commitment (%)", disabled=True)
@@ -626,14 +632,17 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             curr_p = int(row["Participated"])
             curr_role = row["Role"]
             curr_hand = row["Mano"]
+            curr_style = row["Play Style"]
             
             if (curr_t != squad_players[idx]["trainings"] or 
                 curr_p != squad_players[idx]["participated"] or 
                 curr_role != squad_players[idx]["side"] or
-                curr_hand != squad_players[idx].get("hand", "Destro")):
+                curr_hand != squad_players[idx].get("hand", "Destro") or
+                curr_style != squad_players[idx].get("play_style", "equilibrated")):
                 
                 squad_players[idx]["side"] = curr_role
                 squad_players[idx]["hand"] = curr_hand
+                squad_players[idx]["play_style"] = curr_style
                 squad_players[idx]["trainings"] = curr_t
                 squad_players[idx]["participated"] = curr_p
                 calc_pct = int(round((curr_p / curr_t) * 100)) if curr_t > 0 else 0
@@ -679,7 +688,6 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             with st.form("coach_eval_form"):
                 st.markdown(f"**Modifica voti e profilo per: {selected_player_name}**")
                 
-                # Selezione dello Stile / Profilo di Gioco (Coach)
                 style_options = ["offensive", "defensive", "equilibrated", "counterattack"]
                 current_style = p_obj.get("play_style", "equilibrated")
                 if current_style not in style_options:
@@ -871,7 +879,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         matched_right.add(item["right"])
                 
                 unmatched_l = [l for l in left_players if f"{l['fname']} {l['lname']}" not in matched_left]
-                unmatched_r = [r for r in right_players if f"{r['fname']} {r['lname']}" not in matched_right]
+                unmatched_r = [r for r in right_players if f"{r['fname']} {r['lname']}" not in unmatched_right]
                 
                 st.markdown("### 🏆 Risultato Pairing Consigliato:")
                 
