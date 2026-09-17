@@ -586,13 +586,12 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
     
     with coach_tab1:
         st.subheader("👥 Elenco Intero Giocatori, Ruoli e Presenze")
-        st.markdown("Modifica direttamente qui sotto i dati della squadra. I cambiamenti si salvano in tempo reale.")
+        st.markdown("Modifica direttamente qui sotto i dati della squadra. I cambiamenti si salvano in tempo reale e il **Commitment (%)** viene ricalcolato automaticamente.")
         
-        # Form di modifica rapida con selectbox e input nativi in stile scuro coerente
         with st.form("squad_edit_form"):
             updated_squad = []
             for idx, p in enumerate(squad_players):
-                col_n, col_r, col_h, col_s, col_t, col_p = st.columns([2, 1.2, 1.2, 1.5, 1, 1])
+                col_n, col_r, col_h, col_s, col_t, col_p, col_c = st.columns([1.8, 1.2, 1.2, 1.4, 0.9, 0.9, 0.9])
                 
                 with col_n:
                     st.markdown(f"**{p['fname']} {p['lname']}**")
@@ -609,6 +608,9 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     new_tr = st.number_input("Trainings", min_value=0, max_value=50, value=int(p.get("trainings", 1)), key=f"tr_{idx}")
                 with col_p:
                     new_pa = st.number_input("Participated", min_value=0, max_value=50, value=int(p.get("participated", 1)), key=f"pa_{idx}")
+                with col_c:
+                    pct_calc = int(round((new_pa / new_tr) * 100)) if new_tr > 0 else 0
+                    st.markdown(f"<div style='padding-top: 28px; font-weight: bold; color: {'#2ecc71' if pct_calc >= 70 else '#e74c3c'};'>{pct_calc}%</div>", unsafe_allow_html=True)
                 
                 p["side"] = new_side
                 p["hand"] = new_hand
