@@ -62,7 +62,7 @@ if "authenticated_coach" not in st.session_state:
 if "authenticated_player" not in st.session_state:
     st.session_state.authenticated_player = None
 
-# Lista aggiornata con Jairo Lopez al posto di Joahn Lohman
+# Lista giocatori aggiornata
 if "squad_data" not in st.session_state:
     st.session_state.squad_data = [
         {"fname": "Álvaro", "lname": "Gomez", "side": "Left", "trainings": 1, "participated": 1,
@@ -543,15 +543,51 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
 
     with coach_tab2:
         st.subheader("📅 Registrazione Partite")
+        st.markdown("Seleziona i giocatori per ciascuna squadra (ciascun team richiede 1 giocatore di Sinistra e 1 di Destra).")
+        
+        left_list = [f"{p['fname']} {p['lname']}" for p in squad_players if p['side'] == "Left"]
+        right_list = [f"{p['fname']} {p['lname']}" for p in squad_players if p['side'] == "Right"]
+        
         with st.form("match_form"):
-            m_date = st.date_input("Data", datetime.now())
-            t_a = st.text_input("Team A")
-            t_b = st.text_input("Team B")
-            score = st.text_input("Risultato")
-            if st.form_submit_button("Registra"):
-                st.session_state.match_results.append({"date": str(m_date), "team_a": t_a, "team_b": t_b, "score": score})
-                st.success("Partita registrata!")
+            m_date = st.date_input("Data Partita", datetime.now())
+            
+            st.markdown("#### 🔵 Team A")
+            col_ta1, col_ta2 = st.columns(2)
+            with col_ta1:
+                team_a_left = st.selectbox("Team A - Sinistra (Left)", left_list, key="ta_left")
+            with col_ta2:
+                team_a_right = st.selectbox("Team A - Destra (Right)", right_list, key="ta_right")
+                
+            st.markdown("#### 🔴 Team B")
+            col_tb1, col_tb2 = st.columns(2)
+            with col_tb1:
+                team_b_left = st.selectbox("Team B - Sinistra (Left)", left_list, key="tb_left")
+            with col_tb2:
+                team_b_right = st.selectbox("Team B - Destra (Right)", right_list, key="tb_right")
+                
+            score = st.text_input("Risultato (es. 6-4, 6-2)")
+            
+            if st.form_submit_button("Registra Partita", type="primary"):
+                # Controllo che non ci siano duplicati nello stesso match
+                team_a_players = {team_a_left, team_a_right}
+                team_b_players = {team_b_left, team_b_right}
+                
+                if len(team_a_players) < 2 or len(team_b_players) < 2:
+                    st.error("⚠️ All'interno dello stesso team non puoi selezionare due volte lo stesso giocatore!")
+                else:
+                    team_a_str = f"{team_a_left} / {team_a_right}"
+                    team_b_str = f"{team_b_left} / {team_b_right}"
+                    
+                    st.session_state.match_results.append({
+                        "Data": str(m_date),
+                        "Team A": team_a_str,
+                        "Team B": team_b_str,
+                        "Risultato": score
+                    })
+                    st.success("✅ Partita registrata con successo!")
+                    
         if st.session_state.match_results:
+            st.markdown("### 📋 Storico Partite Registrate")
             st.table(pd.DataFrame(st.session_state.match_results))
 
     with coach_tab3:
