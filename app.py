@@ -6,7 +6,7 @@ from datetime import datetime
 
 # Streamlit page configuration
 st.set_page_config(
-    page_title="Padel Performance Hub",
+    page_title="Nac Team Performance App",
     page_icon="🎾",
     layout="wide"
 )
