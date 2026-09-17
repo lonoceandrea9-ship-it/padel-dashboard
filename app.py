@@ -39,15 +39,17 @@ st.markdown("""
         color: #ffffff !important;
     }
     
-    /* Pulsanti specifici di accesso (Allenatore e Giocatore) in rosso brillante nella Home */
+    /* Pulsanti specifici di accesso e ritorno alla Home in rosso brillante */
     .element-container:has(button:contains("Allenatore")) button,
-    .element-container:has(button:contains("Giocatore")) button {
+    .element-container:has(button:contains("Giocatore")) button,
+    .element-container:has(button:contains("Torna alla Home")) button {
         background-color: #dc2626 !important;
         color: white !important;
         border-color: #b91c1c !important;
     }
     .element-container:has(button:contains("Allenatore")) button:hover,
-    .element-container:has(button:contains("Giocatore")) button:hover {
+    .element-container:has(button:contains("Giocatore")) button:hover,
+    .element-container:has(button:contains("Torna alla Home")) button:hover {
         background-color: #b91c1c !important;
         color: white !important;
     }
@@ -491,7 +493,7 @@ elif st.session_state.nav_mode == "Player_Dashboard":
 # --- AREA ALLENATORE ---
 elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coach:
     st.title("📋 Dashboard Allenatore")
-    if st.button("🚪 Esci da Area Allenatore"):
+    if st.button("Esci da Area Allenatore"):
         st.session_state.authenticated_coach = False
         st.session_state.nav_mode = "Home"
         st.rerun()
