@@ -305,26 +305,30 @@ elif st.session_state.nav_mode == "Player_Dashboard":
         st.subheader("📊 Gestione e Confronto Valutazioni")
         st.markdown("Regola i cursori per la tua autovalutazione. Sulla destra puoi consultare in sola lettura i valori assegnati dal coach.")
         
-        st.markdown(f"**{lang_dict['tech_skills']}**")
+        col_eval_left, col_eval_right = st.columns(2)
+        
         new_tech_vals = []
-        for i, skill in enumerate(TECH_SKILLS):
-            c1, c2 = st.columns(2)
-            with c1:
-                val = st.slider(f"Tu - {skill}", 1, 10, int(current_player['tech'][i]), key=f"p_tech_{i}")
-                new_tech_vals.append(val)
-            with c2:
-                st.slider(f"Coach - {skill}", 1, 10, int(current_player['c_tech'][i]), disabled=True, key=f"c_tech_view_{i}")
-
-        st.markdown("---")
-        st.markdown(f"**{lang_dict['mental_skills']}**")
         new_mental_vals = []
-        for i, skill in enumerate(MENTAL_SKILLS):
-            c1, c2 = st.columns(2)
-            with c1:
-                val = st.slider(f"Tu - {skill}", 1, 10, int(current_player['mental'][i]), key=f"p_mental_{i}")
-                new_mental_vals.append(val)
-            with c2:
-                st.slider(f"Coach - {skill}", 1, 10, int(current_player['c_mental'][i]), disabled=True, key=f"c_mental_view_{i}")
+        
+        with col_eval_left:
+            st.markdown(f"**{lang_dict['tech_skills']}**")
+            for i, skill in enumerate(TECH_SKILLS):
+                c1, c2 = st.columns(2)
+                with c1:
+                    val = st.slider(f"Tu - {skill}", 1, 10, int(current_player['tech'][i]), key=f"p_tech_{i}")
+                    new_tech_vals.append(val)
+                with c2:
+                    st.slider(f"Coach - {skill}", 1, 10, int(current_player['c_tech'][i]), disabled=True, key=f"c_tech_view_{i}")
+
+        with col_eval_right:
+            st.markdown(f"**{lang_dict['mental_skills']}**")
+            for i, skill in enumerate(MENTAL_SKILLS):
+                c1, c2 = st.columns(2)
+                with c1:
+                    val = st.slider(f"Tu - {skill}", 1, 10, int(current_player['mental'][i]), key=f"p_mental_{i}")
+                    new_mental_vals.append(val)
+                with c2:
+                    st.slider(f"Coach - {skill}", 1, 10, int(current_player['c_mental'][i]), disabled=True, key=f"c_mental_view_{i}")
                 
         if st.button("Salva Autovalutazione", type="primary"):
             current_player['tech'] = new_tech_vals
@@ -611,17 +615,22 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             with st.form("coach_eval_form"):
                 st.markdown(f"**Modifica voti per: {selected_player_name}**")
                 
-                c_tech_new = []
-                st.markdown("🎾 *Competenze Tecniche (Coach)*")
-                for idx, t_label in enumerate(TECH_SKILLS):
-                    val = st.slider(f"Coach - {t_label}", 1, 10, int(p_obj['c_tech'][idx]), key=f"scoach_tech_{idx}")
-                    c_tech_new.append(val)
+                col_c_left, col_c_right = st.columns(2)
                 
+                c_tech_new = []
                 c_mental_new = []
-                st.markdown("🧠 *Competenze Mentali (Coach)*")
-                for idx, m_label in enumerate(MENTAL_SKILLS):
-                    val = st.slider(f"Coach - {m_label}", 1, 10, int(p_obj['c_mental'][idx]), key=f"scoach_mental_{idx}")
-                    c_mental_new.append(val)
+                
+                with col_c_left:
+                    st.markdown("🎾 *Competenze Tecniche (Coach)*")
+                    for idx, t_label in enumerate(TECH_SKILLS):
+                        val = st.slider(f"Coach - {t_label}", 1, 10, int(p_obj['c_tech'][idx]), key=f"scoach_tech_{idx}")
+                        c_tech_new.append(val)
+                
+                with col_c_right:
+                    st.markdown("🧠 *Competenze Mentali (Coach)*")
+                    for idx, m_label in enumerate(MENTAL_SKILLS):
+                        val = st.slider(f"Coach - {m_label}", 1, 10, int(p_obj['c_mental'][idx]), key=f"scoach_mental_{idx}")
+                        c_mental_new.append(val)
                         
                 if st.form_submit_button("Salva Voti Coach", type="primary"):
                     p_obj.setdefault("history", []).append({
