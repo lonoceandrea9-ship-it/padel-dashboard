@@ -239,7 +239,6 @@ elif st.session_state.nav_mode == "Player_Dashboard":
         p_vals_radar = player_full_vals + [player_full_vals[0]]
         c_vals_radar = coach_full_vals + [coach_full_vals[0]]
         
-        # Due colonne per affiancare i due grafici separati
         radar_col1, radar_col2 = st.columns(2)
         
         with radar_col1:
@@ -279,11 +278,13 @@ elif st.session_state.nav_mode == "Player_Dashboard":
             st.plotly_chart(fig_coach, use_container_width=True)
 
         st.markdown("---")
-        st.subheader("📋 Tabella delle Differenze (Tu vs Coach)")
-        diff_rows = []
-        for i, skill in enumerate(all_skills_labels):
-            p_v = player_full_vals[i]
-            c_v = coach_full_vals[i]
+        st.subheader("📋 Tabelle delle Differenze (Tu vs Coach)")
+        
+        # Suddivisione delle tabelle in Tecniche (Sinistra) e Mentali (Destra)
+        diff_tech_rows = []
+        for i, skill in enumerate(TECH_SKILLS):
+            p_v = current_player['tech'][i]
+            c_v = current_player['c_tech'][i]
             diff = p_v - c_v
             
             if diff > 0:
@@ -293,14 +294,43 @@ elif st.session_state.nav_mode == "Player_Dashboard":
             else:
                 diff_display = "<span style='color:gray; font-weight:bold;'>0</span>"
                 
-            diff_rows.append({
-                "Competenza": skill,
-                "Tuo Valore": p_v,
-                "Valore Coach": c_v,
-                "Differenza (Tu - Coach)": diff_display
+            diff_tech_rows.append({
+                "Tecnica": skill,
+                "Tu": p_v,
+                "Coach": c_v,
+                "Diff": diff_display
             })
-        df_diff_table = pd.DataFrame(diff_rows)
-        st.markdown(df_diff_table.to_html(escape=False, index=False), unsafe_allow_html=True)
+
+        diff_mental_rows = []
+        for i, skill in enumerate(MENTAL_SKILLS):
+            p_v = current_player['mental'][i]
+            c_v = current_player['c_mental'][i]
+            diff = p_v - c_v
+            
+            if diff > 0:
+                diff_display = f"<span style='color:green; font-weight:bold;'>+{diff}</span>"
+            elif diff < 0:
+                diff_display = f"<span style='color:red; font-weight:bold;'>{diff}</span>"
+            else:
+                diff_display = "<span style='color:gray; font-weight:bold;'>0</span>"
+                
+            diff_mental_rows.append({
+                "Mentale": skill,
+                "Tu": p_v,
+                "Coach": c_v,
+                "Diff": diff_display
+            })
+
+        t_col1, t_col2 = st.columns(2)
+        with t_col1:
+            st.markdown("#### 🎾 Caratteristiche Tecniche")
+            df_tech_table = pd.DataFrame(diff_tech_rows)
+            st.markdown(df_tech_table.to_html(escape=False, index=False), unsafe_allow_html=True)
+            
+        with t_col2:
+            st.markdown("#### 🧠 Caratteristiche Mentali")
+            df_mental_table = pd.DataFrame(diff_mental_rows)
+            st.markdown(df_mental_table.to_html(escape=False, index=False), unsafe_allow_html=True)
 
     with tab_partners:
         st.subheader("🏆 Gestione Ranking Partner (Fino a 5)")
