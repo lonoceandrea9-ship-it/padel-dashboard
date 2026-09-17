@@ -229,7 +229,7 @@ elif st.session_state.nav_mode == "Player_Dashboard":
             st.rerun()
 
         st.markdown("---")
-        st.subheader("🕸️ Grafico a Tela di Ragno (Radar Chart)")
+        st.subheader("🕸️ Grafici a Tela di Ragno (Confronto Separato)")
         
         all_skills_labels = TECH_SKILLS + MENTAL_SKILLS
         player_full_vals = current_player['tech'] + current_player['mental']
@@ -239,32 +239,44 @@ elif st.session_state.nav_mode == "Player_Dashboard":
         p_vals_radar = player_full_vals + [player_full_vals[0]]
         c_vals_radar = coach_full_vals + [coach_full_vals[0]]
         
-        fig = go.Figure()
-        fig.add_trace(go.Scatterpolar(
-            r=p_vals_radar,
-            theta=categories,
-            fill='toself',
-            name='Tua Autovalutazione',
-            line_color='#1f77b4'
-        ))
-        fig.add_trace(go.Scatterpolar(
-            r=c_vals_radar,
-            theta=categories,
-            fill='toself',
-            name='Valutazione Coach',
-            line_color='#ff7f0e'
-        ))
+        # Due colonne per affiancare i due grafici separati
+        radar_col1, radar_col2 = st.columns(2)
         
-        fig.update_layout(
-            polar=dict(
-                radialaxis=dict(
-                    visible=True,
-                    range=[0, 10]
-                )),
-            showlegend=True,
-            height=550
-        )
-        st.plotly_chart(fig, use_container_width=True)
+        with radar_col1:
+            st.markdown("### 🫵 Autovalutazione Giocatore")
+            fig_player = go.Figure()
+            fig_player.add_trace(go.Scatterpolar(
+                r=p_vals_radar,
+                theta=categories,
+                fill='toself',
+                name='Autovalutazione',
+                line_color='#1f77b4'
+            ))
+            fig_player.update_layout(
+                polar=dict(radialaxis=dict(visible=True, range=[0, 10])),
+                showlegend=False,
+                height=450,
+                margin=dict(l=40, r=40, t=20, b=20)
+            )
+            st.plotly_chart(fig_player, use_container_width=True)
+            
+        with radar_col2:
+            st.markdown("### 📋 Valutazione Coach")
+            fig_coach = go.Figure()
+            fig_coach.add_trace(go.Scatterpolar(
+                r=c_vals_radar,
+                theta=categories,
+                fill='toself',
+                name='Coach',
+                line_color='#ff7f0e'
+            ))
+            fig_coach.update_layout(
+                polar=dict(radialaxis=dict(visible=True, range=[0, 10])),
+                showlegend=False,
+                height=450,
+                margin=dict(l=40, r=40, t=20, b=20)
+            )
+            st.plotly_chart(fig_coach, use_container_width=True)
 
         st.markdown("---")
         st.subheader("📋 Tabella delle Differenze (Tu vs Coach)")
@@ -299,11 +311,9 @@ elif st.session_state.nav_mode == "Player_Dashboard":
         
         with st.form("partners_form"):
             new_partners_dict = {}
-            # Permettiamo di inserire fino a 5 partner
             for i in range(5):
                 col_p1, col_p2 = st.columns([3, 1])
                 
-                # Pre-seleziona i partner esistenti se presenti
                 existing_keys = list(current_partners.keys())
                 default_partner = existing_keys[i] if i < len(existing_keys) else (all_colleagues[0] if all_colleagues else "")
                 default_val = int(current_partners.get(default_partner, 5 - i))
