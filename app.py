@@ -1609,7 +1609,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
 
     with coach_tab2:
         st.subheader("📅 Calendario & Registrazione Partite SNP")
-        st.markdown("Gestione delle **7 giornate SNP**. Per ogni incontro assegna i giocatori NAC sulle 5 piste e inserisci il risultato.")
+        st.markdown("Gestione delle **7 giornate SNP**. Per ogni incontro assegna i giocatori NAC e il **risultato di ogni pista**.")
         
         all_players_list = [f"{p['fname']} {p['lname']}" for p in squad_players]
         
@@ -1635,20 +1635,21 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         day_id = selected_day["id"]
         
         st.markdown(f"### {selected_day['label']}")
-        st.caption("Assegna 2 giocatori NAC per ogni pista (Pista 1 → Pista 5)")
+        st.caption("Per ogni pista: scegli 2 giocatori NAC + inserisci il risultato della pista")
         
         # Carica lineup esistente se presente
         existing = st.session_state.snp_lineups.get(day_id, {})
         
         with st.form(f"snp_day_form_{day_id}"):
-            piste_players = {}
+            piste_data = {}
             
             for pista in range(1, 6):
                 st.markdown(f"**Pista {pista}**")
-                c1, c2 = st.columns(2)
+                c1, c2, c3 = st.columns([2, 2, 1.5])
                 
                 default_p1 = existing.get(f"pista_{pista}_p1", "")
                 default_p2 = existing.get(f"pista_{pista}_p2", "")
+                default_res = existing.get(f"pista_{pista}_risultato", "")
                 
                 with c1:
                     opts1 = [""] + all_players_list
@@ -1670,51 +1671,61 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         key=f"day{day_id}_pista{pista}_p2",
                         label_visibility="collapsed"
                     )
+                with c3:
+                    res = st.text_input(
+                        f"Risultato Pista {pista}",
+                        value=default_res,
+                        placeholder="es. 6-4, 6-2",
+                        key=f"day{day_id}_pista{pista}_res",
+                        label_visibility="collapsed"
+                    )
                 
-                piste_players[pista] = (p1, p2)
+                piste_data[pista] = {"p1": p1, "p2": p2, "risultato": res}
             
             st.markdown("---")
-            default_result = existing.get("risultato", "")
-            risultato = st.text_input(
-                "🏆 Risultato della giornata (es. 3-2 / 4-1 / 5-0)",
-                value=default_result,
-                placeholder="es. 3-2"
-            )
-            
             note_giornata = st.text_area(
-                "📝 Note / Commenti (opzionale)",
+                "📝 Note / Commenti giornata (opzionale)",
                 value=existing.get("note", ""),
                 placeholder="Osservazioni, infortuni, ecc."
             )
             
-            submitted = st.form_submit_button("💾 Salva Formazione e Risultato", type="primary")
+            submitted = st.form_submit_button("💾 Salva Formazioni e Risultati di tutte le Piste", type="primary")
             
             if submitted:
-                # Salva lineup
+                # Calcola risultato complessivo della giornata (vittorie piste)
+                vittorie_nac = 0
+                sconfitte_nac = 0
+                for pista, info in piste_data.items():
+                    r = info["risultato"].strip().lower()
+                    if r:
+                        # Heuristica semplice: se inizia con 6 o 7 e contiene "-" conta come possibile vittoria
+                        # L'utente inserisce il risultato dal punto di vista NAC
+                        # Per semplicità lasciamo il conteggio manuale, ma mostriamo i singoli risultati
+                        pass
+                
                 lineup_data = {
                     "date": selected_day["date"],
                     "home": selected_day["home"],
                     "away": selected_day["away"],
                     "label": selected_day["label"],
-                    "risultato": risultato.strip(),
                     "note": note_giornata.strip()
                 }
-                for pista, (p1, p2) in piste_players.items():
-                    lineup_data[f"pista_{pista}_p1"] = p1
-                    lineup_data[f"pista_{pista}_p2"] = p2
+                
+                for pista, info in piste_data.items():
+                    lineup_data[f"pista_{pista}_p1"] = info["p1"]
+                    lineup_data[f"pista_{pista}_p2"] = info["p2"]
+                    lineup_data[f"pista_{pista}_risultato"] = info["risultato"].strip()
                 
                 st.session_state.snp_lineups[day_id] = lineup_data
                 
-                # Aggiorna anche match_results per lo storico
-                # Rimuovi eventuali record precedenti di questa giornata
+                # Aggiorna match_results per lo storico
                 st.session_state.match_results = [
                     m for m in st.session_state.match_results
                     if not (m.get("Tipo") == "SNP" and m.get("Giornata_ID") == day_id)
                 ]
                 
-                # Crea un record per ogni pista
-                for pista, (p1, p2) in piste_players.items():
-                    if p1 or p2:
+                for pista, info in piste_data.items():
+                    if info["p1"] or info["p2"] or info["risultato"].strip():
                         st.session_state.match_results.append({
                             "Data": selected_day["date"],
                             "Tipo": "SNP",
@@ -1723,12 +1734,12 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                             "Casa": selected_day["home"],
                             "Trasferta": selected_day["away"],
                             "Pista": f"Pista {pista}",
-                            "Giocatori_NAC": f"{p1} / {p2}" if p1 and p2 else (p1 or p2 or "—"),
-                            "Risultato_Giornata": risultato.strip() or "—"
+                            "Giocatori_NAC": f"{info['p1']} / {info['p2']}" if info["p1"] and info["p2"] else (info["p1"] or info["p2"] or "—"),
+                            "Risultato_Pista": info["risultato"].strip() or "—"
                         })
                 
                 save_data_to_server()
-                st.success(f"✅ Formazione e risultato salvati per **{selected_day['label']}**!")
+                st.success(f"✅ Formazioni e risultati di tutte le piste salvati per **{selected_day['label']}**!")
                 st.rerun()
         
         # --- Riepilogo completo delle 7 giornate ---
@@ -1738,19 +1749,23 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         for day in SNP_CALENDAR:
             did = day["id"]
             data = st.session_state.snp_lineups.get(did, {})
-            risultato = data.get("risultato", "—")
             
-            with st.expander(f"**{day['label']}**   →   Risultato: **{risultato}**", expanded=False):
+            # Conta quante piste hanno risultato
+            piste_con_risultato = sum(1 for p in range(1, 6) if data.get(f"pista_{p}_risultato", "").strip())
+            summary = f"{piste_con_risultato}/5 piste compilate" if data else "Non compilata"
+            
+            with st.expander(f"**{day['label']}**   →   {summary}", expanded=False):
                 if data:
-                    # Tabella delle 5 piste
                     rows = []
                     for pista in range(1, 6):
                         p1 = data.get(f"pista_{pista}_p1", "")
                         p2 = data.get(f"pista_{pista}_p2", "")
+                        res = data.get(f"pista_{pista}_risultato", "")
                         rows.append({
                             "Pista": f"Pista {pista}",
                             "Giocatore 1": p1 or "—",
-                            "Giocatore 2": p2 or "—"
+                            "Giocatore 2": p2 or "—",
+                            "Risultato": res or "—"
                         })
                     df_day = pd.DataFrame(rows)
                     st.markdown(f"<div class='table-container'>{df_day.to_html(escape=False, index=False, classes='custom-table')}</div>", unsafe_allow_html=True)
@@ -1760,7 +1775,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 else:
                     st.info("Nessuna formazione ancora inserita per questa giornata.")
         
-        # Pulsante reset (opzionale)
+        # Pulsante reset
         with st.expander("🗑️ Reset dati SNP"):
             if st.button("Cancella TUTTE le formazioni e risultati SNP", type="secondary"):
                 st.session_state.snp_lineups = {}
