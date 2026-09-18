@@ -792,9 +792,13 @@ translations = {
 # --- LISTA DELLE SKILLS ---
 TECH_SKILLS = ["Volley", "Bandeja", "Remate", "Smash", "Bajada", "Chiquita", "Lob"]
 
-# --- INIZIALIZZAZIONE STATO CON PERSISTENZA AUTOMATICA ---
+# --- INIZIALIZZAZIONE LINGUA & SKILLS (PRIMA DEI DATI) ---
 if "language" not in st.session_state:
     st.session_state.language = "Italiano"
+
+lang_dict = translations.get(st.session_state.language, translations["Italiano"])
+MENTAL_SKILLS = lang_dict.get("mental_list", translations["Italiano"]["mental_list"])
+ALL_SKILLS = TECH_SKILLS + MENTAL_SKILLS
 
 if "nav_mode" not in st.session_state:
     st.session_state.nav_mode = "Home"
@@ -862,8 +866,6 @@ for p in st.session_state.squad_data:
     if len(p["c_mental"]) != len(MENTAL_SKILLS): p["c_mental"] = [6] * len(MENTAL_SKILLS)
 
 squad_players = st.session_state.squad_data
-
-# Salvataggio iniziale per sicurezza
 save_data_to_server()
 
 # --- SIDEBAR & LINGUA ---
@@ -1029,7 +1031,7 @@ elif st.session_state.nav_mode == "Player_Dashboard":
             current_player['tech'] = new_tech_vals
             current_player['mental'] = new_mental_vals
             current_player['player_play_style'] = new_player_style
-            save_data_to_server() # Salvataggio automatico persistente
+            save_data_to_server()
             st.success(lang_dict.get('eval_saved', 'Saved!'))
             st.rerun()
 
@@ -1167,7 +1169,7 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                     
             if st.form_submit_button(lang_dict.get('save_partners', 'Save Partners'), type="primary"):
                 current_player["partners"] = new_partners_dict
-                save_data_to_server() # Salvataggio automatico persistente
+                save_data_to_server()
                 st.success(lang_dict.get('partners_saved', 'Saved!'))
                 st.rerun()
                 
@@ -1212,7 +1214,7 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                         "text": comment_text,
                         "date": datetime.now().strftime("%Y-%m-%d %H:%M")
                     })
-                    save_data_to_server() # Salvataggio automatico persistente
+                    save_data_to_server()
                     st.success(lang_dict.get('note_sent', 'Sent!'))
             else:
                 st.warning(lang_dict.get('empty_note_warn', 'Cannot be empty.'))
@@ -1280,7 +1282,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                                     "partners": {},
                                     "comments": []
                                 })
-                                save_data_to_server() # Salvataggio automatico persistente
+                                save_data_to_server()
                                 st.success(f"Giocatore {new_fname} {new_lname} aggiunto con successo!")
                                 st.rerun()
                         else:
@@ -1293,7 +1295,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     
                     if st.form_submit_button("🗑️ Rimuovi Giocatore", type="secondary"):
                         st.session_state.squad_data = [p for p in st.session_state.squad_data if f"{p['fname']} {p['lname']}" != player_to_delete]
-                        save_data_to_server() # Salvataggio automatico persistente
+                        save_data_to_server()
                         st.success(f"Giocatore {player_to_delete} rimosso con successo!")
                         st.rerun()
         st.markdown("---")
@@ -1453,7 +1455,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     p_obj['c_mental'] = c_mental_new
                     p_obj['play_style'] = selected_style
                     p_obj['coach_note'] = new_coach_note
-                    save_data_to_server() # Salvataggio automatico persistente
+                    save_data_to_server()
                     st.success(f"✅ {selected_player_name} updated and saved successfully!")
 
     with coach_tab_training:
@@ -1528,7 +1530,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         "2° Priorità": coach_choice_p2,
                         "3° Priorità": coach_choice_p3
                     })
-                    save_data_to_server() # Salvataggio automatico persistente
+                    save_data_to_server()
                     st.success(f"🎉 Allenamento salvato con successo per il giorno {training_date}!")
                     st.rerun()
 
@@ -1546,7 +1548,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     if st.form_submit_button("🗑️ Elimina Allenamento Selezionato", type="secondary"):
                         selected_index = training_options.index(selected_training_to_delete)
                         removed_training = st.session_state.planned_trainings.pop(selected_index)
-                        save_data_to_server() # Salvataggio automatico persistente
+                        save_data_to_server()
                         st.success(f"Allenamento del {removed_training['Data']} eliminato con successo dal calendario!")
                         st.rerun()
             else:
@@ -1597,7 +1599,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         "Team B": team_b_str,
                         "Risultato": score
                     })
-                    save_data_to_server() # Salvataggio automatico persistente
+                    save_data_to_server()
                     st.success(f"✅ {lang_dict.get('match_saved', 'Saved!')}")
                     
         if st.session_state.match_results:
