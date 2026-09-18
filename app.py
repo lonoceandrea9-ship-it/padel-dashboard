@@ -122,6 +122,31 @@ st.markdown("""
     .custom-table tr:hover {
         background-color: #24344d !important;
     }
+    .feedback-box {
+        background-color: #f1f5f9 !important;
+        color: #000000 !important;
+        padding: 12px 16px;
+        border-radius: 8px;
+        border-left: 4px solid #64748b;
+        margin-bottom: 8px;
+    }
+    .feedback-box, .feedback-box * {
+        color: #000000 !important;
+    }
+    .feedback-box .feedback-date {
+        color: #334155 !important;
+    }
+    .coach-note-box {
+        background-color: #e0f2fe !important;
+        color: #000000 !important;
+        padding: 12px 16px;
+        border-radius: 8px;
+        border-left: 4px solid #0284c7;
+        margin-bottom: 8px;
+    }
+    .coach-note-box, .coach-note-box * {
+        color: #000000 !important;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -1245,7 +1270,7 @@ elif st.session_state.nav_mode == "Player_Dashboard":
         coach_note_val = current_player.get("coach_note", "")
         if coach_note_val.strip():
             st.markdown(
-                f"<div style='background-color:#e0f2fe; color:#000000; padding:12px 16px; border-radius:8px; border-left:4px solid #0284c7; margin-bottom:8px;'>{coach_note_val}</div>",
+                f"<div class='coach-note-box'>{coach_note_val}</div>",
                 unsafe_allow_html=True
             )
         else:
@@ -1273,9 +1298,9 @@ elif st.session_state.nav_mode == "Player_Dashboard":
         st.markdown(f"### {lang_dict.get('received_lbl', 'Received:')}")
         for c in current_player.get("comments", []):
             st.markdown(
-                f"<div style='background-color:#f1f5f9; color:#000000; padding:12px 16px; border-radius:8px; border-left:4px solid #64748b; margin-bottom:8px;'>"
-                f"<strong style='color:#000000;'>From {c['from']}</strong> <span style='color:#475569;'>({c['date']})</span><br>"
-                f"<span style='color:#000000;'>{c['text']}</span></div>",
+                f"<div class='feedback-box'>"
+                f"<strong>From {c['from']}</strong> <span class='feedback-date'>({c['date']})</span><br>"
+                f"{c['text']}</div>",
                 unsafe_allow_html=True
             )
 
