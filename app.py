@@ -795,10 +795,10 @@ TECH_SKILLS = ["Volley", "Bandeja", "Vibora", "Smash", "Bajada", "Chiquita", "Lo
 
 # --- INIZIALIZZAZIONE LINGUA & SKILLS ---
 if "language" not in st.session_state:
-    st.session_state.language = "Italiano"
+    st.session_state.language = "English"
 
-lang_dict = translations.get(st.session_state.language, translations["Italiano"])
-MENTAL_SKILLS = lang_dict.get("mental_list", translations["Italiano"]["mental_list"])
+lang_dict = translations.get(st.session_state.language, translations["English"])
+MENTAL_SKILLS = lang_dict.get("mental_list", translations["English"]["mental_list"])
 ALL_SKILLS = TECH_SKILLS + MENTAL_SKILLS
 
 if "nav_mode" not in st.session_state:
@@ -890,7 +890,7 @@ with st.sidebar:
         st.session_state.language = selected_lang
         st.rerun()
         
-    lang_dict = translations.get(st.session_state.language, translations["Italiano"])
+    lang_dict = translations.get(st.session_state.language, translations["English"])
     
     st.markdown("---")
     if st.session_state.authenticated_coach:
@@ -907,8 +907,8 @@ with st.sidebar:
             st.session_state.nav_mode = "Home"
             st.rerun()
 
-lang_dict = translations.get(st.session_state.language, translations["Italiano"])
-MENTAL_SKILLS = lang_dict.get("mental_list", translations["Italiano"]["mental_list"])
+lang_dict = translations.get(st.session_state.language, translations["English"])
+MENTAL_SKILLS = lang_dict.get("mental_list", translations["English"]["mental_list"])
 ALL_SKILLS = TECH_SKILLS + MENTAL_SKILLS
 
 # --- CONTROLLO FORZATURA CAMBIO PASSWORD (PRIMO ACCESSO) ---
