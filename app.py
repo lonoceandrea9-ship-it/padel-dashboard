@@ -161,12 +161,12 @@ translations = {
         "coach_desc": "Accesso riservato allo staff tecnico per la gestione dei dati, la pianificazione e le partite.",
         "coach_btn": "Accedi come Allenatore",
         "login_player_title": "Accesso Area Giocatore",
-        "login_player_sub": "Seleziona il tuo nome e inserisci la tua password (il tuo nome di battesimo).",
+        "login_player_sub": "Seleziona il tuo nome e inserisci la tua password.",
         "profile_select": "Seleziona il tuo profilo:",
-        "pwd_label": "Password (Il tuo nome di battesimo)",
+        "pwd_label": "Password",
         "enter_card": "Entra nella mia scheda",
         "back_home": "Torna alla Home",
-        "wrong_pwd": "Password errata! Ricorda che la password è il tuo nome di battesimo.",
+        "wrong_pwd": "Password errata!",
         "coach_login_title": "Autenticazione Area Allenatore",
         "coach_login_sub": "Inserisci la password di sicurezza per accedere alle funzioni di gestione.",
         "coach_pwd_label": "Password Allenatore",
@@ -267,12 +267,12 @@ translations = {
         "coach_desc": "Restricted access for coaching staff to manage data, planning, and matches.",
         "coach_btn": "Access as Coach",
         "login_player_title": "Player Area Login",
-        "login_player_sub": "Select your name and enter your password (your first name).",
+        "login_player_sub": "Select your name and enter your password.",
         "profile_select": "Select your profile:",
-        "pwd_label": "Password (Your first name)",
+        "pwd_label": "Password",
         "enter_card": "Enter my card",
         "back_home": "Back to Home",
-        "wrong_pwd": "Wrong password! Remember the password is your first name.",
+        "wrong_pwd": "Wrong password!",
         "coach_login_title": "Coach Area Authentication",
         "coach_login_sub": "Enter the security password to access management features.",
         "coach_pwd_label": "Coach Password",
@@ -373,12 +373,12 @@ translations = {
         "coach_desc": "Acceso restringido al cuerpo técnico para la gestión de datos, planificación y partidos.",
         "coach_btn": "Acceder como Entrenador",
         "login_player_title": "Acceso Área de Jugador",
-        "login_player_sub": "Selecciona tu nombre e introduce tu contraseña (tu nombre de pila).",
+        "login_player_sub": "Selecciona tu nombre e introduce tu contraseña.",
         "profile_select": "Selecciona tu perfil:",
-        "pwd_label": "Contraseña (Tu nombre de pila)",
+        "pwd_label": "Contraseña",
         "enter_card": "Entrar en mi ficha",
         "back_home": "Volver al Inicio",
-        "wrong_pwd": "¡Contraseña incorrecta! Recuerda que la contraseña es tu nombre de pila.",
+        "wrong_pwd": "¡Contraseña incorrecta!",
         "coach_login_title": "Autenticación Área de Entrenador",
         "coach_login_sub": "Introduce la contraseña de seguridad para acceder a las funciones de gestión.",
         "coach_pwd_label": "Contraseña de Entrenador",
@@ -479,12 +479,12 @@ translations = {
         "coach_desc": "Begränsad åtkomst för tränarstab för datahantering, planering och matcher.",
         "coach_btn": "Logga in som Tränare",
         "login_player_title": "Inloggning Spelarområde",
-        "login_player_sub": "Välj ditt namn och ange ditt lösenord (ditt förnamn).",
+        "login_player_sub": "Välj ditt namn och ange ditt lösenord.",
         "profile_select": "Välj din profil:",
-        "pwd_label": "Lösenord (Ditt förnamn)",
+        "pwd_label": "Lösenord",
         "enter_card": "Gå till mitt kort",
         "back_home": "Tillbaka till Hem",
-        "wrong_pwd": "Fel lösenord! Kom ihåg att lösenordet är ditt förnamn.",
+        "wrong_pwd": "Fel lösenord!",
         "coach_login_title": "Autentisering Tränarområde",
         "coach_login_sub": "Ange säkerhetslösenordet för att komma åt hanteringsfunktioner.",
         "coach_pwd_label": "Tränarlösenord",
@@ -585,12 +585,12 @@ translations = {
         "coach_desc": "Beperkte toegang voor de technische staf voor gegevensbeheer, planning en wedstrijden.",
         "coach_btn": "Toegang als Coach",
         "login_player_title": "Inloggen Spelersgebied",
-        "login_player_sub": "Selecteer je naam en voer je wachtwoord in (je voornaam).",
+        "login_player_sub": "Selecteer je naam en voer je wachtwoord in.",
         "profile_select": "Selecteer je profiel:",
-        "pwd_label": "Wachtwoord (Je voornaam)",
+        "pwd_label": "Wachtwoord",
         "enter_card": "Ga naar mijn kaart",
         "back_home": "Terug naar Home",
-        "wrong_pwd": "Verkeerd wachtwoord! Onthoud dat het wachtwoord je voornaam is.",
+        "wrong_pwd": "Verkeerd wachtwoord!",
         "coach_login_title": "Authenticatie Coachgebied",
         "coach_login_sub": "Voer het beveiligingswachtwoord in om toegang te krijgen tot de beheerfuncties.",
         "coach_pwd_label": "Coachwachtwoord",
@@ -691,12 +691,12 @@ translations = {
         "coach_desc": "Begrænset adgang for trænerstab til datahåndtering, planlægning og kampe.",
         "coach_btn": "Log ind som Træner",
         "login_player_title": "Login Spillerområde",
-        "login_player_sub": "Vælg dit navn og indtast din adgangskode (dit fornavn).",
+        "login_player_sub": "Vælg dit navn og indtast din adgangskode.",
         "profile_select": "Vælg din profil:",
-        "pwd_label": "Adgangskode (Dit fornavn)",
+        "pwd_label": "Adgangskode",
         "enter_card": "Gå til mit kort",
         "back_home": "Tilbage til Hjem",
-        "wrong_pwd": "Forkert adgangskode! Husk at adgangskoden er dit fornavn.",
+        "wrong_pwd": "Forkert adgangskode!",
         "coach_login_title": "Godkendelse Trænerområde",
         "coach_login_sub": "Indtast sikkerhedsadgangskoden for at få adgang til administrationsfunktionerne.",
         "coach_pwd_label": "Træneradgangskode",
@@ -741,7 +741,7 @@ translations = {
         "manage_roster_btn": "Trupstyring",
         "coach_tab_squad": "Trupstyring & Fremmøde",
         "coach_tab_evals": "Trænerkarakterer Håndtering",
-        "coach_tab_training": "Træning & Fokus",
+        "coach_tab_training": "Träning & Fokus",
         "coach_tab_matches": "Kampstyring",
         "coach_tab_comments": "Alle Kommentarer",
         "coach_tab_pairing": "Automatisk Makkerparring",
@@ -792,7 +792,7 @@ translations = {
 # --- LISTA DELLE SKILLS ---
 TECH_SKILLS = ["Volley", "Bandeja", "Remate", "Smash", "Bajada", "Chiquita", "Lob"]
 
-# --- INIZIALIZZAZIONE LINGUA & SKILLS (PRIMA DEI DATI) ---
+# --- INIZIALIZZAZIONE LINGUA & SKILLS ---
 if "language" not in st.session_state:
     st.session_state.language = "Italiano"
 
@@ -812,6 +812,9 @@ if "authenticated_player" not in st.session_state:
 if "show_roster_modal" not in st.session_state:
     st.session_state.show_roster_modal = False
 
+if "force_password_change" not in st.session_state:
+    st.session_state.force_password_change = False
+
 # Caricamento dati salvati in precedenza sul server se esistono
 saved_server_data = load_data_from_server()
 
@@ -829,25 +832,25 @@ else:
         st.session_state.match_results = []
     if "squad_data" not in st.session_state:
         st.session_state.squad_data = [
-            {"fname": "Alexander", "lname": "Wennstam", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1, "tech": [8, 8, 7, 7, 8, 6, 7], "mental": [7, 7, 8, 8, 7, 7, 8], "c_tech": [7, 7, 6, 6, 7, 5, 6], "c_mental": [6, 6, 7, 7, 6, 6, 7], "play_style": "Equilibrated", "player_play_style": "Equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []},
-            {"fname": "Alvaro", "lname": "Gomez", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1, "tech": [7, 7, 6, 7, 6, 6, 7], "mental": [8, 7, 7, 7, 8, 7, 8], "c_tech": [6, 6, 5, 6, 5, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6, 7], "play_style": "Equilibrated", "player_play_style": "Equilibrated", "history": [], "coach_note": "", "partners": {"Yannik Langeslag": 12, "Josu Usabiaga": 8}, "comments": []},
-            {"fname": "Andrea", "lname": "Lonoce", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1, "tech": [8, 7, 8, 7, 9, 6, 8], "mental": [9, 7, 8, 8, 9, 7, 9], "c_tech": [8, 7, 8, 7, 9, 6, 8], "c_mental": [9, 7, 8, 8, 9, 7, 9], "play_style": "Offensive", "player_play_style": "Offensive", "history": [], "coach_note": "", "partners": {"Alexander Wennstam": 14}, "comments": []},
-            {"fname": "Benjamin", "lname": "Thyrell", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1, "tech": [7, 7, 8, 6, 7, 6, 7], "mental": [8, 7, 7, 7, 8, 7, 8], "c_tech": [6, 6, 7, 5, 6, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6, 7], "play_style": "Counterattack", "player_play_style": "Counterattack", "history": [], "coach_note": "", "partners": {}, "comments": []},
-            {"fname": "Doug", "lname": "Ramsay", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0, "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "play_style": "Equilibrated", "player_play_style": "Equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []},
-            {"fname": "Fernando", "lname": "Oribe", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 0, "tech": [8, 7, 8, 7, 8, 6, 7], "mental": [8, 7, 8, 8, 8, 7, 8], "c_tech": [7, 6, 7, 6, 7, 5, 6], "c_mental": [7, 6, 7, 7, 7, 6, 7], "play_style": "Counterattack", "player_play_style": "Counterattack", "history": [], "coach_note": "", "partners": {}, "comments": []},
-            {"fname": "Gonzalo", "lname": "Diez de Onate", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1, "tech": [8, 7, 8, 7, 8, 6, 7], "mental": [8, 7, 8, 8, 8, 7, 8], "c_tech": [7, 6, 7, 6, 7, 5, 6], "c_mental": [7, 6, 7, 7, 7, 6, 7], "play_style": "Equilibrated", "player_play_style": "Equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []},
-            {"fname": "Hector", "lname": "Guerrero", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1, "tech": [7, 7, 7, 7, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 6, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6, 6], "play_style": "Counterattack", "player_play_style": "Counterattack", "history": [], "coach_note": "", "partners": {}, "comments": []},
-            {"fname": "Jairo", "lname": "Lopez", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0, "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "play_style": "Defensive", "player_play_style": "Defensive", "history": [], "coach_note": "", "partners": {}, "comments": []},
-            {"fname": "Josu", "lname": "Usabiaga", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1, "tech": [6, 8, 7, 7, 6, 7, 7], "mental": [6, 8, 6, 8, 7, 7, 8], "c_tech": [5, 7, 6, 6, 5, 6, 6], "c_mental": [5, 7, 5, 7, 6, 6, 7], "play_style": "Defensive", "player_play_style": "Defensive", "history": [], "coach_note": "", "partners": {"Alvaro Gomez": 8}, "comments": []},
-            {"fname": "Juanjo", "lname": "Lopez Benitez", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0, "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7, 7], "play_style": "Offensive", "player_play_style": "Offensive", "history": [], "coach_note": "", "partners": {}, "comments": []},
-            {"fname": "Julio", "lname": "Morales", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1, "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "play_style": "Offensive", "player_play_style": "Offensive", "history": [], "coach_note": "", "partners": {}, "comments": []},
-            {"fname": "Lars", "lname": "Mikkelsen", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0, "tech": [7, 7, 7, 6, 8, 6, 7], "mental": [8, 7, 7, 7, 8, 7, 8], "c_tech": [6, 6, 6, 5, 7, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6, 7], "play_style": "Equilibrated", "player_play_style": "Equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []},
-            {"fname": "Mikkel", "lname": "Hoff", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1, "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "play_style": "Defensive", "player_play_style": "Defensive", "history": [], "coach_note": "", "partners": {}, "comments": []},
-            {"fname": "Nacho", "lname": "Saracho", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 0, "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7, 7], "play_style": "Counterattack", "player_play_style": "Counterattack", "history": [], "coach_note": "", "partners": {}, "comments": []},
-            {"fname": "Pedro", "lname": "Rios", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1, "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7, 7], "play_style": "Equilibrated", "player_play_style": "Equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []},
-            {"fname": "Peter", "lname": "Gustafsson", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0, "tech": [7, 7, 7, 6, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6, 6], "play_style": "Equilibrated", "player_play_style": "Equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []},
-            {"fname": "Sascha", "lname": "Van De Bilt", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 0, "tech": [7, 7, 7, 6, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6, 6], "play_style": "Defensive", "player_play_style": "Defensive", "history": [], "coach_note": "", "partners": {}, "comments": []},
-            {"fname": "Yannik", "lname": "Langeslag", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1, "tech": [8, 6, 7, 7, 7, 5, 6], "mental": [7, 6, 8, 6, 7, 6, 7], "c_tech": [7, 5, 6, 6, 6, 4, 5], "c_mental": [6, 5, 7, 5, 6, 5, 6], "play_style": "Offensive", "player_play_style": "Offensive", "history": [], "coach_note": "", "partners": {"Alvaro Gomez": 12}, "comments": []}
+            {"fname": "Alexander", "lname": "Wennstam", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1, "tech": [8, 8, 7, 7, 8, 6, 7], "mental": [7, 7, 8, 8, 7, 7, 8], "c_tech": [7, 7, 6, 6, 7, 5, 6], "c_mental": [6, 6, 7, 7, 6, 6, 7], "play_style": "Equilibrated", "player_play_style": "Equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": [], "password": "Alexander", "first_login_done": False},
+            {"fname": "Alvaro", "lname": "Gomez", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1, "tech": [7, 7, 6, 7, 6, 6, 7], "mental": [8, 7, 7, 7, 8, 7, 8], "c_tech": [6, 6, 5, 6, 5, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6, 7], "play_style": "Equilibrated", "player_play_style": "Equilibrated", "history": [], "coach_note": "", "partners": {"Yannik Langeslag": 12, "Josu Usabiaga": 8}, "comments": [], "password": "Alvaro", "first_login_done": False},
+            {"fname": "Andrea", "lname": "Lonoce", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1, "tech": [8, 7, 8, 7, 9, 6, 8], "mental": [9, 7, 8, 8, 9, 7, 9], "c_tech": [8, 7, 8, 7, 9, 6, 8], "c_mental": [9, 7, 8, 8, 9, 7, 9], "play_style": "Offensive", "player_play_style": "Offensive", "history": [], "coach_note": "", "partners": {"Alexander Wennstam": 14}, "comments": [], "password": "Andrea", "first_login_done": False},
+            {"fname": "Benjamin", "lname": "Thyrell", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1, "tech": [7, 7, 8, 6, 7, 6, 7], "mental": [8, 7, 7, 7, 8, 7, 8], "c_tech": [6, 6, 7, 5, 6, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6, 7], "play_style": "Counterattack", "player_play_style": "Counterattack", "history": [], "coach_note": "", "partners": {}, "comments": [], "password": "Benjamin", "first_login_done": False},
+            {"fname": "Doug", "lname": "Ramsay", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0, "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "play_style": "Equilibrated", "player_play_style": "Equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": [], "password": "Doug", "first_login_done": False},
+            {"fname": "Fernando", "lname": "Oribe", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 0, "tech": [8, 7, 8, 7, 8, 6, 7], "mental": [8, 7, 8, 8, 8, 7, 8], "c_tech": [7, 6, 7, 6, 7, 5, 6], "c_mental": [7, 6, 7, 7, 7, 6, 7], "play_style": "Counterattack", "player_play_style": "Counterattack", "history": [], "coach_note": "", "partners": {}, "comments": [], "password": "Fernando", "first_login_done": False},
+            {"fname": "Gonzalo", "lname": "Diez de Onate", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1, "tech": [8, 7, 8, 7, 8, 6, 7], "mental": [8, 7, 8, 8, 8, 7, 8], "c_tech": [7, 6, 7, 6, 7, 5, 6], "c_mental": [7, 6, 7, 7, 7, 6, 7], "play_style": "Equilibrated", "player_play_style": "Equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": [], "password": "Gonzalo", "first_login_done": False},
+            {"fname": "Hector", "lname": "Guerrero", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1, "tech": [7, 7, 7, 7, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 6, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6, 6], "play_style": "Counterattack", "player_play_style": "Counterattack", "history": [], "coach_note": "", "partners": {}, "comments": [], "password": "Hector", "first_login_done": False},
+            {"fname": "Jairo", "lname": "Lopez", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0, "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "play_style": "Defensive", "player_play_style": "Defensive", "history": [], "coach_note": "", "partners": {}, "comments": [], "password": "Jairo", "first_login_done": False},
+            {"fname": "Josu", "lname": "Usabiaga", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1, "tech": [6, 8, 7, 7, 6, 7, 7], "mental": [6, 8, 6, 8, 7, 7, 8], "c_tech": [5, 7, 6, 6, 5, 6, 6], "c_mental": [5, 7, 5, 7, 6, 6, 7], "play_style": "Defensive", "player_play_style": "Defensive", "history": [], "coach_note": "", "partners": {"Alvaro Gomez": 8}, "comments": [], "password": "Josu", "first_login_done": False},
+            {"fname": "Juanjo", "lname": "Lopez Benitez", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0, "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7, 7], "play_style": "Offensive", "player_play_style": "Offensive", "history": [], "coach_note": "", "partners": {}, "comments": [], "password": "Juanjo", "first_login_done": False},
+            {"fname": "Julio", "lname": "Morales", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1, "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "play_style": "Offensive", "player_play_style": "Offensive", "history": [], "coach_note": "", "partners": {}, "comments": [], "password": "Julio", "first_login_done": False},
+            {"fname": "Lars", "lname": "Mikkelsen", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0, "tech": [7, 7, 7, 6, 8, 6, 7], "mental": [8, 7, 7, 7, 8, 7, 8], "c_tech": [6, 6, 6, 5, 7, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6, 7], "play_style": "Equilibrated", "player_play_style": "Equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": [], "password": "Lars", "first_login_done": False},
+            {"fname": "Mikkel", "lname": "Hoff", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1, "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "play_style": "Defensive", "player_play_style": "Defensive", "history": [], "coach_note": "", "partners": {}, "comments": [], "password": "Mikkel", "first_login_done": False},
+            {"fname": "Nacho", "lname": "Saracho", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 0, "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7, 7], "play_style": "Counterattack", "player_play_style": "Counterattack", "history": [], "coach_note": "", "partners": {}, "comments": [], "password": "Nacho", "first_login_done": False},
+            {"fname": "Pedro", "lname": "Rios", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1, "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7, 7], "play_style": "Equilibrated", "player_play_style": "Equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": [], "password": "Pedro", "first_login_done": False},
+            {"fname": "Peter", "lname": "Gustafsson", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0, "tech": [7, 7, 7, 6, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6, 6], "play_style": "Equilibrated", "player_play_style": "Equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": [], "password": "Peter", "first_login_done": False},
+            {"fname": "Sascha", "lname": "Van De Bilt", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 0, "tech": [7, 7, 7, 6, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6, 6], "play_style": "Defensive", "player_play_style": "Defensive", "history": [], "coach_note": "", "partners": {}, "comments": [], "password": "Sascha", "first_login_done": False},
+            {"fname": "Yannik", "lname": "Langeslag", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1, "tech": [8, 6, 7, 7, 7, 5, 6], "mental": [7, 6, 8, 6, 7, 6, 7], "c_tech": [7, 5, 6, 6, 6, 4, 5], "c_mental": [6, 5, 7, 5, 6, 5, 6], "play_style": "Offensive", "player_play_style": "Offensive", "history": [], "coach_note": "", "partners": {"Alvaro Gomez": 12}, "comments": [], "password": "Yannik", "first_login_done": False}
         ]
 
 st.session_state.squad_data = sorted(st.session_state.squad_data, key=lambda x: x['fname'])
@@ -859,6 +862,8 @@ for p in st.session_state.squad_data:
     if "player_play_style" not in p: p["player_play_style"] = p.get("play_style", "Equilibrated")
     if "trainings" not in p: p["trainings"] = 1
     if "participated" not in p: p["participated"] = 1
+    if "password" not in p: p["password"] = p["fname"]
+    if "first_login_done" not in p: p["first_login_done"] = False
     
     if len(p["tech"]) != len(TECH_SKILLS): p["tech"] = [7] * len(TECH_SKILLS)
     if len(p["mental"]) != len(MENTAL_SKILLS): p["mental"] = [7] * len(MENTAL_SKILLS)
@@ -893,6 +898,7 @@ with st.sidebar:
         st.success(f"👤 Player: {st.session_state.authenticated_player}")
         if st.button(lang_dict.get("logout", "Logout")):
             st.session_state.authenticated_player = None
+            st.session_state.force_password_change = False
             st.session_state.nav_mode = "Home"
             st.rerun()
 
@@ -929,21 +935,62 @@ elif st.session_state.nav_mode == "Player_Login":
     selected_player_str = st.selectbox(lang_dict.get('profile_select', 'Select profile:'), player_options)
     selected_fname = selected_player_str.split(" ")[0]
     
+    player_obj = next((p for p in squad_players if p['fname'] == selected_fname), None)
+    
     player_pwd_input = st.text_input(lang_dict.get('pwd_label', 'Password'), type="password")
     
     col_pl1, col_pl2 = st.columns(2)
     with col_pl1:
         if st.button(lang_dict.get('enter_card', 'Enter'), type="primary", use_container_width=True):
-            if player_pwd_input.strip().lower() == selected_fname.lower():
-                st.session_state.authenticated_player = selected_fname
-                st.session_state.nav_mode = "Player_Dashboard"
-                st.rerun()
-            else:
-                st.error(f"❌ {lang_dict.get('wrong_pwd', 'Wrong password')}")
+            if player_obj:
+                current_saved_pwd = player_obj.get("password", player_obj["fname"])
+                is_first_login = not player_obj.get("first_login_done", False)
+                
+                # Se è il primo accesso, verifica con il nome di battesimo
+                if is_first_login:
+                    if player_pwd_input.strip().lower() == player_obj["fname"].lower():
+                        st.session_state.authenticated_player = selected_fname
+                        st.session_state.force_password_change = True
+                        st.rerun()
+                    else:
+                        st.error("❌ Primo accesso: inserisci il tuo nome di battesimo come password.")
+                else:
+                    # Accesso normale con la password personale impostata
+                    if player_pwd_input == current_saved_pwd:
+                        st.session_state.authenticated_player = selected_fname
+                        st.session_state.force_password_change = False
+                        st.session_state.nav_mode = "Player_Dashboard"
+                        st.rerun()
+                    else:
+                        st.error(f"❌ {lang_dict.get('wrong_pwd', 'Wrong password')}")
     with col_pl2:
         if st.button(lang_dict.get('back_home', 'Back'), use_container_width=True):
             st.session_state.nav_mode = "Home"
             st.rerun()
+
+# --- SCHERMATA CAMBIO PASSWORD OBBLIGATORIO (PRIMO ACCESSO) ---
+elif st.session_state.get("force_password_change", False):
+    current_player = next((p for p in squad_players if p['fname'] == st.session_state.authenticated_player), None)
+    st.title("🔒 Primo Accesso: Imposta la tua Nuova Password")
+    st.markdown(f"Benvenuto **{current_player['fname']}**! Per motivi di sicurezza, essendo il tuo primo accesso, devi impostare una password personale che solo tu conoscerai.")
+    
+    with st.form("change_pwd_form"):
+        new_pwd1 = st.text_input("Nuova Password Personale", type="password")
+        new_pwd2 = st.text_input("Conferma Nuova Password", type="password")
+        
+        if st.form_submit_button("Salva Password e Accedi", type="primary"):
+            if not new_pwd1.strip():
+                st.warning("La password non può essere vuota.")
+            elif new_pwd1 != new_pwd2:
+                st.error("Le password non coincidono. Riprova.")
+            else:
+                current_player["password"] = new_pwd1
+                current_player["first_login_done"] = True
+                save_data_to_server()
+                st.session_state.force_password_change = False
+                st.session_state.nav_mode = "Player_Dashboard"
+                st.success("Password impostata con successo!")
+                st.rerun()
 
 # --- LOGIN ALLENATORE ---
 elif st.session_state.nav_mode == "Coach_Login":
@@ -978,6 +1025,7 @@ elif st.session_state.nav_mode == "Player_Dashboard":
         st.markdown("<div style='text-align: right;'>", unsafe_allow_html=True)
         if st.button(lang_dict.get('logout', 'Logout'), use_container_width=False):
             st.session_state.authenticated_player = None
+            st.session_state.force_password_change = False
             st.session_state.nav_mode = "Home"
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
@@ -1280,7 +1328,9 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                                     "history": [],
                                     "coach_note": "",
                                     "partners": {},
-                                    "comments": []
+                                    "comments": [],
+                                    "password": new_fname.strip(),
+                                    "first_login_done": False
                                 })
                                 save_data_to_server()
                                 st.success(f"Giocatore {new_fname} {new_lname} aggiunto con successo!")
