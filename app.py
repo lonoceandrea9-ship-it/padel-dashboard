@@ -759,7 +759,7 @@ translations = {
         "tech_skills_coach": "Tekniske Færdigheder (Træner)",
         "mental_skills_coach": "Mentale Færdigheder (Træner)",
         "save_coach_eval": "Gem Karakterer, Profil og Trænernote",
-        "training_title": "Træning & Fokus",
+        "training_title": "Träning & Fokus",
         "training_desc": "Vælg deltagere. Systemet foreslår prioriterede områder. Træneren kan ændre dem, vælge dato og bekræfte lagring i kalenderen.",
         "select_attendees": "Vælg mødedeltagere:",
         "training_priorities": "🎯 Systemets Anbefalede Prioriterede Områder",
@@ -789,8 +789,8 @@ translations = {
     }
 }
 
-# --- LISTA DELLE SKILLS ---
-TECH_SKILLS = ["Volley", "Bandeja", "Remate", "Smash", "Bajada", "Chiquita", "Lob"]
+# --- LISTA DELLE SKILLS (Remate sostituito con Vibora) ---
+TECH_SKILLS = ["Volley", "Bandeja", "Vibora", "Smash", "Bajada", "Chiquita", "Lob"]
 
 # --- INIZIALIZZAZIONE LINGUA & SKILLS ---
 if "language" not in st.session_state:
@@ -971,7 +971,6 @@ elif st.session_state.nav_mode == "Player_Login":
                 current_saved_pwd = player_obj.get("password", player_obj["fname"])
                 
                 if is_first_login:
-                    # Al primo accesso verifica con il nome di battesimo
                     if player_pwd_input.strip().lower() == player_obj["fname"].lower():
                         st.session_state.authenticated_player = selected_fname
                         st.session_state.force_password_change = True
@@ -979,7 +978,6 @@ elif st.session_state.nav_mode == "Player_Login":
                     else:
                         st.error("❌ Primo accesso: inserisci il tuo nome di battesimo come password.")
                 else:
-                    # Accesso successivo con la nuova password personale
                     if player_pwd_input == current_saved_pwd:
                         st.session_state.authenticated_player = selected_fname
                         st.session_state.force_password_change = False
