@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
+import json
+import os
 
 # Streamlit page configuration
 st.set_page_config(
@@ -15,23 +17,16 @@ st.set_page_config(
 # --- CUSTOM CSS: MOBILE FRIENDLY, SFONDO BLU SCURO, TESTO BIANCO, HEADER, BOTTONI E TABELLE STILIZZATE ---
 st.markdown("""
     <style>
-    /* Sfondo generale dell'applicazione */
     .stApp {
         background-color: #0d1b2a;
         color: #ffffff;
     }
-    
-    /* Rimozione della barra bianca superiore (Header di Streamlit) e colorazione in blu scuro */
     header[data-testid="stHeader"] {
         background-color: #0d1b2a !important;
     }
-    
-    /* Colore dei testi principali, intestazioni e label */
     h1, h2, h3, h4, h5, h6, p, label, span, .stMarkdown, div[data-baseweb="select"] span {
         color: #ffffff !important;
     }
-    
-    /* Sidebar */
     [data-testid="stSidebar"] {
         background-color: #1b263b;
         color: #ffffff;
@@ -39,8 +34,6 @@ st.markdown("""
     [data-testid="stSidebar"] h1, [data-testid="stSidebar"] span, [data-testid="stSidebar"] label {
         color: #ffffff !important;
     }
-    
-    /* Adattamento mobile per colonne e grafici */
     @media (max-width: 768px) {
         .stColumns {
             flex-direction: column !important;
@@ -51,8 +44,6 @@ st.markdown("""
             min-width: 100% !important;
         }
     }
-
-    /* Pulsanti specifici di accesso e gestione in rosso brillante */
     .element-container:has(button:contains("Allenatore")) button,
     .element-container:has(button:contains("Giocatore")) button,
     .element-container:has(button:contains("Coach")) button,
@@ -86,8 +77,6 @@ st.markdown("""
         color: white !important;
         border-color: #b91c1c !important;
     }
-    
-    /* Tutti gli altri bottoni standard in Blu scuro */
     div.stButton > button, div.stFormSubmitButton > button, button[kind="secondary"] {
         background-color: #2563eb !important;
         color: white !important;
@@ -97,13 +86,9 @@ st.markdown("""
         background-color: #1d4ed8 !important;
         color: white !important;
     }
-    
-    /* Tabs */
     .stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] p {
         color: #ffffff !important;
     }
-
-    /* --- STILE TABELLE HTML PERSONALIZZATE IN TEMA SCURO & RESPONSIVE --- */
     .table-container {
         width: 100%;
         overflow-x: auto;
@@ -139,6 +124,30 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
+
+# --- GESTIONE PERSISTENZA AUTOMATICA SU SERVER ---
+DATA_FILE = "squad_data_persistence.json"
+
+def save_data_to_server():
+    data_to_save = {
+        "squad_data": st.session_state.squad_data,
+        "planned_trainings": st.session_state.planned_trainings,
+        "match_results": st.session_state.match_results
+    }
+    try:
+        with open(DATA_FILE, "w", encoding="utf-8") as f:
+            json.dump(data_to_save, f, ensure_ascii=False, indent=4)
+    except Exception as e:
+        pass
+
+def load_data_from_server():
+    if os.path.exists(DATA_FILE):
+        try:
+            with open(DATA_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception as e:
+            return None
+    return None
 
 # --- TRADUZIONI COMPLETE (6 LINGUE) ---
 translations = {
@@ -783,7 +792,7 @@ translations = {
 # --- LISTA DELLE SKILLS ---
 TECH_SKILLS = ["Volley", "Bandeja", "Remate", "Smash", "Bajada", "Chiquita", "Lob"]
 
-# --- INIZIALIZZAZIONE STATO PROTETTA ---
+# --- INIZIALIZZAZIONE STATO CON PERSISTENZA AUTOMATICA ---
 if "language" not in st.session_state:
     st.session_state.language = "Italiano"
 
@@ -796,60 +805,46 @@ if "authenticated_coach" not in st.session_state:
 if "authenticated_player" not in st.session_state:
     st.session_state.authenticated_player = None
 
-if "planned_trainings" not in st.session_state:
-    st.session_state.planned_trainings = []
-
 if "show_roster_modal" not in st.session_state:
     st.session_state.show_roster_modal = False
 
-if "match_results" not in st.session_state:
-    st.session_state.match_results = []
+# Caricamento dati salvati in precedenza sul server se esistono
+saved_server_data = load_data_from_server()
 
-lang_dict = translations.get(st.session_state.language, translations["Italiano"])
-MENTAL_SKILLS = lang_dict.get("mental_list", translations["Italiano"]["mental_list"])
-ALL_SKILLS = TECH_SKILLS + MENTAL_SKILLS
-
-if "squad_data" not in st.session_state:
-    st.session_state.squad_data = [
-        {"fname": "Alexander", "lname": "Wennstam", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1,
-         "tech": [8, 8, 7, 7, 8, 6, 7], "mental": [7, 7, 8, 8, 7, 7, 8], "c_tech": [7, 7, 6, 6, 7, 5, 6], "c_mental": [6, 6, 7, 7, 6, 6, 7], "play_style": "Equilibrated", "player_play_style": "Equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []},
-        {"fname": "Alvaro", "lname": "Gomez", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1,
-         "tech": [7, 7, 6, 7, 6, 6, 7], "mental": [8, 7, 7, 7, 8, 7, 8], "c_tech": [6, 6, 5, 6, 5, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6, 7], "play_style": "Equilibrated", "player_play_style": "Equilibrated", "history": [], "coach_note": "", "partners": {"Yannik Langeslag": 12, "Josu Usabiaga": 8}, "comments": []},
-        {"fname": "Andrea", "lname": "Lonoce", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1,
-         "tech": [8, 7, 8, 7, 9, 6, 8], "mental": [9, 7, 8, 8, 9, 7, 9], "c_tech": [8, 7, 8, 7, 9, 6, 8], "c_mental": [9, 7, 8, 8, 9, 7, 9], "play_style": "Offensive", "player_play_style": "Offensive", "history": [], "coach_note": "", "partners": {"Alexander Wennstam": 14}, "comments": []},
-        {"fname": "Benjamin", "lname": "Thyrell", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1,
-         "tech": [7, 7, 8, 6, 7, 6, 7], "mental": [8, 7, 7, 7, 8, 7, 8], "c_tech": [6, 6, 7, 5, 6, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6, 7], "play_style": "Counterattack", "player_play_style": "Counterattack", "history": [], "coach_note": "", "partners": {}, "comments": []},
-        {"fname": "Doug", "lname": "Ramsay", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0,
-         "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "play_style": "Equilibrated", "player_play_style": "Equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []},
-        {"fname": "Fernando", "lname": "Oribe", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 0,
-         "tech": [8, 7, 8, 7, 8, 6, 7], "mental": [8, 7, 8, 8, 8, 7, 8], "c_tech": [7, 6, 7, 6, 7, 5, 6], "c_mental": [7, 6, 7, 7, 7, 6, 7], "play_style": "Counterattack", "player_play_style": "Counterattack", "history": [], "coach_note": "", "partners": {}, "comments": []},
-        {"fname": "Gonzalo", "lname": "Diez de Onate", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1,
-         "tech": [8, 7, 8, 7, 8, 6, 7], "mental": [8, 7, 8, 8, 8, 7, 8], "c_tech": [7, 6, 7, 6, 7, 5, 6], "c_mental": [7, 6, 7, 7, 7, 6, 7], "play_style": "Equilibrated", "player_play_style": "Equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []},
-        {"fname": "Hector", "lname": "Guerrero", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1,
-         "tech": [7, 7, 7, 7, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 6, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6, 6], "play_style": "Counterattack", "player_play_style": "Counterattack", "history": [], "coach_note": "", "partners": {}, "comments": []},
-        {"fname": "Jairo", "lname": "Lopez", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0,
-         "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "play_style": "Defensive", "player_play_style": "Defensive", "history": [], "coach_note": "", "partners": {}, "comments": []},
-        {"fname": "Josu", "lname": "Usabiaga", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1,
-         "tech": [6, 8, 7, 7, 6, 7, 7], "mental": [6, 8, 6, 8, 7, 7, 8], "c_tech": [5, 7, 6, 6, 5, 6, 6], "c_mental": [5, 7, 5, 7, 6, 6, 7], "play_style": "Defensive", "player_play_style": "Defensive", "history": [], "coach_note": "", "partners": {"Alvaro Gomez": 8}, "comments": []},
-        {"fname": "Juanjo", "lname": "Lopez Benitez", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0,
-         "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7, 7], "play_style": "Offensive", "player_play_style": "Offensive", "history": [], "coach_note": "", "partners": {}, "comments": []},
-        {"fname": "Julio", "lname": "Morales", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1,
-         "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "play_style": "Offensive", "player_play_style": "Offensive", "history": [], "coach_note": "", "partners": {}, "comments": []},
-        {"fname": "Lars", "lname": "Mikkelsen", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0,
-         "tech": [7, 7, 7, 6, 8, 6, 7], "mental": [8, 7, 7, 7, 8, 7, 8], "c_tech": [6, 6, 6, 5, 7, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6, 7], "play_style": "Equilibrated", "player_play_style": "Equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []},
-        {"fname": "Mikkel", "lname": "Hoff", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1,
-         "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "play_style": "Defensive", "player_play_style": "Defensive", "history": [], "coach_note": "", "partners": {}, "comments": []},
-        {"fname": "Nacho", "lname": "Saracho", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 0,
-         "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7, 7], "play_style": "Counterattack", "player_play_style": "Counterattack", "history": [], "coach_note": "", "partners": {}, "comments": []},
-        {"fname": "Pedro", "lname": "Rios", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1,
-         "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7, 7], "play_style": "Equilibrated", "player_play_style": "Equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []},
-        {"fname": "Peter", "lname": "Gustafsson", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0,
-         "tech": [7, 7, 7, 6, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6, 6], "play_style": "Equilibrated", "player_play_style": "Equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []},
-        {"fname": "Sascha", "lname": "Van De Bilt", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 0,
-         "tech": [7, 7, 7, 6, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6, 6], "play_style": "Defensive", "player_play_style": "Defensive", "history": [], "coach_note": "", "partners": {}, "comments": []},
-        {"fname": "Yannik", "lname": "Langeslag", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1,
-         "tech": [8, 6, 7, 7, 7, 5, 6], "mental": [7, 6, 8, 6, 7, 6, 7], "c_tech": [7, 5, 6, 6, 6, 4, 5], "c_mental": [6, 5, 7, 5, 6, 5, 6], "play_style": "Offensive", "player_play_style": "Offensive", "history": [], "coach_note": "", "partners": {"Alvaro Gomez": 12}, "comments": []}
-    ]
+if saved_server_data:
+    if "squad_data" not in st.session_state:
+        st.session_state.squad_data = saved_server_data.get("squad_data", [])
+    if "planned_trainings" not in st.session_state:
+        st.session_state.planned_trainings = saved_server_data.get("planned_trainings", [])
+    if "match_results" not in st.session_state:
+        st.session_state.match_results = saved_server_data.get("match_results", [])
+else:
+    if "planned_trainings" not in st.session_state:
+        st.session_state.planned_trainings = []
+    if "match_results" not in st.session_state:
+        st.session_state.match_results = []
+    if "squad_data" not in st.session_state:
+        st.session_state.squad_data = [
+            {"fname": "Alexander", "lname": "Wennstam", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1, "tech": [8, 8, 7, 7, 8, 6, 7], "mental": [7, 7, 8, 8, 7, 7, 8], "c_tech": [7, 7, 6, 6, 7, 5, 6], "c_mental": [6, 6, 7, 7, 6, 6, 7], "play_style": "Equilibrated", "player_play_style": "Equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []},
+            {"fname": "Alvaro", "lname": "Gomez", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1, "tech": [7, 7, 6, 7, 6, 6, 7], "mental": [8, 7, 7, 7, 8, 7, 8], "c_tech": [6, 6, 5, 6, 5, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6, 7], "play_style": "Equilibrated", "player_play_style": "Equilibrated", "history": [], "coach_note": "", "partners": {"Yannik Langeslag": 12, "Josu Usabiaga": 8}, "comments": []},
+            {"fname": "Andrea", "lname": "Lonoce", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1, "tech": [8, 7, 8, 7, 9, 6, 8], "mental": [9, 7, 8, 8, 9, 7, 9], "c_tech": [8, 7, 8, 7, 9, 6, 8], "c_mental": [9, 7, 8, 8, 9, 7, 9], "play_style": "Offensive", "player_play_style": "Offensive", "history": [], "coach_note": "", "partners": {"Alexander Wennstam": 14}, "comments": []},
+            {"fname": "Benjamin", "lname": "Thyrell", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1, "tech": [7, 7, 8, 6, 7, 6, 7], "mental": [8, 7, 7, 7, 8, 7, 8], "c_tech": [6, 6, 7, 5, 6, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6, 7], "play_style": "Counterattack", "player_play_style": "Counterattack", "history": [], "coach_note": "", "partners": {}, "comments": []},
+            {"fname": "Doug", "lname": "Ramsay", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0, "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "play_style": "Equilibrated", "player_play_style": "Equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []},
+            {"fname": "Fernando", "lname": "Oribe", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 0, "tech": [8, 7, 8, 7, 8, 6, 7], "mental": [8, 7, 8, 8, 8, 7, 8], "c_tech": [7, 6, 7, 6, 7, 5, 6], "c_mental": [7, 6, 7, 7, 7, 6, 7], "play_style": "Counterattack", "player_play_style": "Counterattack", "history": [], "coach_note": "", "partners": {}, "comments": []},
+            {"fname": "Gonzalo", "lname": "Diez de Onate", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1, "tech": [8, 7, 8, 7, 8, 6, 7], "mental": [8, 7, 8, 8, 8, 7, 8], "c_tech": [7, 6, 7, 6, 7, 5, 6], "c_mental": [7, 6, 7, 7, 7, 6, 7], "play_style": "Equilibrated", "player_play_style": "Equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []},
+            {"fname": "Hector", "lname": "Guerrero", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1, "tech": [7, 7, 7, 7, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 6, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6, 6], "play_style": "Counterattack", "player_play_style": "Counterattack", "history": [], "coach_note": "", "partners": {}, "comments": []},
+            {"fname": "Jairo", "lname": "Lopez", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0, "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "play_style": "Defensive", "player_play_style": "Defensive", "history": [], "coach_note": "", "partners": {}, "comments": []},
+            {"fname": "Josu", "lname": "Usabiaga", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1, "tech": [6, 8, 7, 7, 6, 7, 7], "mental": [6, 8, 6, 8, 7, 7, 8], "c_tech": [5, 7, 6, 6, 5, 6, 6], "c_mental": [5, 7, 5, 7, 6, 6, 7], "play_style": "Defensive", "player_play_style": "Defensive", "history": [], "coach_note": "", "partners": {"Alvaro Gomez": 8}, "comments": []},
+            {"fname": "Juanjo", "lname": "Lopez Benitez", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0, "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7, 7], "play_style": "Offensive", "player_play_style": "Offensive", "history": [], "coach_note": "", "partners": {}, "comments": []},
+            {"fname": "Julio", "lname": "Morales", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1, "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "play_style": "Offensive", "player_play_style": "Offensive", "history": [], "coach_note": "", "partners": {}, "comments": []},
+            {"fname": "Lars", "lname": "Mikkelsen", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0, "tech": [7, 7, 7, 6, 8, 6, 7], "mental": [8, 7, 7, 7, 8, 7, 8], "c_tech": [6, 6, 6, 5, 7, 5, 6], "c_mental": [7, 6, 6, 6, 7, 6, 7], "play_style": "Equilibrated", "player_play_style": "Equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []},
+            {"fname": "Mikkel", "lname": "Hoff", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1, "tech": [7, 6, 7, 6, 7, 5, 6], "mental": [7, 6, 7, 7, 7, 6, 7], "c_tech": [6, 5, 6, 5, 6, 4, 5], "c_mental": [6, 5, 6, 6, 6, 5, 6], "play_style": "Defensive", "player_play_style": "Defensive", "history": [], "coach_note": "", "partners": {}, "comments": []},
+            {"fname": "Nacho", "lname": "Saracho", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 0, "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7, 7], "play_style": "Counterattack", "player_play_style": "Counterattack", "history": [], "coach_note": "", "partners": {}, "comments": []},
+            {"fname": "Pedro", "lname": "Rios", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 1, "tech": [8, 8, 8, 7, 8, 7, 7], "mental": [8, 8, 8, 8, 8, 8, 8], "c_tech": [7, 7, 7, 6, 7, 6, 6], "c_mental": [7, 7, 7, 7, 7, 7, 7], "play_style": "Equilibrated", "player_play_style": "Equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []},
+            {"fname": "Peter", "lname": "Gustafsson", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 0, "tech": [7, 7, 7, 6, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6, 6], "play_style": "Equilibrated", "player_play_style": "Equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": []},
+            {"fname": "Sascha", "lname": "Van De Bilt", "side": "Right", "hand": "Destro", "trainings": 1, "participated": 0, "tech": [7, 7, 7, 6, 7, 6, 7], "mental": [7, 7, 7, 7, 7, 7, 7], "c_tech": [6, 6, 6, 5, 6, 5, 6], "c_mental": [6, 6, 6, 6, 6, 6, 6], "play_style": "Defensive", "player_play_style": "Defensive", "history": [], "coach_note": "", "partners": {}, "comments": []},
+            {"fname": "Yannik", "lname": "Langeslag", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1, "tech": [8, 6, 7, 7, 7, 5, 6], "mental": [7, 6, 8, 6, 7, 6, 7], "c_tech": [7, 5, 6, 6, 6, 4, 5], "c_mental": [6, 5, 7, 5, 6, 5, 6], "play_style": "Offensive", "player_play_style": "Offensive", "history": [], "coach_note": "", "partners": {"Alvaro Gomez": 12}, "comments": []}
+        ]
 
 st.session_state.squad_data = sorted(st.session_state.squad_data, key=lambda x: x['fname'])
 
@@ -867,6 +862,9 @@ for p in st.session_state.squad_data:
     if len(p["c_mental"]) != len(MENTAL_SKILLS): p["c_mental"] = [6] * len(MENTAL_SKILLS)
 
 squad_players = st.session_state.squad_data
+
+# Salvataggio iniziale per sicurezza
+save_data_to_server()
 
 # --- SIDEBAR & LINGUA ---
 with st.sidebar:
@@ -1031,6 +1029,7 @@ elif st.session_state.nav_mode == "Player_Dashboard":
             current_player['tech'] = new_tech_vals
             current_player['mental'] = new_mental_vals
             current_player['player_play_style'] = new_player_style
+            save_data_to_server() # Salvataggio automatico persistente
             st.success(lang_dict.get('eval_saved', 'Saved!'))
             st.rerun()
 
@@ -1168,6 +1167,7 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                     
             if st.form_submit_button(lang_dict.get('save_partners', 'Save Partners'), type="primary"):
                 current_player["partners"] = new_partners_dict
+                save_data_to_server() # Salvataggio automatico persistente
                 st.success(lang_dict.get('partners_saved', 'Saved!'))
                 st.rerun()
                 
@@ -1212,6 +1212,7 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                         "text": comment_text,
                         "date": datetime.now().strftime("%Y-%m-%d %H:%M")
                     })
+                    save_data_to_server() # Salvataggio automatico persistente
                     st.success(lang_dict.get('note_sent', 'Sent!'))
             else:
                 st.warning(lang_dict.get('empty_note_warn', 'Cannot be empty.'))
@@ -1279,6 +1280,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                                     "partners": {},
                                     "comments": []
                                 })
+                                save_data_to_server() # Salvataggio automatico persistente
                                 st.success(f"Giocatore {new_fname} {new_lname} aggiunto con successo!")
                                 st.rerun()
                         else:
@@ -1291,6 +1293,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     
                     if st.form_submit_button("🗑️ Rimuovi Giocatore", type="secondary"):
                         st.session_state.squad_data = [p for p in st.session_state.squad_data if f"{p['fname']} {p['lname']}" != player_to_delete]
+                        save_data_to_server() # Salvataggio automatico persistente
                         st.success(f"Giocatore {player_to_delete} rimosso con successo!")
                         st.rerun()
         st.markdown("---")
@@ -1324,47 +1327,54 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         with th_cols[6]: st.markdown(f"<div style='text-align: center;'>{lang_dict.get('col_commitment', 'Commitment (%)')}</div>", unsafe_allow_html=True)
         st.markdown("---")
 
-        for idx, p in enumerate(squad_players):
-            col_n, col_r, col_h, col_s, col_t, col_p, col_c = st.columns([1.8, 1.2, 1.2, 1.4, 0.9, 0.9, 0.9])
-            
-            player_first_name = p['fname']
-            participated_count = 0
-            for session in st.session_state.planned_trainings:
-                attendees_str = session.get("Partecipanti", "")
-                if player_first_name in attendees_str:
-                    participated_count += 1
-            
-            if total_scheduled_trainings > 0:
-                calc_trainings = total_scheduled_trainings
-                calc_participated = participated_count
-            else:
-                calc_trainings = int(p.get("trainings", 1))
-                calc_participated = int(p.get("participated", 1))
+        with st.form("squad_update_form"):
+            for idx, p in enumerate(squad_players):
+                col_n, col_r, col_h, col_s, col_t, col_p, col_c = st.columns([1.8, 1.2, 1.2, 1.4, 0.9, 0.9, 0.9])
+                
+                player_first_name = p['fname']
+                participated_count = 0
+                for session in st.session_state.planned_trainings:
+                    attendees_str = session.get("Partecipanti", "")
+                    if player_first_name in attendees_str:
+                        participated_count += 1
+                
+                if total_scheduled_trainings > 0:
+                    calc_trainings = total_scheduled_trainings
+                    calc_participated = participated_count
+                else:
+                    calc_trainings = int(p.get("trainings", 1))
+                    calc_participated = int(p.get("participated", 1))
 
-            with col_n:
-                st.markdown(f"**{p['fname']} {p['lname']}**")
-            with col_r:
-                new_side = st.selectbox("Role", ["Left", "Right"], index=0 if p["side"]=="Left" else 1, key=f"side_{idx}", label_visibility="collapsed")
-            with col_h:
-                new_hand = st.selectbox("Mano", ["Destro", "Mancino"], index=0 if p.get("hand","Destro")=="Destro" else 1, key=f"hand_{idx}", label_visibility="collapsed")
-            with col_s:
-                styles_list = ["Offensive", "Defensive", "Equilibrated", "Counterattack"]
-                curr_st = p.get("play_style", "Equilibrated")
-                idx_st = styles_list.index(curr_st) if curr_st in styles_list else 2
-                new_st = st.selectbox("Style", styles_list, index=idx_st, key=f"style_{idx}", label_visibility="collapsed")
-            with col_t:
-                st.markdown(f"<div style='padding-top: 8px; text-align: center; font-weight: bold;'>{calc_trainings}</div>", unsafe_allow_html=True)
-            with col_p:
-                st.markdown(f"<div style='padding-top: 8px; text-align: center; font-weight: bold;'>{calc_participated}</div>", unsafe_allow_html=True)
-            with col_c:
-                pct_calc = int(round((calc_participated / calc_trainings) * 100)) if calc_trainings > 0 else 0
-                st.markdown(f"<div style='padding-top: 8px; font-weight: bold; text-align: center; color: {'#2ecc71' if pct_calc >= 70 else '#e74c3c'};'>{pct_calc}%</div>", unsafe_allow_html=True)
-            
-            p["side"] = new_side
-            p["hand"] = new_hand
-            p["play_style"] = new_st
-            p["trainings"] = calc_trainings
-            p["participated"] = calc_participated
+                with col_n:
+                    st.markdown(f"**{p['fname']} {p['lname']}**")
+                with col_r:
+                    new_side = st.selectbox("Role", ["Left", "Right"], index=0 if p["side"]=="Left" else 1, key=f"side_{idx}", label_visibility="collapsed")
+                with col_h:
+                    new_hand = st.selectbox("Mano", ["Destro", "Mancino"], index=0 if p.get("hand","Destro")=="Destro" else 1, key=f"hand_{idx}", label_visibility="collapsed")
+                with col_s:
+                    styles_list = ["Offensive", "Defensive", "Equilibrated", "Counterattack"]
+                    curr_st = p.get("play_style", "Equilibrated")
+                    idx_st = styles_list.index(curr_st) if curr_st in styles_list else 2
+                    new_st = st.selectbox("Style", styles_list, index=idx_st, key=f"style_{idx}", label_visibility="collapsed")
+                with col_t:
+                    st.markdown(f"<div style='padding-top: 8px; text-align: center; font-weight: bold;'>{calc_trainings}</div>", unsafe_allow_html=True)
+                with col_p:
+                    st.markdown(f"<div style='padding-top: 8px; text-align: center; font-weight: bold;'>{calc_participated}</div>", unsafe_allow_html=True)
+                with col_c:
+                    pct_calc = int(round((calc_participated / calc_trainings) * 100)) if calc_trainings > 0 else 0
+                    st.markdown(f"<div style='padding-top: 8px; font-weight: bold; text-align: center; color: {'#2ecc71' if pct_calc >= 70 else '#e74c3c'};'>{pct_calc}%</div>", unsafe_allow_html=True)
+                
+                p["side"] = new_side
+                p["hand"] = new_hand
+                p["play_style"] = new_st
+                p["trainings"] = calc_trainings
+                p["participated"] = calc_participated
+
+            st.markdown("<br>", unsafe_allow_html=True)
+            if st.form_submit_button("💾 Salva Modifiche Rosa e Ruoli", type="primary"):
+                save_data_to_server()
+                st.success("Tutte le modifiche alla rosa, ruoli e destri/mancini sono state salvate permanentemente!")
+                st.rerun()
 
         st.markdown("---")
         st.subheader(f"🎯 {lang_dict.get('work_groups', 'Work Groups')}")
@@ -1443,7 +1453,8 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     p_obj['c_mental'] = c_mental_new
                     p_obj['play_style'] = selected_style
                     p_obj['coach_note'] = new_coach_note
-                    st.success(f"✅ {selected_player_name} updated successfully!")
+                    save_data_to_server() # Salvataggio automatico persistente
+                    st.success(f"✅ {selected_player_name} updated and saved successfully!")
 
     with coach_tab_training:
         st.subheader(f"🎾 {lang_dict.get('training_title', 'Training Planning & Focus')}")
@@ -1517,6 +1528,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         "2° Priorità": coach_choice_p2,
                         "3° Priorità": coach_choice_p3
                     })
+                    save_data_to_server() # Salvataggio automatico persistente
                     st.success(f"🎉 Allenamento salvato con successo per il giorno {training_date}!")
                     st.rerun()
 
@@ -1534,6 +1546,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     if st.form_submit_button("🗑️ Elimina Allenamento Selezionato", type="secondary"):
                         selected_index = training_options.index(selected_training_to_delete)
                         removed_training = st.session_state.planned_trainings.pop(selected_index)
+                        save_data_to_server() # Salvataggio automatico persistente
                         st.success(f"Allenamento del {removed_training['Data']} eliminato con successo dal calendario!")
                         st.rerun()
             else:
@@ -1584,6 +1597,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         "Team B": team_b_str,
                         "Risultato": score
                     })
+                    save_data_to_server() # Salvataggio automatico persistente
                     st.success(f"✅ {lang_dict.get('match_saved', 'Saved!')}")
                     
         if st.session_state.match_results:
