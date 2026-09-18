@@ -1244,7 +1244,10 @@ elif st.session_state.nav_mode == "Player_Dashboard":
         st.markdown(f"### 📋 {lang_dict.get('official_note', 'Official Note')}")
         coach_note_val = current_player.get("coach_note", "")
         if coach_note_val.strip():
-            st.info(coach_note_val)
+            st.markdown(
+                f"<div style='background-color:#e0f2fe; color:#000000; padding:12px 16px; border-radius:8px; border-left:4px solid #0284c7; margin-bottom:8px;'>{coach_note_val}</div>",
+                unsafe_allow_html=True
+            )
         else:
             st.markdown(f"*{lang_dict.get('no_coach_note', 'No note.')}*")
             
@@ -1269,7 +1272,12 @@ elif st.session_state.nav_mode == "Player_Dashboard":
         
         st.markdown(f"### {lang_dict.get('received_lbl', 'Received:')}")
         for c in current_player.get("comments", []):
-            st.info(f"**Da {c['from']}** ({c['date']}): {c['text']}")
+            st.markdown(
+                f"<div style='background-color:#f1f5f9; color:#000000; padding:12px 16px; border-radius:8px; border-left:4px solid #64748b; margin-bottom:8px;'>"
+                f"<strong style='color:#000000;'>From {c['from']}</strong> <span style='color:#475569;'>({c['date']})</span><br>"
+                f"<span style='color:#000000;'>{c['text']}</span></div>",
+                unsafe_allow_html=True
+            )
 
 # --- AREA ALLENATORE ---
 elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coach:
@@ -1511,22 +1519,23 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
 
     with coach_tab_stats:
         st.subheader("📊 Players Stats – Self-Evaluation vs Coach Evaluation")
-        st.markdown("Overview of every player's self-evaluation (left) and coach evaluation (right), with radar charts.")
+        st.markdown("Overview of every player's self-evaluation (left) and **editable** coach evaluation (right), with radar charts.")
         
         all_skills_labels = TECH_SKILLS + MENTAL_SKILLS
+        style_options = ["Offensive", "Defensive", "Equilibrated", "Counterattack"]
         
         for p in squad_players:
             player_name = f"{p['fname']} {p['lname']}"
             player_style = p.get("player_play_style", "Equilibrated")
             coach_style = p.get("play_style", "Equilibrated")
+            if coach_style not in style_options:
+                coach_style = "Equilibrated"
             
             with st.expander(f"👤 **{player_name}**  |  Side: {p['side']}  |  Self style: {player_style}  |  Coach style: {coach_style}", expanded=False):
-                col_left, col_right = st.columns(2)
                 
-                player_full = p.get("tech", [7]*len(TECH_SKILLS)) + p.get("mental", [7]*len(MENTAL_SKILLS))
-                coach_full = p.get("c_tech", [6]*len(TECH_SKILLS)) + p.get("c_mental", [6]*len(MENTAL_SKILLS))
+                player_full = list(p.get("tech", [7]*len(TECH_SKILLS))) + list(p.get("mental", [7]*len(MENTAL_SKILLS)))
+                coach_full = list(p.get("c_tech", [6]*len(TECH_SKILLS))) + list(p.get("c_mental", [6]*len(MENTAL_SKILLS)))
                 
-                # Ensure lengths match
                 while len(player_full) < len(all_skills_labels):
                     player_full.append(7)
                 while len(coach_full) < len(all_skills_labels):
@@ -1536,16 +1545,14 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 
                 categories = all_skills_labels + [all_skills_labels[0]]
                 p_vals_radar = player_full + [player_full[0]]
-                c_vals_radar = coach_full + [coach_full[0]]
+                
+                col_left, col_right = st.columns(2)
                 
                 with col_left:
-                    st.markdown("#### 🟦 Player Self-Evaluation")
+                    st.markdown("#### 🟦 Player Self-Evaluation *(read-only)*")
                     st.markdown(f"**Play Style:** {player_style}")
                     
-                    # Table of values
-                    rows_p = []
-                    for i, skill in enumerate(all_skills_labels):
-                        rows_p.append({"Skill": skill, "Value": player_full[i]})
+                    rows_p = [{"Skill": skill, "Value": player_full[i]} for i, skill in enumerate(all_skills_labels)]
                     df_p = pd.DataFrame(rows_p)
                     st.markdown(f"<div class='table-container'>{df_p.to_html(escape=False, index=False, classes='custom-table')}</div>", unsafe_allow_html=True)
                     
@@ -1573,14 +1580,58 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     st.plotly_chart(fig_p, use_container_width=True, key=f"radar_player_{p['fname']}_{p['lname']}")
                 
                 with col_right:
-                    st.markdown("#### 🟧 Coach Evaluation")
-                    st.markdown(f"**Play Style:** {coach_style}")
+                    st.markdown("#### 🟧 Coach Evaluation *(editable)*")
                     
-                    rows_c = []
-                    for i, skill in enumerate(all_skills_labels):
-                        rows_c.append({"Skill": skill, "Value": coach_full[i]})
-                    df_c = pd.DataFrame(rows_c)
-                    st.markdown(f"<div class='table-container'>{df_c.to_html(escape=False, index=False, classes='custom-table')}</div>", unsafe_allow_html=True)
+                    with st.form(key=f"coach_edit_form_{p['fname']}_{p['lname']}"):
+                        new_coach_style = st.selectbox(
+                            "Coach Play Style",
+                            options=style_options,
+                            index=style_options.index(coach_style),
+                            key=f"stats_style_{p['fname']}_{p['lname']}"
+                        )
+                        
+                        st.markdown("**Technical Skills**")
+                        new_c_tech = []
+                        for i, skill in enumerate(TECH_SKILLS):
+                            val = st.slider(
+                                f"Coach – {skill}",
+                                1, 10,
+                                int(coach_full[i]),
+                                key=f"stats_ctech_{p['fname']}_{p['lname']}_{i}"
+                            )
+                            new_c_tech.append(val)
+                        
+                        st.markdown("**Mental Skills**")
+                        new_c_mental = []
+                        for i, skill in enumerate(MENTAL_SKILLS):
+                            val = st.slider(
+                                f"Coach – {skill}",
+                                1, 10,
+                                int(coach_full[len(TECH_SKILLS) + i]),
+                                key=f"stats_cmental_{p['fname']}_{p['lname']}_{i}"
+                            )
+                            new_c_mental.append(val)
+                        
+                        saved = st.form_submit_button("💾 Save Coach Evaluation", type="primary")
+                        
+                        if saved:
+                            p.setdefault("history", []).append({
+                                "date": datetime.now().strftime("%Y-%m-%d %H:%M"),
+                                "values": new_c_tech + new_c_mental
+                            })
+                            p["c_tech"] = new_c_tech
+                            p["c_mental"] = new_c_mental
+                            p["play_style"] = new_coach_style
+                            save_data_to_server()
+                            st.success(f"✅ Coach evaluation for **{player_name}** saved!")
+                            st.rerun()
+                    
+                    # Radar with current (possibly just-saved) values
+                    current_coach = list(p.get("c_tech", [6]*len(TECH_SKILLS))) + list(p.get("c_mental", [6]*len(MENTAL_SKILLS)))
+                    while len(current_coach) < len(all_skills_labels):
+                        current_coach.append(6)
+                    current_coach = current_coach[:len(all_skills_labels)]
+                    c_vals_radar = current_coach + [current_coach[0]]
                     
                     fig_c = go.Figure()
                     fig_c.add_trace(go.Scatterpolar(
@@ -1605,12 +1656,17 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     )
                     st.plotly_chart(fig_c, use_container_width=True, key=f"radar_coach_{p['fname']}_{p['lname']}")
                 
-                # Difference summary
+                # Difference summary (using latest coach values)
+                current_coach = list(p.get("c_tech", [6]*len(TECH_SKILLS))) + list(p.get("c_mental", [6]*len(MENTAL_SKILLS)))
+                while len(current_coach) < len(all_skills_labels):
+                    current_coach.append(6)
+                current_coach = current_coach[:len(all_skills_labels)]
+                
                 st.markdown("---")
                 st.markdown("##### 📉 Differences (Self − Coach)")
                 diff_rows = []
                 for i, skill in enumerate(all_skills_labels):
-                    diff = player_full[i] - coach_full[i]
+                    diff = player_full[i] - current_coach[i]
                     if diff > 0:
                         diff_display = f"<span style='color:#2ecc71; font-weight:bold;'>+{diff}</span>"
                     elif diff < 0:
@@ -1620,7 +1676,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     diff_rows.append({
                         "Skill": skill,
                         "Self": player_full[i],
-                        "Coach": coach_full[i],
+                        "Coach": current_coach[i],
                         "Diff": diff_display
                     })
                 df_diff = pd.DataFrame(diff_rows)
