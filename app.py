@@ -190,7 +190,7 @@ translations = {
         "diff_tables": "Tabelle delle Differenze (Tu vs Coach)",
         "tech_feat": "Caratteristiche Tecniche",
         "mental_feat": "Caratteristiche Mentali",
-        "partner_mgmt": "Gestione Ranking Partner (Fino a 5)",
+        "partner_mgmt": "Gestione Ranking Partner",
         "save_partners": "Salva Ranking Partner",
         "partners_saved": "Ranking partner aggiornato con successo!",
         "current_ranking": "Classifica Attuale:",
@@ -296,7 +296,7 @@ translations = {
         "diff_tables": "Difference Tables (You vs Coach)",
         "tech_feat": "Technical Features",
         "mental_feat": "Mental Features",
-        "partner_mgmt": "Partner Ranking Management (Up to 5)",
+        "partner_mgmt": "Partner Ranking Management",
         "save_partners": "Save Partner Ranking",
         "partners_saved": "Partner ranking successfully updated!",
         "current_ranking": "Current Ranking:",
@@ -402,7 +402,7 @@ translations = {
         "diff_tables": "Tablas de Diferencias (Tú vs Entrenador)",
         "tech_feat": "Características Técnicas",
         "mental_feat": "Características Mentales",
-        "partner_mgmt": "Gestión de Ranking de Compañeros (Hasta 5)",
+        "partner_mgmt": "Gestión de Ranking de Compañeros",
         "save_partners": "Guardar Ranking de Compañeros",
         "partners_saved": "¡Ranking de compañeros actualizado con éxito!",
         "current_ranking": "Clasificación Actual:",
@@ -508,7 +508,7 @@ translations = {
         "diff_tables": "Differenstabeller (Du vs Coach)",
         "tech_feat": "Tekniska Egenskaper",
         "mental_feat": "Mentala Egenskaper",
-        "partner_mgmt": "Partnerrankinghantering (Upp till 5)",
+        "partner_mgmt": "Partnerrankinghantering",
         "save_partners": "Spara Partnerranking",
         "partners_saved": "Partnerranking uppdaterad!",
         "current_ranking": "Aktuell Ranking:",
@@ -533,7 +533,7 @@ translations = {
         "coach_tab_matches": "Matchhantering",
         "coach_tab_comments": "Alla Kommentarer",
         "coach_tab_pairing": "Automatiskt Parval",
-        "squad_desc": "'Trainings' och 'Participated' synkroniseras automatiskt med träningskalendern. Engagemang (%) räknas om i realtid.",
+        "squad_desc": "'Trainings' and 'Participated' synkroniseras automatiskt med träningskalendern. Engagemang (%) räknas om i realtid.",
         "col_name": "Namn", "col_role": "Roll", "col_hand": "Hand", "col_style": "Spelstil", "col_trainings": "Träningar", "col_participated": "Deltagit", "col_commitment": "Engagemang (%)",
         "work_groups": "Arbetsgrupper & Riktad Förbättring",
         "work_groups_desc": "Automatisk gruppering av alla spelare baserat på vanliga svagheter identifierade i coachbedömningar (värden ≤ 6).",
@@ -545,7 +545,7 @@ translations = {
         "coach_note_lbl": "Officiell Coachanteckning / Kommentar (Synlig för spelaren)",
         "coach_note_placeholder": "Skriv kommentaren till spelaren här...",
         "tech_skills_coach": "Tekniska Färdigheter (Coach)",
-        "mental_skills_coach": "Mentala Färdigheter (Coach)",
+        "mental_skills_coach": "Mentale Färdigheter (Coach)",
         "save_coach_eval": "Spara Betyg, Profil och Coachanteckning",
         "training_title": "Träning & Fokus",
         "training_desc": "Välj deltagare. Systemet föreslår prioriterade områden. Coachen kan ändra dem, välja datum och bekräfta sparandet i kalendern.",
@@ -614,7 +614,7 @@ translations = {
         "diff_tables": "Verschillentabellen (Jij vs Coach)",
         "tech_feat": "Technische Kenmerken",
         "mental_feat": "Mentale Kenmerken",
-        "partner_mgmt": "Partner Ranking Beheer (Tot 5)",
+        "partner_mgmt": "Partner Ranking Beheer",
         "save_partners": "Partner Ranking Opslaan",
         "partners_saved": "Partner ranking succesvol bijgewerkt!",
         "current_ranking": "Huidige Ranking:",
@@ -720,7 +720,7 @@ translations = {
         "diff_tables": "Differenstabeller (Du vs Træner)",
         "tech_feat": "Tekniske Egenskaber",
         "mental_feat": "Mentale Egenskaber",
-        "partner_mgmt": "Partnerranking Håndtering (Op til 5)",
+        "partner_mgmt": "Partnerranking Håndtering",
         "save_partners": "Gem Partnerranking",
         "partners_saved": "Partnerranking opdateret!",
         "current_ranking": "Aktuel Ranking:",
@@ -783,13 +783,13 @@ translations = {
         "pairing_p2": "Vikt 0.5: Spillernes gensidige vilje / præference.",
         "select_available_players": "Vælg tilgængelige spillere i dag:",
         "run_pairing": "Generer Optimal Par med Tilgængelige",
-        "pairing_err": "For at danne par skal du bruge mindst én venstrespiller og én højrespiller blandt de valgte!",
+        "pairing_err": "För att bilda par behöver du minst en vänsterspelare och en högerspelare bland de valda!",
         "recommended_pairing": "Anbefalet Parringsresultat (Top 5 Hold):",
         "unmatched_warn": "Spillere valgt men udeladt i denne runde på grund af numerisk ubalance mellem Højre og Venstre:"
     }
 }
 
-# --- LISTA DELLE SKILLS (Remate sostituito con Vibora) ---
+# --- LISTA DELLE SKILLS ---
 TECH_SKILLS = ["Volley", "Bandeja", "Vibora", "Smash", "Bajada", "Chiquita", "Lob"]
 
 # --- INIZIALIZZAZIONE LINGUA & SKILLS ---
@@ -1200,18 +1200,14 @@ elif st.session_state.nav_mode == "Player_Dashboard":
         with st.form("partners_form"):
             new_partners_dict = {}
             for i in range(5):
-                col_p1, col_p2 = st.columns([3, 1])
                 existing_keys = list(current_partners.keys())
                 default_partner = existing_keys[i] if i < len(existing_keys) else (all_colleagues[0] if all_colleagues else "")
                 default_val = int(current_partners.get(default_partner, 5 - i))
                 
-                with col_p1:
-                    p_sel = st.selectbox(f"Partner #{i+1}", all_colleagues, index=all_colleagues.index(default_partner) if default_partner in all_colleagues else 0, key=f"partner_sel_{i}")
-                with col_p2:
-                    p_score = st.number_input(f"Match #{i+1}", min_value=1, max_value=50, value=default_val, key=f"partner_val_{i}")
+                p_sel = st.selectbox(f"Partner #{i+1}", all_colleagues, index=all_colleagues.index(default_partner) if default_partner in all_colleagues else 0, key=f"partner_sel_{i}")
                 
                 if p_sel:
-                    new_partners_dict[p_sel] = p_score
+                    new_partners_dict[p_sel] = default_val
                     
             if st.form_submit_button(lang_dict.get('save_partners', 'Save Partners'), type="primary"):
                 current_player["partners"] = new_partners_dict
@@ -1221,8 +1217,9 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                 
         st.markdown(f"### {lang_dict.get('current_ranking', 'Current Ranking:')}")
         if current_player.get("partners"):
-            df_part = pd.DataFrame(list(current_player["partners"].items()), columns=["Compagno", "Match / Preferenza"]).sort_values(by="Match / Preferenza", ascending=False).reset_index(drop=True)
-            st.markdown(f"<div class='table-container'>{df_part.to_html(escape=False, index=False, classes='custom-table')}</div>", unsafe_allow_html=True)
+            df_part = pd.DataFrame(list(current_player["partners"].keys()), columns=["Compagno"]).reset_index(drop=True)
+            df_part.index = df_part.index + 1
+            st.markdown(f"<div class='table-container'>{df_part.to_html(escape=False, index=True, classes='custom-table')}</div>", unsafe_allow_html=True)
         else:
             st.info(lang_dict.get('no_partners', 'No partners.'))
 
