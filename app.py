@@ -212,7 +212,7 @@ translations = {
         "coach_tab_squad": "Gestione Squadra & Presenze",
         "coach_tab_evals": "Gestione Voti Coach",
         "coach_tab_training": "Allenamenti & Focus",
-        "coach_tab_matches": "Partite SNP",
+        "coach_tab_matches": "Gestione Partite",
         "coach_tab_comments": "Tutti i Commenti",
         "coach_tab_pairing": "Pairing Coppie Automatico",
         "squad_desc": "I campi 'Trainings' e 'Participated' sono sincronizzati automaticamente con il Calendario Allenamenti Pianificati. Il Commitment (%) viene ricalcolato in tempo reale.",
@@ -318,7 +318,7 @@ translations = {
         "coach_tab_squad": "Squad Management & Attendance",
         "coach_tab_evals": "Coach Grades Management",
         "coach_tab_training": "Training & Focus",
-        "coach_tab_matches": "Partite SNP",
+        "coach_tab_matches": "Match Management",
         "coach_tab_comments": "All Comments",
         "coach_tab_pairing": "Automatic Pair Pairing",
         "squad_desc": "'Trainings' and 'Participated' are automatically synced with the Planned Training Calendar. Commitment (%) is recalculated in real time.",
@@ -424,7 +424,7 @@ translations = {
         "coach_tab_squad": "Gestión de Plantilla y Asistencia",
         "coach_tab_evals": "Gestión de Notas del Entrenador",
         "coach_tab_training": "Entrenamiento y Enfoque",
-        "coach_tab_matches": "Partite SNP",
+        "coach_tab_matches": "Gestión de Partidos",
         "coach_tab_comments": "Todos los Comentarios",
         "coach_tab_pairing": "Emparejamiento Automático de Parejas",
         "squad_desc": "'Trainings' y 'Participated' se sincronizan automáticamente con el Calendario de Entrenamientos. El Compromiso (%) se recalcula en tiempo real.",
@@ -530,7 +530,7 @@ translations = {
         "coach_tab_squad": "Trupphantering & Närvaro",
         "coach_tab_evals": "Coachbetygshantering",
         "coach_tab_training": "Träning & Fokus",
-        "coach_tab_matches": "Partite SNP",
+        "coach_tab_matches": "Matchhantering",
         "coach_tab_comments": "Alla Kommentarer",
         "coach_tab_pairing": "Automatiskt Parval",
         "squad_desc": "'Trainings' and 'Participated' synkroniseras automatiskt med träningskalendern. Engagemang (%) räknas om i realtid.",
@@ -636,7 +636,7 @@ translations = {
         "coach_tab_squad": "Selectiebeheer & Aanwezigheid",
         "coach_tab_evals": "Coach Cijfers Beheer",
         "coach_tab_training": "Training & Focus",
-        "coach_tab_matches": "Partite SNP",
+        "coach_tab_matches": "Wedstrijdbeheer",
         "coach_tab_comments": "Alle Opmerkingen",
         "coach_tab_pairing": "Automatische Koppelindeling",
         "squad_desc": "'Trainings' and 'Participated' worden automatisch gesynchroniseerd met de trainingskalender. Betrokkenheid (%) wordt in realtime herberekend.",
@@ -742,7 +742,7 @@ translations = {
         "coach_tab_squad": "Trupstyring & Fremmøde",
         "coach_tab_evals": "Trænerkarakterer Håndtering",
         "coach_tab_training": "Träning & Fokus",
-        "coach_tab_matches": "Partite SNP",
+        "coach_tab_matches": "Kampstyring",
         "coach_tab_comments": "Alle Kommentarer",
         "coach_tab_pairing": "Automatisk Makkerparring",
         "squad_desc": "'Trainings' and 'Participated' synkroniseres automatisk med træningskalenderen. Engagement (%) genberegnes i realtid.",
@@ -1353,78 +1353,6 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         f"💬 {lang_dict.get('coach_tab_comments', 'Comments')}",
         f"🤖 {lang_dict.get('coach_tab_pairing', 'Pairing')}"
     ])
-
-# ==========================================
-# SEZIONE REGISTRAZIONE PARTITE SNP (7 MATCH)
-# ==========================================
-st.header("🏆 Registrazione Partite SNP")
-
-# Nome del club avversario generale
-club_avversario = st.text_input(
-    "Nome Club Avversario (es. Padel Club Marbella)",
-    value="Club Avversario",
-    key="snp_club_avv",
-)
-
-st.markdown("---")
-st.write(
-    "Definisci le formazioni schierate nei **7 match** dell'incontro SNP (5"
-    " squadre NAC contro 5 squadre avversarie) e registra i relativi risultati:"
-)
-
-# Struttura per i 7 incontri totali della giornata SNP
-risultati_snp = []
-
-for i in range(1, 8):
-  with st.container():
-    st.subheader(f"Match {i}")
-    col1, col2, col3 = st.columns([2, 2, 2])
-
-    with col1:
-      # Nome della coppia/team NAC schierato
-      team_nac = st.text_input(
-          f"Team NAC (Match {i})",
-          value=f"Coppia NAC {i}",
-          key=f"nac_match_{i}",
-      )
-
-    with col2:
-      # Nome personalizzabile del team avversario
-      team_avv = st.text_input(
-          f"Team {club_avversario} (Match {i})",
-          value=f"Coppia Avversaria {i}",
-          key=f"avv_match_{i}",
-      )
-
-    with col3:
-      # Inserimento del risultato
-      risultato = st.text_input(
-          f"Risultato (es. 6-2, 6-4)",
-          placeholder="es. 6-3 4-6 7-6",
-          key=f"res_match_{i}",
-      )
-
-    st.markdown("")  # Spaziatura
-
-# Pulsante di salvataggio collegato allo st.session_state (se lo usi per persistere i dati)
-if st.button("💾 Salva Giornata SNP", type="primary", key="btn_save_snp"):
-  # Esempio di salvataggio in session_state se vuoi riutilizzarli altrove nel codice
-  st.session_state["ultima_giornata_snp"] = {
-      "club_avversario": club_avversario,
-      "partite": [
-          {
-              "match": i,
-              "nac": st.session_state.get(f"nac_match_{i}"),
-              "avversario": st.session_state.get(f"avv_match_{i}"),
-              "risultato": st.session_state.get(f"res_match_{i}"),
-          }
-          for i in range(1, 8)
-      ],
-  }
-  st.success(
-      f"Tutti i risultati per la giornata contro **{club_avversario}** sono"
-      " stati salvati con successo!"
-  )
     
     with coach_tab1:
         st.subheader(f"👥 {lang_dict.get('coach_tab_squad', 'Squad Management & Attendance')}")
