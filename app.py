@@ -147,6 +147,23 @@ st.markdown("""
     .coach-note-box, .coach-note-box * {
         color: #000000 !important;
     }
+    /* Text inputs and text areas: black text on light background */
+    textarea, 
+    .stTextArea textarea,
+    div[data-baseweb="textarea"] textarea,
+    input[type="text"],
+    .stTextInput input,
+    div[data-baseweb="input"] input {
+        color: #000000 !important;
+        background-color: #ffffff !important;
+        -webkit-text-fill-color: #000000 !important;
+    }
+    textarea::placeholder,
+    .stTextArea textarea::placeholder,
+    input::placeholder {
+        color: #64748b !important;
+        -webkit-text-fill-color: #64748b !important;
+    }
     </style>
 """, unsafe_allow_html=True)
 
