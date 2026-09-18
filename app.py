@@ -1350,13 +1350,13 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         st.rerun()
         st.markdown("---")
         
-    coach_tab1, coach_tab_evals, coach_tab_training, coach_tab2, coach_tab3, coach_tab_pairing = st.tabs([
+    coach_tab1, coach_tab_evals, coach_tab_training, coach_tab3, coach_tab_pairing, coach_tab2 = st.tabs([
         f"👥 {lang_dict.get('coach_tab_squad', 'Squad')}", 
         f"✏️ {lang_dict.get('coach_tab_evals', 'Grades')}",
         f"🎾 {lang_dict.get('coach_tab_training', 'Training')}",
-        f"📅 {lang_dict.get('coach_tab_matches', 'Matches')}", 
         f"💬 {lang_dict.get('coach_tab_comments', 'Comments')}",
-        f"🤖 {lang_dict.get('coach_tab_pairing', 'Pairing')}"
+        f"🤖 {lang_dict.get('coach_tab_pairing', 'Pairing')}",
+        f"📅 {lang_dict.get('coach_tab_matches', 'Matches')}"
     ])
     
     with coach_tab1:
