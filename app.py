@@ -132,7 +132,8 @@ def save_data_to_server():
     data_to_save = {
         "squad_data": st.session_state.squad_data,
         "planned_trainings": st.session_state.planned_trainings,
-        "match_results": st.session_state.match_results
+        "match_results": st.session_state.match_results,
+        "snp_lineups": st.session_state.get("snp_lineups", {})
     }
     try:
         with open(DATA_FILE, "w", encoding="utf-8") as f:
@@ -825,11 +826,15 @@ if saved_server_data:
         st.session_state.planned_trainings = saved_server_data.get("planned_trainings", [])
     if "match_results" not in st.session_state:
         st.session_state.match_results = saved_server_data.get("match_results", [])
+    if "snp_lineups" not in st.session_state:
+        st.session_state.snp_lineups = saved_server_data.get("snp_lineups", {})
 else:
     if "planned_trainings" not in st.session_state:
         st.session_state.planned_trainings = []
     if "match_results" not in st.session_state:
         st.session_state.match_results = []
+    if "snp_lineups" not in st.session_state:
+        st.session_state.snp_lineups = {}
     if "squad_data" not in st.session_state:
         st.session_state.squad_data = [
             {"fname": "Alexander", "lname": "Wennstam", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1, "tech": [8, 8, 7, 7, 8, 6, 7], "mental": [7, 7, 8, 8, 7, 7, 8], "c_tech": [7, 7, 6, 6, 7, 5, 6], "c_mental": [6, 6, 7, 7, 6, 6, 7], "play_style": "Equilibrated", "player_play_style": "Equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": [], "password": "Alexander", "first_login_done": False},
@@ -1603,164 +1608,166 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             st.info(lang_dict.get('training_no_attendees', 'Select at least one player.'))
 
     with coach_tab2:
-        st.subheader("📅 Registrazione Partite SNP")
-        st.markdown("Schema per le partite della **SNP**: 5 Team NAC contro 5 Team della squadra avversaria (nome modificabile). Totale **7 scontri**.")
+        st.subheader("📅 Calendario & Registrazione Partite SNP")
+        st.markdown("Gestione delle **7 giornate SNP**. Per ogni incontro assegna i giocatori NAC sulle 5 piste e inserisci il risultato.")
         
-        left_list = [f"{p['fname']} {p['lname']}" for p in squad_players if p['side'] == "Left"]
-        right_list = [f"{p['fname']} {p['lname']}" for p in squad_players if p['side'] == "Right"]
+        all_players_list = [f"{p['fname']} {p['lname']}" for p in squad_players]
         
-        # --- Nome squadra avversaria ---
-        if "snp_opponent_name" not in st.session_state:
-            st.session_state.snp_opponent_name = "Squadra Avversaria"
+        # Calendario fisso delle 7 giornate SNP
+        SNP_CALENDAR = [
+            {"id": 1, "date": "27-Sep", "home": "NAC", "away": "Padelmadena", "label": "27-Sep  NAC  vs  Padelmadena"},
+            {"id": 2, "date": "03-Oct", "home": "La Ultima Ronda", "away": "NAC", "label": "03-Oct  La Ultima Ronda  vs  NAC"},
+            {"id": 3, "date": "25-Oct", "home": "NAC", "away": "Awa Pool Club", "label": "25-Oct  NAC  vs  Awa Pool Club"},
+            {"id": 4, "date": "07-Nov", "home": "Gomez Hoyos Padel", "away": "NAC", "label": "07-Nov  Gomez Hoyos Padel  vs  NAC"},
+            {"id": 5, "date": "28-Nov", "home": "Padelmadena", "away": "NAC", "label": "28-Nov  Padelmadena  vs  NAC"},
+            {"id": 6, "date": "13-Dec", "home": "NAC", "away": "La Ultima Ronda", "label": "13-Dec  NAC  vs  La Ultima Ronda"},
+            {"id": 7, "date": "10-Jan", "home": "NAC", "away": "Awa Pool Club", "label": "10-Jan  NAC  vs  Awa Pool Club"},
+        ]
         
-        opponent_name = st.text_input(
-            "🏷️ Nome Squadra Avversaria (modificabile)",
-            value=st.session_state.snp_opponent_name,
-            key="snp_opponent_input"
-        )
-        st.session_state.snp_opponent_name = opponent_name
+        # Inizializza storage delle formazioni SNP se non esiste
+        if "snp_lineups" not in st.session_state:
+            st.session_state.snp_lineups = {}
         
-        st.markdown("---")
-        st.markdown("### 🔵 Definizione dei 5 Team NAC")
-        st.caption("Seleziona i giocatori della tua rosa per ogni team (1 Sinistra + 1 Destra).")
+        # Selettore giornata
+        day_labels = [d["label"] for d in SNP_CALENDAR]
+        selected_label = st.selectbox("📆 Seleziona la giornata SNP", day_labels)
+        selected_day = next(d for d in SNP_CALENDAR if d["label"] == selected_label)
+        day_id = selected_day["id"]
         
-        nac_teams = {}
-        used_players = set()
+        st.markdown(f"### {selected_day['label']}")
+        st.caption("Assegna 2 giocatori NAC per ogni pista (Pista 1 → Pista 5)")
         
-        for i in range(1, 6):
-            st.markdown(f"**Team NAC {i}**")
-            c1, c2 = st.columns(2)
-            with c1:
-                left_opts = [""] + left_list
-                l_player = st.selectbox(
-                    f"Sinistra (Left) - Team {i}",
-                    options=left_opts,
-                    key=f"nac_left_{i}",
-                    label_visibility="collapsed"
-                )
-            with c2:
-                right_opts = [""] + right_list
-                r_player = st.selectbox(
-                    f"Destra (Right) - Team {i}",
-                    options=right_opts,
-                    key=f"nac_right_{i}",
-                    label_visibility="collapsed"
-                )
+        # Carica lineup esistente se presente
+        existing = st.session_state.snp_lineups.get(day_id, {})
+        
+        with st.form(f"snp_day_form_{day_id}"):
+            piste_players = {}
             
-            if l_player and r_player:
-                nac_teams[i] = f"{l_player} / {r_player}"
-                used_players.add(l_player)
-                used_players.add(r_player)
-            else:
-                nac_teams[i] = None
-        
-        st.markdown("---")
-        st.markdown(f"### 🔴 Team {opponent_name}")
-        st.info("I team avversari sono fissi: **Team 1 · Team 2 · Team 3 · Team 4 · Team 5**")
-        
-        st.markdown("---")
-        st.markdown("### 🎾 Schema dei 7 Scontri SNP")
-        st.caption("Per ogni scontro scegli il Team NAC e il Team Avversario, poi inserisci il risultato.")
-        
-        with st.form("snp_matches_form"):
-            match_date = st.date_input("📅 Data delle partite SNP", datetime.now())
-            
-            results_data = []
-            for m in range(1, 8):
-                st.markdown(f"**Scontro #{m}**")
-                col_n, col_o, col_s = st.columns([2, 2, 2])
+            for pista in range(1, 6):
+                st.markdown(f"**Pista {pista}**")
+                c1, c2 = st.columns(2)
                 
-                with col_n:
-                    nac_choice = st.selectbox(
-                        f"Team NAC - Scontro {m}",
-                        options=["— Seleziona —"] + [f"Team NAC {i}" for i in range(1, 6)],
-                        key=f"snp_nac_{m}",
+                default_p1 = existing.get(f"pista_{pista}_p1", "")
+                default_p2 = existing.get(f"pista_{pista}_p2", "")
+                
+                with c1:
+                    opts1 = [""] + all_players_list
+                    idx1 = opts1.index(default_p1) if default_p1 in opts1 else 0
+                    p1 = st.selectbox(
+                        f"Giocatore 1 - Pista {pista}",
+                        options=opts1,
+                        index=idx1,
+                        key=f"day{day_id}_pista{pista}_p1",
                         label_visibility="collapsed"
                     )
-                with col_o:
-                    opp_choice = st.selectbox(
-                        f"Team Avversario - Scontro {m}",
-                        options=["— Seleziona —"] + [f"Team {i}" for i in range(1, 6)],
-                        key=f"snp_opp_{m}",
-                        label_visibility="collapsed"
-                    )
-                with col_s:
-                    score_val = st.text_input(
-                        f"Risultato - Scontro {m}",
-                        placeholder="es. 6-4, 6-2",
-                        key=f"snp_score_{m}",
+                with c2:
+                    opts2 = [""] + all_players_list
+                    idx2 = opts2.index(default_p2) if default_p2 in opts2 else 0
+                    p2 = st.selectbox(
+                        f"Giocatore 2 - Pista {pista}",
+                        options=opts2,
+                        index=idx2,
+                        key=f"day{day_id}_pista{pista}_p2",
                         label_visibility="collapsed"
                     )
                 
-                results_data.append({
-                    "match_num": m,
-                    "nac": nac_choice,
-                    "opp": opp_choice,
-                    "score": score_val
-                })
+                piste_players[pista] = (p1, p2)
             
-            submitted = st.form_submit_button("💾 Registra tutti i 7 Scontri SNP", type="primary")
+            st.markdown("---")
+            default_result = existing.get("risultato", "")
+            risultato = st.text_input(
+                "🏆 Risultato della giornata (es. 3-2 / 4-1 / 5-0)",
+                value=default_result,
+                placeholder="es. 3-2"
+            )
+            
+            note_giornata = st.text_area(
+                "📝 Note / Commenti (opzionale)",
+                value=existing.get("note", ""),
+                placeholder="Osservazioni, infortuni, ecc."
+            )
+            
+            submitted = st.form_submit_button("💾 Salva Formazione e Risultato", type="primary")
             
             if submitted:
-                valid_count = 0
-                for item in results_data:
-                    if item["nac"] != "— Seleziona —" and item["opp"] != "— Seleziona —" and item["score"].strip():
-                        # Recupera i giocatori del Team NAC selezionato
-                        try:
-                            team_idx = int(item["nac"].replace("Team NAC ", ""))
-                            nac_players = nac_teams.get(team_idx, "Non definito")
-                        except:
-                            nac_players = "Non definito"
-                        
-                        st.session_state.match_results.append({
-                            "Data": str(match_date),
-                            "Tipo": "SNP",
-                            "Squadra_Avversaria": opponent_name,
-                            "Scontro": f"#{item['match_num']}",
-                            "Team_NAC": item["nac"],
-                            "Giocatori_NAC": nac_players if nac_players else "—",
-                            "Team_Avversario": item["opp"],
-                            "Risultato": item["score"].strip()
-                        })
-                        valid_count += 1
+                # Salva lineup
+                lineup_data = {
+                    "date": selected_day["date"],
+                    "home": selected_day["home"],
+                    "away": selected_day["away"],
+                    "label": selected_day["label"],
+                    "risultato": risultato.strip(),
+                    "note": note_giornata.strip()
+                }
+                for pista, (p1, p2) in piste_players.items():
+                    lineup_data[f"pista_{pista}_p1"] = p1
+                    lineup_data[f"pista_{pista}_p2"] = p2
                 
-                if valid_count > 0:
-                    save_data_to_server()
-                    st.success(f"✅ {valid_count} scontri SNP registrati con successo contro **{opponent_name}**!")
-                    st.rerun()
-                else:
-                    st.warning("⚠️ Nessuno scontro valido da registrare. Compila almeno Team NAC, Team Avversario e Risultato.")
+                st.session_state.snp_lineups[day_id] = lineup_data
+                
+                # Aggiorna anche match_results per lo storico
+                # Rimuovi eventuali record precedenti di questa giornata
+                st.session_state.match_results = [
+                    m for m in st.session_state.match_results
+                    if not (m.get("Tipo") == "SNP" and m.get("Giornata_ID") == day_id)
+                ]
+                
+                # Crea un record per ogni pista
+                for pista, (p1, p2) in piste_players.items():
+                    if p1 or p2:
+                        st.session_state.match_results.append({
+                            "Data": selected_day["date"],
+                            "Tipo": "SNP",
+                            "Giornata_ID": day_id,
+                            "Incontro": selected_day["label"],
+                            "Casa": selected_day["home"],
+                            "Trasferta": selected_day["away"],
+                            "Pista": f"Pista {pista}",
+                            "Giocatori_NAC": f"{p1} / {p2}" if p1 and p2 else (p1 or p2 or "—"),
+                            "Risultato_Giornata": risultato.strip() or "—"
+                        })
+                
+                save_data_to_server()
+                st.success(f"✅ Formazione e risultato salvati per **{selected_day['label']}**!")
+                st.rerun()
         
-        # --- Storico Partite ---
-        if st.session_state.match_results:
-            st.markdown("---")
-            st.markdown("### 📋 Storico Partite Registrate")
+        # --- Riepilogo completo delle 7 giornate ---
+        st.markdown("---")
+        st.markdown("### 📋 Riepilogo Completo Calendario SNP")
+        
+        for day in SNP_CALENDAR:
+            did = day["id"]
+            data = st.session_state.snp_lineups.get(did, {})
+            risultato = data.get("risultato", "—")
             
-            # Mostra prima le partite SNP
-            snp_matches = [m for m in st.session_state.match_results if m.get("Tipo") == "SNP"]
-            other_matches = [m for m in st.session_state.match_results if m.get("Tipo") != "SNP"]
-            
-            if snp_matches:
-                st.markdown("#### 🎾 Partite SNP")
-                df_snp = pd.DataFrame(snp_matches)
-                # Ordina le colonne in modo leggibile
-                preferred_cols = ["Data", "Squadra_Avversaria", "Scontro", "Team_NAC", "Giocatori_NAC", "Team_Avversario", "Risultato"]
-                cols = [c for c in preferred_cols if c in df_snp.columns] + [c for c in df_snp.columns if c not in preferred_cols]
-                df_snp = df_snp[cols]
-                st.markdown(f"<div class='table-container'>{df_snp.to_html(escape=False, index=False, classes='custom-table')}</div>", unsafe_allow_html=True)
-            
-            if other_matches:
-                st.markdown("#### 📅 Altre Partite")
-                df_other = pd.DataFrame(other_matches)
-                st.markdown(f"<div class='table-container'>{df_other.to_html(escape=False, index=False, classes='custom-table')}</div>", unsafe_allow_html=True)
-            
-            # Pulsante per cancellare tutte le partite (opzionale)
-            with st.expander("🗑️ Gestione Storico"):
-                if st.button("Elimina TUTTE le partite registrate", type="secondary"):
-                    st.session_state.match_results = []
-                    save_data_to_server()
-                    st.success("Storico partite cancellato.")
-                    st.rerun()
+            with st.expander(f"**{day['label']}**   →   Risultato: **{risultato}**", expanded=False):
+                if data:
+                    # Tabella delle 5 piste
+                    rows = []
+                    for pista in range(1, 6):
+                        p1 = data.get(f"pista_{pista}_p1", "")
+                        p2 = data.get(f"pista_{pista}_p2", "")
+                        rows.append({
+                            "Pista": f"Pista {pista}",
+                            "Giocatore 1": p1 or "—",
+                            "Giocatore 2": p2 or "—"
+                        })
+                    df_day = pd.DataFrame(rows)
+                    st.markdown(f"<div class='table-container'>{df_day.to_html(escape=False, index=False, classes='custom-table')}</div>", unsafe_allow_html=True)
+                    
+                    if data.get("note"):
+                        st.markdown(f"**Note:** {data['note']}")
+                else:
+                    st.info("Nessuna formazione ancora inserita per questa giornata.")
+        
+        # Pulsante reset (opzionale)
+        with st.expander("🗑️ Reset dati SNP"):
+            if st.button("Cancella TUTTE le formazioni e risultati SNP", type="secondary"):
+                st.session_state.snp_lineups = {}
+                st.session_state.match_results = [m for m in st.session_state.match_results if m.get("Tipo") != "SNP"]
+                save_data_to_server()
+                st.success("Dati SNP resettati.")
+                st.rerun()
 
     with coach_tab3:
         st.subheader(f"💬 {lang_dict.get('global_comments', 'Global Comments')}")
