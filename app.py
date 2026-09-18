@@ -849,6 +849,9 @@ if "nav_mode" not in st.session_state:
 if "authenticated_coach" not in st.session_state:
     st.session_state.authenticated_coach = False
 
+if "authenticated_admin" not in st.session_state:
+    st.session_state.authenticated_admin = False
+
 if "authenticated_player" not in st.session_state:
     st.session_state.authenticated_player = None
 
@@ -935,15 +938,22 @@ with st.sidebar:
     lang_dict = translations.get(st.session_state.language, translations["English"])
     
     st.markdown("---")
-    if st.session_state.authenticated_coach:
+    if st.session_state.get("authenticated_admin"):
+        st.success("🛡️ Admin Logged In")
+        if st.button(lang_dict.get("logout", "Logout"), key="sidebar_logout_admin"):
+            st.session_state.authenticated_admin = False
+            st.session_state.authenticated_coach = False
+            st.session_state.nav_mode = "Home"
+            st.rerun()
+    elif st.session_state.authenticated_coach:
         st.success("🔒 Coach Logged In")
-        if st.button(lang_dict.get("logout", "Logout")):
+        if st.button(lang_dict.get("logout", "Logout"), key="sidebar_logout_coach"):
             st.session_state.authenticated_coach = False
             st.session_state.nav_mode = "Home"
             st.rerun()
     elif st.session_state.authenticated_player:
         st.success(f"👤 Player: {st.session_state.authenticated_player}")
-        if st.button(lang_dict.get("logout", "Logout")):
+        if st.button(lang_dict.get("logout", "Logout"), key="sidebar_logout_player"):
             st.session_state.authenticated_player = None
             st.session_state.force_password_change = False
             st.session_state.nav_mode = "Home"
@@ -995,6 +1005,15 @@ elif st.session_state.nav_mode == "Home":
         st.markdown(lang_dict.get('coach_desc', ''))
         if st.button(lang_dict.get('coach_btn', 'Coach Login'), use_container_width=True, type="primary"):
             st.session_state.nav_mode = "Coach_Login"
+            st.rerun()
+    
+    # Admin access - small, bottom
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    st.markdown("---")
+    col_adm1, col_adm2, col_adm3 = st.columns([2, 1, 2])
+    with col_adm2:
+        if st.button("🛡️ Admin", use_container_width=True, type="secondary"):
+            st.session_state.nav_mode = "Admin_Login"
             st.rerun()
 
 # --- LOGIN GIOCATORE ---
@@ -1055,7 +1074,30 @@ elif st.session_state.nav_mode == "Coach_Login":
             else:
                 st.error("❌ Password errata! Riprova.")
     with col_btn2:
-        if st.button(lang_dict.get('back_home', 'Back'), use_container_width=True):
+        if st.button(lang_dict.get('back_home', 'Back'), use_container_width=True, key="coach_login_back"):
+            st.session_state.nav_mode = "Home"
+            st.rerun()
+
+# --- LOGIN ADMIN ---
+elif st.session_state.nav_mode == "Admin_Login":
+    st.title("🛡️ Admin Access")
+    st.markdown("Full access to all app features (squad, evaluations, matches, players).")
+    
+    ADMIN_PASSWORD = "nacadmin2026"
+    admin_pwd = st.text_input("Admin Password", type="password", key="admin_pwd_input")
+    
+    col_a1, col_a2 = st.columns(2)
+    with col_a1:
+        if st.button("Verify Admin", type="primary", use_container_width=True, key="admin_verify_btn"):
+            if admin_pwd == ADMIN_PASSWORD:
+                st.session_state.authenticated_admin = True
+                st.session_state.authenticated_coach = True  # full coach privileges
+                st.session_state.nav_mode = "Coach"
+                st.rerun()
+            else:
+                st.error("❌ Wrong admin password.")
+    with col_a2:
+        if st.button(lang_dict.get('back_home', 'Back'), use_container_width=True, key="admin_login_back"):
             st.session_state.nav_mode = "Home"
             st.rerun()
 
@@ -1321,11 +1363,15 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                 unsafe_allow_html=True
             )
 
-# --- AREA ALLENATORE ---
+# --- AREA ALLENATORE / ADMIN ---
 elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coach:
+    is_admin = st.session_state.get("authenticated_admin", False)
     col_title, col_btn_roster, col_btn_exit = st.columns([4, 1.8, 1.8])
     with col_title:
-        st.title(f"📋 {lang_dict.get('coach_dash_title', 'Coach Dashboard')}")
+        if is_admin:
+            st.title("🛡️ Admin Dashboard – Full Access")
+        else:
+            st.title(f"📋 {lang_dict.get('coach_dash_title', 'Coach Dashboard')}")
     with col_btn_roster:
         st.markdown("<div style='padding-top: 15px;'>", unsafe_allow_html=True)
         if st.button(lang_dict.get('manage_roster_btn', 'Manage Squad'), use_container_width=True):
@@ -1336,6 +1382,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         st.markdown("<div style='padding-top: 15px;'>", unsafe_allow_html=True)
         if st.button(lang_dict.get('exit_coach', 'Exit'), use_container_width=True):
             st.session_state.authenticated_coach = False
+            st.session_state.authenticated_admin = False
             st.session_state.show_roster_modal = False
             st.session_state.nav_mode = "Home"
             st.rerun()
