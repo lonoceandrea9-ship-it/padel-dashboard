@@ -170,12 +170,34 @@ st.markdown("""
 # --- GESTIONE PERSISTENZA AUTOMATICA SU SERVER ---
 DATA_FILE = "squad_data_persistence.json"
 
+def log_activity(action, detail=""):
+    """Append an entry to the activity log (Admin only view)."""
+    if "activity_log" not in st.session_state:
+        st.session_state.activity_log = []
+    actor = "System"
+    if st.session_state.get("authenticated_admin"):
+        actor = "Admin"
+    elif st.session_state.get("authenticated_coach"):
+        actor = "Coach"
+    elif st.session_state.get("authenticated_player"):
+        actor = f"Player: {st.session_state.authenticated_player}"
+    entry = {
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "actor": actor,
+        "action": action,
+        "detail": detail
+    }
+    st.session_state.activity_log.insert(0, entry)
+    # Keep last 500 entries
+    st.session_state.activity_log = st.session_state.activity_log[:500]
+
 def save_data_to_server():
     data_to_save = {
         "squad_data": st.session_state.squad_data,
         "planned_trainings": st.session_state.planned_trainings,
         "match_results": st.session_state.match_results,
-        "snp_lineups": st.session_state.get("snp_lineups", {})
+        "snp_lineups": st.session_state.get("snp_lineups", {}),
+        "activity_log": st.session_state.get("activity_log", [])
     }
     try:
         with open(DATA_FILE, "w", encoding="utf-8") as f:
@@ -873,6 +895,8 @@ if saved_server_data:
         st.session_state.match_results = saved_server_data.get("match_results", [])
     if "snp_lineups" not in st.session_state:
         st.session_state.snp_lineups = saved_server_data.get("snp_lineups", {})
+    if "activity_log" not in st.session_state:
+        st.session_state.activity_log = saved_server_data.get("activity_log", [])
 else:
     if "planned_trainings" not in st.session_state:
         st.session_state.planned_trainings = []
@@ -880,6 +904,8 @@ else:
         st.session_state.match_results = []
     if "snp_lineups" not in st.session_state:
         st.session_state.snp_lineups = {}
+    if "activity_log" not in st.session_state:
+        st.session_state.activity_log = []
     if "squad_data" not in st.session_state:
         st.session_state.squad_data = [
             {"fname": "Alexander", "lname": "Wennstam", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1, "tech": [8, 8, 7, 7, 8, 6, 7], "mental": [7, 7, 8, 8, 7, 7, 8], "c_tech": [7, 7, 6, 6, 7, 5, 6], "c_mental": [6, 6, 7, 7, 6, 6, 7], "play_style": "Equilibrated", "player_play_style": "Equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": [], "password": "Alexander", "first_login_done": False},
@@ -921,6 +947,8 @@ for p in st.session_state.squad_data:
     if len(p["c_mental"]) != len(MENTAL_SKILLS): p["c_mental"] = [6] * len(MENTAL_SKILLS)
 
 squad_players = st.session_state.squad_data
+if "activity_log" not in st.session_state:
+    st.session_state.activity_log = []
 save_data_to_server()
 
 # --- SIDEBAR & LINGUA ---
@@ -1069,6 +1097,8 @@ elif st.session_state.nav_mode == "Coach_Login":
         if st.button(lang_dict.get('verify_pwd', 'Verify'), type="primary", use_container_width=True):
             if pwd_input == COACH_PASSWORD:
                 st.session_state.authenticated_coach = True
+                log_activity("Coach login", "Coach accessed the system")
+                save_data_to_server()
                 st.session_state.nav_mode = "Coach"
                 st.rerun()
             else:
@@ -1092,6 +1122,8 @@ elif st.session_state.nav_mode == "Admin_Login":
             if admin_pwd == ADMIN_PASSWORD:
                 st.session_state.authenticated_admin = True
                 st.session_state.authenticated_coach = True  # full coach privileges
+                log_activity("Admin login", "Admin accessed the system")
+                save_data_to_server()
                 st.session_state.nav_mode = "Coach"
                 st.rerun()
             else:
@@ -1179,6 +1211,7 @@ elif st.session_state.nav_mode == "Player_Dashboard":
             current_player['tech'] = new_tech_vals
             current_player['mental'] = new_mental_vals
             current_player['player_play_style'] = new_player_style
+            log_activity("Self-evaluation saved", f"{current_player['fname']} {current_player['lname']} – style: {new_player_style}")
             save_data_to_server()
             st.success(lang_dict.get('eval_saved', 'Saved!'))
             st.rerun()
@@ -1313,6 +1346,7 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                     
             if st.form_submit_button(lang_dict.get('save_partners', 'Save Partners'), type="primary"):
                 current_player["partners"] = new_partners_dict
+                log_activity("Partner ranking updated", f"{current_player['fname']} {current_player['lname']}")
                 save_data_to_server()
                 st.success(lang_dict.get('partners_saved', 'Saved!'))
                 st.rerun()
@@ -1362,6 +1396,7 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                         "text": comment_text,
                         "date": datetime.now().strftime("%Y-%m-%d %H:%M")
                     })
+                    log_activity("Peer feedback sent", f"From {current_player['fname']} to {selected_target}")
                     save_data_to_server()
                     st.success(lang_dict.get('note_sent', 'Sent!'))
             else:
@@ -1421,6 +1456,8 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 st.session_state.authenticated_player = selected_fname
                 st.session_state.admin_viewing_player = True
                 st.session_state.force_password_change = False
+                log_activity("Admin opened player profile", selected_admin_player)
+                save_data_to_server()
                 st.session_state.nav_mode = "Player_Dashboard"
                 st.rerun()
             
@@ -1465,6 +1502,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                                     "password": new_fname.strip(),
                                     "first_login_done": False
                                 })
+                                log_activity("Player added", f"{new_fname.strip()} {new_lname.strip()} ({new_side})")
                                 save_data_to_server()
                                 st.success(f"Giocatore {new_fname} {new_lname} aggiunto con successo!")
                                 st.rerun()
@@ -1478,20 +1516,34 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     
                     if st.form_submit_button("🗑️ Rimuovi Giocatore", type="secondary"):
                         st.session_state.squad_data = [p for p in st.session_state.squad_data if f"{p['fname']} {p['lname']}" != player_to_delete]
+                        log_activity("Player removed", player_to_delete)
                         save_data_to_server()
                         st.success(f"Giocatore {player_to_delete} rimosso con successo!")
                         st.rerun()
         st.markdown("---")
         
-    coach_tab1, coach_tab_evals, coach_tab_stats, coach_tab_training, coach_tab3, coach_tab_pairing, coach_tab2 = st.tabs([
-        f"👥 {lang_dict.get('coach_tab_squad', 'Squad')}", 
-        f"✏️ {lang_dict.get('coach_tab_evals', 'Grades')}",
-        f"📊 Players Stats",
-        f"🎾 {lang_dict.get('coach_tab_training', 'Training')}",
-        f"💬 {lang_dict.get('coach_tab_comments', 'Comments')}",
-        f"🤖 {lang_dict.get('coach_tab_pairing', 'Pairing')}",
-        f"📅 {lang_dict.get('coach_tab_matches', 'Matches')}"
-    ])
+    if is_admin:
+        coach_tab1, coach_tab_evals, coach_tab_stats, coach_tab_training, coach_tab3, coach_tab_pairing, coach_tab2, coach_tab_log = st.tabs([
+            f"👥 {lang_dict.get('coach_tab_squad', 'Squad')}", 
+            f"✏️ {lang_dict.get('coach_tab_evals', 'Grades')}",
+            f"📊 Players Stats",
+            f"🎾 {lang_dict.get('coach_tab_training', 'Training')}",
+            f"💬 {lang_dict.get('coach_tab_comments', 'Comments')}",
+            f"🤖 {lang_dict.get('coach_tab_pairing', 'Pairing')}",
+            f"📅 {lang_dict.get('coach_tab_matches', 'Matches')}",
+            "📋 Activity Log"
+        ])
+    else:
+        coach_tab1, coach_tab_evals, coach_tab_stats, coach_tab_training, coach_tab3, coach_tab_pairing, coach_tab2 = st.tabs([
+            f"👥 {lang_dict.get('coach_tab_squad', 'Squad')}", 
+            f"✏️ {lang_dict.get('coach_tab_evals', 'Grades')}",
+            f"📊 Players Stats",
+            f"🎾 {lang_dict.get('coach_tab_training', 'Training')}",
+            f"💬 {lang_dict.get('coach_tab_comments', 'Comments')}",
+            f"🤖 {lang_dict.get('coach_tab_pairing', 'Pairing')}",
+            f"📅 {lang_dict.get('coach_tab_matches', 'Matches')}"
+        ])
+        coach_tab_log = None
     
     with coach_tab1:
         st.subheader(f"👥 {lang_dict.get('coach_tab_squad', 'Squad Management & Attendance')}")
@@ -1558,6 +1610,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
 
             st.markdown("<br>", unsafe_allow_html=True)
             if st.form_submit_button("💾 Salva Modifiche Rosa e Ruoli", type="primary"):
+                log_activity("Squad roles/styles updated", f"{len(squad_players)} players")
                 save_data_to_server()
                 st.success("Tutte le modifiche alla rosa, ruoli e destri/mancini sono state salvate permanentemente!")
                 st.rerun()
@@ -1639,6 +1692,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     p_obj['c_mental'] = c_mental_new
                     p_obj['play_style'] = selected_style
                     p_obj['coach_note'] = new_coach_note
+                    log_activity("Coach grades updated", f"{selected_player_name} – style: {selected_style}")
                     save_data_to_server()
                     st.success(f"✅ {selected_player_name} updated and saved successfully!")
 
@@ -1747,6 +1801,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                             p["c_tech"] = new_c_tech
                             p["c_mental"] = new_c_mental
                             p["play_style"] = new_coach_style
+                            log_activity("Coach evaluation saved (Players Stats)", f"{player_name} – style: {new_coach_style}")
                             save_data_to_server()
                             st.success(f"✅ Coach evaluation for **{player_name}** saved!")
                             st.rerun()
@@ -1879,6 +1934,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         "2° Priorità": coach_choice_p2,
                         "3° Priorità": coach_choice_p3
                     })
+                    log_activity("Training planned", f"{training_date} – {coach_choice_p1}, {coach_choice_p2}, {coach_choice_p3}")
                     save_data_to_server()
                     st.success(f"🎉 Allenamento salvato con successo per il giorno {training_date}!")
                     st.rerun()
@@ -2037,6 +2093,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                             "Risultato_Pista": info["risultato"].strip() or "—"
                         })
                 
+                log_activity("SNP lineup & results saved", selected_day["label"])
                 save_data_to_server()
                 st.success(f"✅ Formazioni e risultati di tutte le piste salvati per **{selected_day['label']}**!")
                 st.rerun()
@@ -2259,3 +2316,34 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 st.warning(f"⚠️ {lang_dict.get('unmatched_warn', 'Unmatched warning')}")
                 un_names = [f"{p['fname']} {p['lname']}" for p in st.session_state.unmatched_cache]
                 st.markdown("- " + "\n- ".join(un_names))
+
+
+    # --- ACTIVITY LOG (Admin only) ---
+    if is_admin and coach_tab_log is not None:
+        with coach_tab_log:
+            st.subheader("📋 Activity Log")
+            st.markdown("History of recent changes in the app. Visible only to Admin.")
+            
+            logs = st.session_state.get("activity_log", [])
+            if not logs:
+                st.info("No activity recorded yet.")
+            else:
+                df_log = pd.DataFrame(logs)
+                # Ensure columns order
+                cols = [c for c in ["timestamp", "actor", "action", "detail"] if c in df_log.columns]
+                df_log = df_log[cols]
+                df_log.columns = ["Timestamp", "User", "Action", "Detail"]
+                st.markdown(
+                    f"<div class='table-container'>{df_log.to_html(escape=False, index=False, classes='custom-table')}</div>",
+                    unsafe_allow_html=True
+                )
+                st.caption(f"Showing last {len(logs)} entries (max 500).")
+            
+            st.markdown("---")
+            col_clear1, col_clear2 = st.columns([1, 3])
+            with col_clear1:
+                if st.button("🗑️ Clear Activity Log", type="secondary"):
+                    st.session_state.activity_log = []
+                    save_data_to_server()
+                    st.success("Activity log cleared.")
+                    st.rerun()
