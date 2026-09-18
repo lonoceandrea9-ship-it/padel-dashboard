@@ -8,10 +8,11 @@ from datetime import datetime, timedelta
 st.set_page_config(
     page_title="Nac Team Performance App",
     page_icon="🎾",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="auto"
 )
 
-# --- CUSTOM CSS: SFONDO BLU SCURO, TESTO BIANCO, HEADER, BOTTONI E TABELLE STILIZZATE ---
+# --- CUSTOM CSS: MOBILE FRIENDLY, SFONDO BLU SCURO, TESTO BIANCO, HEADER, BOTTONI E TABELLE STILIZZATE ---
 st.markdown("""
     <style>
     /* Sfondo generale dell'applicazione */
@@ -39,6 +40,18 @@ st.markdown("""
         color: #ffffff !important;
     }
     
+    /* Adattamento mobile per colonne e grafici */
+    @media (max-width: 768px) {
+        .stColumns {
+            flex-direction: column !important;
+        }
+        div[data-testid="column"] {
+            width: 100% !important;
+            flex: 1 1 100% !important;
+            min-width: 100% !important;
+        }
+    }
+
     /* Pulsanti specifici di accesso e gestione in rosso brillante */
     .element-container:has(button:contains("Allenatore")) button,
     .element-container:has(button:contains("Giocatore")) button,
@@ -90,7 +103,13 @@ st.markdown("""
         color: #ffffff !important;
     }
 
-    /* --- STILE TABELLE HTML PERSONALIZZATE IN TEMA SCURO --- */
+    /* --- STILE TABELLE HTML PERSONALIZZATE IN TEMA SCURO & RESPONSIVE --- */
+    .table-container {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin-bottom: 20px;
+    }
     .custom-table {
         width: 100%;
         border-collapse: collapse;
@@ -99,7 +118,7 @@ st.markdown("""
         border-radius: 8px;
         overflow: hidden;
         border: 1px solid #334155;
-        margin-bottom: 20px;
+        white-space: nowrap;
     }
     .custom-table th {
         background-color: #0d1b2a !important;
@@ -521,7 +540,7 @@ translations = {
         "save_coach_eval": "Spara Betyg, Profil och Coachanteckning",
         "training_title": "Träning & Fokus",
         "training_desc": "Välj deltagare. Systemet föreslår prioriterade områden. Coachen kan ändra dem, välja datum och bekräfta sparandet i kalendern.",
-        "select_attendees": "Välj mötesdeltagare:",
+        "select_attendees": "Välj mödedeltagare:",
         "training_priorities": "🎯 Systemets Rekommenderade Prioriterade Områden",
         "training_no_attendees": "Välj minst en spelare för att se träningsfokus.",
         "match_mgmt": "Matchregistrering",
@@ -786,7 +805,6 @@ if "show_roster_modal" not in st.session_state:
 if "match_results" not in st.session_state:
     st.session_state.match_results = []
 
-# Caricamento sicuro di MENTAL_SKILLS basato sulla lingua attiva nello state
 lang_dict = translations.get(st.session_state.language, translations["Italiano"])
 MENTAL_SKILLS = lang_dict.get("mental_list", translations["Italiano"]["mental_list"])
 ALL_SKILLS = TECH_SKILLS + MENTAL_SKILLS
@@ -1052,8 +1070,8 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                     angularaxis=dict(gridcolor='#334155')
                 ),
                 showlegend=False,
-                height=420,
-                margin=dict(l=40, r=40, t=10, b=20)
+                height=400,
+                margin=dict(l=20, r=20, t=10, b=10)
             )
             st.plotly_chart(fig_player, use_container_width=True)
             
@@ -1080,8 +1098,8 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                     angularaxis=dict(gridcolor='#334155')
                 ),
                 showlegend=False,
-                height=420,
-                margin=dict(l=40, r=40, t=10, b=20)
+                height=400,
+                margin=dict(l=20, r=20, t=10, b=10)
             )
             st.plotly_chart(fig_coach, use_container_width=True)
 
@@ -1121,11 +1139,11 @@ elif st.session_state.nav_mode == "Player_Dashboard":
         t_col1, t_col2 = st.columns(2)
         with t_col1:
             st.markdown(f"#### 🎾 {lang_dict.get('tech_feat', 'Technical Features')}")
-            st.markdown(pd.DataFrame(diff_tech_rows).to_html(escape=False, index=False, classes="custom-table"), unsafe_allow_html=True)
+            st.markdown(f"<div class='table-container'>{pd.DataFrame(diff_tech_rows).to_html(escape=False, index=False, classes='custom-table')}</div>", unsafe_allow_html=True)
             
         with t_col2:
             st.markdown(f"#### 🧠 {lang_dict.get('mental_feat', 'Mental Features')}")
-            st.markdown(pd.DataFrame(diff_mental_rows).to_html(escape=False, index=False, classes="custom-table"), unsafe_allow_html=True)
+            st.markdown(f"<div class='table-container'>{pd.DataFrame(diff_mental_rows).to_html(escape=False, index=False, classes='custom-table')}</div>", unsafe_allow_html=True)
 
     with tab_partners:
         st.subheader(f"🏆 {lang_dict.get('partner_mgmt', 'Partner Management')}")
@@ -1156,7 +1174,7 @@ elif st.session_state.nav_mode == "Player_Dashboard":
         st.markdown(f"### {lang_dict.get('current_ranking', 'Current Ranking:')}")
         if current_player.get("partners"):
             df_part = pd.DataFrame(list(current_player["partners"].items()), columns=["Compagno", "Match / Preferenza"]).sort_values(by="Match / Preferenza", ascending=False).reset_index(drop=True)
-            st.markdown(df_part.to_html(escape=False, index=False, classes="custom-table"), unsafe_allow_html=True)
+            st.markdown(f"<div class='table-container'>{df_part.to_html(escape=False, index=False, classes='custom-table')}</div>", unsafe_allow_html=True)
         else:
             st.info(lang_dict.get('no_partners', 'No partners.'))
 
@@ -1204,7 +1222,6 @@ elif st.session_state.nav_mode == "Player_Dashboard":
 
 # --- AREA ALLENATORE ---
 elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coach:
-    # --- INTESTAZIONE E PULSANTI A DESTRA ---
     col_title, col_btn_roster, col_btn_exit = st.columns([4, 1.8, 1.8])
     with col_title:
         st.title(f"📋 {lang_dict.get('coach_dash_title', 'Coach Dashboard')}")
@@ -1223,7 +1240,6 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
             
-    # --- PANNELLO A SCOMPARSA PER GESTIONE ROSA ---
     if st.session_state.show_roster_modal:
         st.markdown("---")
         st.markdown("### 👥 Pannello Gestione Rosa Giocatori (Aggiungi o Rimuovi)")
@@ -1508,9 +1524,8 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             st.markdown("### 📅 Storico Calendario Allenamenti Pianificati")
             if st.session_state.planned_trainings:
                 df_planned = pd.DataFrame(st.session_state.planned_trainings).sort_values(by="Data").reset_index(drop=True)
-                st.markdown(df_planned.to_html(escape=False, index=False, classes="custom-table"), unsafe_allow_html=True)
+                st.markdown(f"<div class='table-container'>{df_planned.to_html(escape=False, index=False, classes='custom-table')}</div>", unsafe_allow_html=True)
                 
-                # --- GESTIONE CANCELLAZIONE ALLENAMENTO ---
                 st.markdown("#### 🗑️ Cancella Allenamento dal Calendario")
                 with st.form("delete_training_form"):
                     training_options = [f"{t['Data']} - {t['1° Priorità']} ({t['Partecipanti'][:25]}...)" for t in st.session_state.planned_trainings]
@@ -1574,7 +1589,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         if st.session_state.match_results:
             st.markdown(f"### 📋 {lang_dict.get('match_history', 'Match History')}")
             df_matches = pd.DataFrame(st.session_state.match_results)
-            st.markdown(df_matches.to_html(escape=False, index=False, classes="custom-table"), unsafe_allow_html=True)
+            st.markdown(f"<div class='table-container'>{df_matches.to_html(escape=False, index=False, classes='custom-table')}</div>", unsafe_allow_html=True)
 
     with coach_tab3:
         st.subheader(f"💬 {lang_dict.get('global_comments', 'Global Comments')}")
@@ -1690,16 +1705,18 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             selected_rights = []
             
             st.markdown("""
-                <table class="custom-table">
-                    <tr>
-                        <th style="width: 10%;">Pair #</th>
-                        <th style="width: 30%;">Left Player</th>
-                        <th style="width: 30%;">Right Player</th>
-                        <th style="width: 10%;">Coach Score</th>
-                        <th style="width: 10%;">Mutual Willingness</th>
-                        <th style="width: 10%;">Total Score</th>
-                    </tr>
-                </table>
+                <div class="table-container">
+                    <table class="custom-table">
+                        <tr>
+                            <th style="width: 10%;">Pair #</th>
+                            <th style="width: 30%;">Left Player</th>
+                            <th style="width: 30%;">Right Player</th>
+                            <th style="width: 10%;">Coach Score</th>
+                            <th style="width: 10%;">Mutual Willingness</th>
+                            <th style="width: 10%;">Total Score</th>
+                        </tr>
+                    </table>
+                </div>
             """, unsafe_allow_html=True)
             
             new_confirmed_pairs = []
