@@ -906,8 +906,32 @@ lang_dict = translations.get(st.session_state.language, translations["Italiano"]
 MENTAL_SKILLS = lang_dict.get("mental_list", translations["Italiano"]["mental_list"])
 ALL_SKILLS = TECH_SKILLS + MENTAL_SKILLS
 
+# --- CONTROLLO FORZATURA CAMBIO PASSWORD (PRIMO ACCESSO) ---
+if st.session_state.get("force_password_change", False):
+    current_player = next((p for p in squad_players if p['fname'] == st.session_state.authenticated_player), None)
+    st.title("🔒 Primo Accesso: Imposta la tua Nuova Password")
+    st.markdown(f"Benvenuto **{current_player['fname']}**! Per motivi di sicurezza, essendo il tuo primo accesso, devi impostare una password personale che solo tu conoscerai.")
+    
+    with st.form("change_pwd_form"):
+        new_pwd1 = st.text_input("Nuova Password Personale", type="password")
+        new_pwd2 = st.text_input("Conferma Nuova Password", type="password")
+        
+        if st.form_submit_button("Salva Password e Accedi", type="primary"):
+            if not new_pwd1.strip():
+                st.warning("La password non può essere vuota.")
+            elif new_pwd1 != new_pwd2:
+                st.error("Le password non coincidono. Riprova.")
+            else:
+                current_player["password"] = new_pwd1
+                current_player["first_login_done"] = True
+                save_data_to_server()
+                st.session_state.force_password_change = False
+                st.session_state.nav_mode = "Player_Dashboard"
+                st.success("Password impostata con successo!")
+                st.rerun()
+
 # --- HOME SELECTION ---
-if st.session_state.nav_mode == "Home":
+elif st.session_state.nav_mode == "Home":
     st.title(f"🎾 {lang_dict.get('welcome', 'Nac Team Performance App')}")
     st.markdown(lang_dict.get('select_area', 'Select area:'))
     
@@ -943,11 +967,11 @@ elif st.session_state.nav_mode == "Player_Login":
     with col_pl1:
         if st.button(lang_dict.get('enter_card', 'Enter'), type="primary", use_container_width=True):
             if player_obj:
-                current_saved_pwd = player_obj.get("password", player_obj["fname"])
                 is_first_login = not player_obj.get("first_login_done", False)
+                current_saved_pwd = player_obj.get("password", player_obj["fname"])
                 
-                # Se è il primo accesso, verifica con il nome di battesimo
                 if is_first_login:
+                    # Al primo accesso verifica con il nome di battesimo
                     if player_pwd_input.strip().lower() == player_obj["fname"].lower():
                         st.session_state.authenticated_player = selected_fname
                         st.session_state.force_password_change = True
@@ -955,7 +979,7 @@ elif st.session_state.nav_mode == "Player_Login":
                     else:
                         st.error("❌ Primo accesso: inserisci il tuo nome di battesimo come password.")
                 else:
-                    # Accesso normale con la password personale impostata
+                    # Accesso successivo con la nuova password personale
                     if player_pwd_input == current_saved_pwd:
                         st.session_state.authenticated_player = selected_fname
                         st.session_state.force_password_change = False
@@ -967,30 +991,6 @@ elif st.session_state.nav_mode == "Player_Login":
         if st.button(lang_dict.get('back_home', 'Back'), use_container_width=True):
             st.session_state.nav_mode = "Home"
             st.rerun()
-
-# --- SCHERMATA CAMBIO PASSWORD OBBLIGATORIO (PRIMO ACCESSO) ---
-elif st.session_state.get("force_password_change", False):
-    current_player = next((p for p in squad_players if p['fname'] == st.session_state.authenticated_player), None)
-    st.title("🔒 Primo Accesso: Imposta la tua Nuova Password")
-    st.markdown(f"Benvenuto **{current_player['fname']}**! Per motivi di sicurezza, essendo il tuo primo accesso, devi impostare una password personale che solo tu conoscerai.")
-    
-    with st.form("change_pwd_form"):
-        new_pwd1 = st.text_input("Nuova Password Personale", type="password")
-        new_pwd2 = st.text_input("Conferma Nuova Password", type="password")
-        
-        if st.form_submit_button("Salva Password e Accedi", type="primary"):
-            if not new_pwd1.strip():
-                st.warning("La password non può essere vuota.")
-            elif new_pwd1 != new_pwd2:
-                st.error("Le password non coincidono. Riprova.")
-            else:
-                current_player["password"] = new_pwd1
-                current_player["first_login_done"] = True
-                save_data_to_server()
-                st.session_state.force_password_change = False
-                st.session_state.nav_mode = "Player_Dashboard"
-                st.success("Password impostata con successo!")
-                st.rerun()
 
 # --- LOGIN ALLENATORE ---
 elif st.session_state.nav_mode == "Coach_Login":
