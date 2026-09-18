@@ -1603,54 +1603,164 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             st.info(lang_dict.get('training_no_attendees', 'Select at least one player.'))
 
     with coach_tab2:
-        st.subheader(f"📅 {lang_dict.get('match_mgmt', 'Match Management')}")
-        st.markdown(lang_dict.get('match_mgmt_desc', ''))
+        st.subheader("📅 Registrazione Partite SNP")
+        st.markdown("Schema per le partite della **SNP**: 5 Team NAC contro 5 Team della squadra avversaria (nome modificabile). Totale **7 scontri**.")
         
         left_list = [f"{p['fname']} {p['lname']}" for p in squad_players if p['side'] == "Left"]
         right_list = [f"{p['fname']} {p['lname']}" for p in squad_players if p['side'] == "Right"]
         
-        with st.form("match_form"):
-            m_date = st.date_input(lang_dict.get('match_date', 'Match Date'), datetime.now())
+        # --- Nome squadra avversaria ---
+        if "snp_opponent_name" not in st.session_state:
+            st.session_state.snp_opponent_name = "Squadra Avversaria"
+        
+        opponent_name = st.text_input(
+            "🏷️ Nome Squadra Avversaria (modificabile)",
+            value=st.session_state.snp_opponent_name,
+            key="snp_opponent_input"
+        )
+        st.session_state.snp_opponent_name = opponent_name
+        
+        st.markdown("---")
+        st.markdown("### 🔵 Definizione dei 5 Team NAC")
+        st.caption("Seleziona i giocatori della tua rosa per ogni team (1 Sinistra + 1 Destra).")
+        
+        nac_teams = {}
+        used_players = set()
+        
+        for i in range(1, 6):
+            st.markdown(f"**Team NAC {i}**")
+            c1, c2 = st.columns(2)
+            with c1:
+                left_opts = [""] + left_list
+                l_player = st.selectbox(
+                    f"Sinistra (Left) - Team {i}",
+                    options=left_opts,
+                    key=f"nac_left_{i}",
+                    label_visibility="collapsed"
+                )
+            with c2:
+                right_opts = [""] + right_list
+                r_player = st.selectbox(
+                    f"Destra (Right) - Team {i}",
+                    options=right_opts,
+                    key=f"nac_right_{i}",
+                    label_visibility="collapsed"
+                )
             
-            st.markdown(f"#### 🔵 {lang_dict.get('team_a', 'Team A')}")
-            col_ta1, col_ta2 = st.columns(2)
-            with col_ta1:
-                team_a_left = st.selectbox(f"{lang_dict.get('team_a', 'Team A')} - {lang_dict.get('left_role', 'Left')}", left_list, key="ta_left")
-            with col_ta2:
-                team_a_right = st.selectbox(f"{lang_dict.get('team_a', 'Team A')} - {lang_dict.get('right_role', 'Right')}", right_list, key="ta_right")
-                
-            st.markdown(f"#### 🔴 {lang_dict.get('team_b', 'Team B')}")
-            col_tb1, col_tb2 = st.columns(2)
-            with col_tb1:
-                team_b_left = st.selectbox(f"{lang_dict.get('team_b', 'Team B')} - {lang_dict.get('left_role', 'Left')}", left_list, key="tb_left")
-            with col_tb2:
-                team_b_right = st.selectbox(f"{lang_dict.get('team_b', 'Team B')} - {lang_dict.get('right_role', 'Right')}", right_list, key="tb_right")
-                
-            score = st.text_input(lang_dict.get('score_lbl', 'Result'))
+            if l_player and r_player:
+                nac_teams[i] = f"{l_player} / {r_player}"
+                used_players.add(l_player)
+                used_players.add(r_player)
+            else:
+                nac_teams[i] = None
+        
+        st.markdown("---")
+        st.markdown(f"### 🔴 Team {opponent_name}")
+        st.info("I team avversari sono fissi: **Team 1 · Team 2 · Team 3 · Team 4 · Team 5**")
+        
+        st.markdown("---")
+        st.markdown("### 🎾 Schema dei 7 Scontri SNP")
+        st.caption("Per ogni scontro scegli il Team NAC e il Team Avversario, poi inserisci il risultato.")
+        
+        with st.form("snp_matches_form"):
+            match_date = st.date_input("📅 Data delle partite SNP", datetime.now())
             
-            if st.form_submit_button(lang_dict.get('register_match', 'Register Match'), type="primary"):
-                team_a_players = {team_a_left, team_a_right}
-                team_b_players = {team_b_left, team_b_right}
+            results_data = []
+            for m in range(1, 8):
+                st.markdown(f"**Scontro #{m}**")
+                col_n, col_o, col_s = st.columns([2, 2, 2])
                 
-                if len(team_a_players) < 2 or len(team_b_players) < 2:
-                    st.error(f"⚠️ {lang_dict.get('same_player_err', 'Same player error')}")
-                else:
-                    team_a_str = f"{team_a_left} / {team_a_right}"
-                    team_b_str = f"{team_b_left} / {team_b_right}"
-                    
-                    st.session_state.match_results.append({
-                        "Data": str(m_date),
-                        "Team A": team_a_str,
-                        "Team B": team_b_str,
-                        "Risultato": score
-                    })
+                with col_n:
+                    nac_choice = st.selectbox(
+                        f"Team NAC - Scontro {m}",
+                        options=["— Seleziona —"] + [f"Team NAC {i}" for i in range(1, 6)],
+                        key=f"snp_nac_{m}",
+                        label_visibility="collapsed"
+                    )
+                with col_o:
+                    opp_choice = st.selectbox(
+                        f"Team Avversario - Scontro {m}",
+                        options=["— Seleziona —"] + [f"Team {i}" for i in range(1, 6)],
+                        key=f"snp_opp_{m}",
+                        label_visibility="collapsed"
+                    )
+                with col_s:
+                    score_val = st.text_input(
+                        f"Risultato - Scontro {m}",
+                        placeholder="es. 6-4, 6-2",
+                        key=f"snp_score_{m}",
+                        label_visibility="collapsed"
+                    )
+                
+                results_data.append({
+                    "match_num": m,
+                    "nac": nac_choice,
+                    "opp": opp_choice,
+                    "score": score_val
+                })
+            
+            submitted = st.form_submit_button("💾 Registra tutti i 7 Scontri SNP", type="primary")
+            
+            if submitted:
+                valid_count = 0
+                for item in results_data:
+                    if item["nac"] != "— Seleziona —" and item["opp"] != "— Seleziona —" and item["score"].strip():
+                        # Recupera i giocatori del Team NAC selezionato
+                        try:
+                            team_idx = int(item["nac"].replace("Team NAC ", ""))
+                            nac_players = nac_teams.get(team_idx, "Non definito")
+                        except:
+                            nac_players = "Non definito"
+                        
+                        st.session_state.match_results.append({
+                            "Data": str(match_date),
+                            "Tipo": "SNP",
+                            "Squadra_Avversaria": opponent_name,
+                            "Scontro": f"#{item['match_num']}",
+                            "Team_NAC": item["nac"],
+                            "Giocatori_NAC": nac_players if nac_players else "—",
+                            "Team_Avversario": item["opp"],
+                            "Risultato": item["score"].strip()
+                        })
+                        valid_count += 1
+                
+                if valid_count > 0:
                     save_data_to_server()
-                    st.success(f"✅ {lang_dict.get('match_saved', 'Saved!')}")
-                    
+                    st.success(f"✅ {valid_count} scontri SNP registrati con successo contro **{opponent_name}**!")
+                    st.rerun()
+                else:
+                    st.warning("⚠️ Nessuno scontro valido da registrare. Compila almeno Team NAC, Team Avversario e Risultato.")
+        
+        # --- Storico Partite ---
         if st.session_state.match_results:
-            st.markdown(f"### 📋 {lang_dict.get('match_history', 'Match History')}")
-            df_matches = pd.DataFrame(st.session_state.match_results)
-            st.markdown(f"<div class='table-container'>{df_matches.to_html(escape=False, index=False, classes='custom-table')}</div>", unsafe_allow_html=True)
+            st.markdown("---")
+            st.markdown("### 📋 Storico Partite Registrate")
+            
+            # Mostra prima le partite SNP
+            snp_matches = [m for m in st.session_state.match_results if m.get("Tipo") == "SNP"]
+            other_matches = [m for m in st.session_state.match_results if m.get("Tipo") != "SNP"]
+            
+            if snp_matches:
+                st.markdown("#### 🎾 Partite SNP")
+                df_snp = pd.DataFrame(snp_matches)
+                # Ordina le colonne in modo leggibile
+                preferred_cols = ["Data", "Squadra_Avversaria", "Scontro", "Team_NAC", "Giocatori_NAC", "Team_Avversario", "Risultato"]
+                cols = [c for c in preferred_cols if c in df_snp.columns] + [c for c in df_snp.columns if c not in preferred_cols]
+                df_snp = df_snp[cols]
+                st.markdown(f"<div class='table-container'>{df_snp.to_html(escape=False, index=False, classes='custom-table')}</div>", unsafe_allow_html=True)
+            
+            if other_matches:
+                st.markdown("#### 📅 Altre Partite")
+                df_other = pd.DataFrame(other_matches)
+                st.markdown(f"<div class='table-container'>{df_other.to_html(escape=False, index=False, classes='custom-table')}</div>", unsafe_allow_html=True)
+            
+            # Pulsante per cancellare tutte le partite (opzionale)
+            with st.expander("🗑️ Gestione Storico"):
+                if st.button("Elimina TUTTE le partite registrate", type="secondary"):
+                    st.session_state.match_results = []
+                    save_data_to_server()
+                    st.success("Storico partite cancellato.")
+                    st.rerun()
 
     with coach_tab3:
         st.subheader(f"💬 {lang_dict.get('global_comments', 'Global Comments')}")
