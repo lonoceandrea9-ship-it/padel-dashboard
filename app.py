@@ -1104,17 +1104,30 @@ elif st.session_state.nav_mode == "Admin_Login":
 # --- DASHBOARD GIOCATORE ---
 elif st.session_state.nav_mode == "Player_Dashboard":
     current_player = next((p for p in squad_players if p['fname'] == st.session_state.authenticated_player), None)
+    admin_viewing = st.session_state.get("admin_viewing_player", False) and st.session_state.get("authenticated_admin", False)
     
     col_top1, col_top2 = st.columns([5, 2])
     with col_top1:
-        st.title(f"👤 {current_player['fname']} {current_player['lname']} ({current_player['side']})")
+        if admin_viewing:
+            st.title(f"🛡️ Admin → 👤 {current_player['fname']} {current_player['lname']} ({current_player['side']})")
+            st.caption("You are viewing this player profile as Admin. You can edit all fields.")
+        else:
+            st.title(f"👤 {current_player['fname']} {current_player['lname']} ({current_player['side']})")
     with col_top2:
         st.markdown("<div style='text-align: right;'>", unsafe_allow_html=True)
-        if st.button(lang_dict.get('logout', 'Logout'), use_container_width=False):
-            st.session_state.authenticated_player = None
-            st.session_state.force_password_change = False
-            st.session_state.nav_mode = "Home"
-            st.rerun()
+        if admin_viewing:
+            if st.button("← Back to Admin", use_container_width=True, type="primary", key="back_to_admin_btn"):
+                st.session_state.authenticated_player = None
+                st.session_state.admin_viewing_player = False
+                st.session_state.force_password_change = False
+                st.session_state.nav_mode = "Coach"
+                st.rerun()
+        else:
+            if st.button(lang_dict.get('logout', 'Logout'), use_container_width=False):
+                st.session_state.authenticated_player = None
+                st.session_state.force_password_change = False
+                st.session_state.nav_mode = "Home"
+                st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
             
     st.markdown("---")
@@ -1387,6 +1400,29 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             st.session_state.nav_mode = "Home"
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
+    
+    # Admin: open any player profile
+    if is_admin:
+        st.markdown("---")
+        st.markdown("### 🛡️ Open Player Profile")
+        st.caption("Enter any player's personal card to view and edit their data as admin.")
+        admin_player_opts = [f"{p['fname']} {p['lname']} ({p['side']})" for p in squad_players]
+        col_ap1, col_ap2 = st.columns([3, 1])
+        with col_ap1:
+            selected_admin_player = st.selectbox(
+                "Select player",
+                options=admin_player_opts,
+                key="admin_open_player_select",
+                label_visibility="collapsed"
+            )
+        with col_ap2:
+            if st.button("🔓 Open Profile", type="primary", use_container_width=True, key="admin_open_player_btn"):
+                selected_fname = selected_admin_player.split(" ")[0]
+                st.session_state.authenticated_player = selected_fname
+                st.session_state.admin_viewing_player = True
+                st.session_state.force_password_change = False
+                st.session_state.nav_mode = "Player_Dashboard"
+                st.rerun()
             
     if st.session_state.show_roster_modal:
         st.markdown("---")
