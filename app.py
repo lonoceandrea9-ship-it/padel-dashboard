@@ -1350,9 +1350,10 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         st.rerun()
         st.markdown("---")
         
-    coach_tab1, coach_tab_evals, coach_tab_training, coach_tab3, coach_tab_pairing, coach_tab2 = st.tabs([
+    coach_tab1, coach_tab_evals, coach_tab_stats, coach_tab_training, coach_tab3, coach_tab_pairing, coach_tab2 = st.tabs([
         f"👥 {lang_dict.get('coach_tab_squad', 'Squad')}", 
         f"✏️ {lang_dict.get('coach_tab_evals', 'Grades')}",
+        f"📊 Players Stats",
         f"🎾 {lang_dict.get('coach_tab_training', 'Training')}",
         f"💬 {lang_dict.get('coach_tab_comments', 'Comments')}",
         f"🤖 {lang_dict.get('coach_tab_pairing', 'Pairing')}",
@@ -1507,6 +1508,123 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     p_obj['coach_note'] = new_coach_note
                     save_data_to_server()
                     st.success(f"✅ {selected_player_name} updated and saved successfully!")
+
+    with coach_tab_stats:
+        st.subheader("📊 Players Stats – Self-Evaluation vs Coach Evaluation")
+        st.markdown("Overview of every player's self-evaluation (left) and coach evaluation (right), with radar charts.")
+        
+        all_skills_labels = TECH_SKILLS + MENTAL_SKILLS
+        
+        for p in squad_players:
+            player_name = f"{p['fname']} {p['lname']}"
+            player_style = p.get("player_play_style", "Equilibrated")
+            coach_style = p.get("play_style", "Equilibrated")
+            
+            with st.expander(f"👤 **{player_name}**  |  Side: {p['side']}  |  Self style: {player_style}  |  Coach style: {coach_style}", expanded=False):
+                col_left, col_right = st.columns(2)
+                
+                player_full = p.get("tech", [7]*len(TECH_SKILLS)) + p.get("mental", [7]*len(MENTAL_SKILLS))
+                coach_full = p.get("c_tech", [6]*len(TECH_SKILLS)) + p.get("c_mental", [6]*len(MENTAL_SKILLS))
+                
+                # Ensure lengths match
+                while len(player_full) < len(all_skills_labels):
+                    player_full.append(7)
+                while len(coach_full) < len(all_skills_labels):
+                    coach_full.append(6)
+                player_full = player_full[:len(all_skills_labels)]
+                coach_full = coach_full[:len(all_skills_labels)]
+                
+                categories = all_skills_labels + [all_skills_labels[0]]
+                p_vals_radar = player_full + [player_full[0]]
+                c_vals_radar = coach_full + [coach_full[0]]
+                
+                with col_left:
+                    st.markdown("#### 🟦 Player Self-Evaluation")
+                    st.markdown(f"**Play Style:** {player_style}")
+                    
+                    # Table of values
+                    rows_p = []
+                    for i, skill in enumerate(all_skills_labels):
+                        rows_p.append({"Skill": skill, "Value": player_full[i]})
+                    df_p = pd.DataFrame(rows_p)
+                    st.markdown(f"<div class='table-container'>{df_p.to_html(escape=False, index=False, classes='custom-table')}</div>", unsafe_allow_html=True)
+                    
+                    fig_p = go.Figure()
+                    fig_p.add_trace(go.Scatterpolar(
+                        r=p_vals_radar,
+                        theta=categories,
+                        fill='toself',
+                        name='Self-Evaluation',
+                        line_color='#3b82f6'
+                    ))
+                    fig_p.update_layout(
+                        paper_bgcolor='rgba(0,0,0,0)',
+                        plot_bgcolor='rgba(0,0,0,0)',
+                        font=dict(color='white'),
+                        polar=dict(
+                            bgcolor='rgba(0,0,0,0)',
+                            radialaxis=dict(visible=True, range=[0, 10], color='white', gridcolor='#334155'),
+                            angularaxis=dict(gridcolor='#334155')
+                        ),
+                        showlegend=False,
+                        height=380,
+                        margin=dict(l=30, r=30, t=20, b=20)
+                    )
+                    st.plotly_chart(fig_p, use_container_width=True, key=f"radar_player_{p['fname']}_{p['lname']}")
+                
+                with col_right:
+                    st.markdown("#### 🟧 Coach Evaluation")
+                    st.markdown(f"**Play Style:** {coach_style}")
+                    
+                    rows_c = []
+                    for i, skill in enumerate(all_skills_labels):
+                        rows_c.append({"Skill": skill, "Value": coach_full[i]})
+                    df_c = pd.DataFrame(rows_c)
+                    st.markdown(f"<div class='table-container'>{df_c.to_html(escape=False, index=False, classes='custom-table')}</div>", unsafe_allow_html=True)
+                    
+                    fig_c = go.Figure()
+                    fig_c.add_trace(go.Scatterpolar(
+                        r=c_vals_radar,
+                        theta=categories,
+                        fill='toself',
+                        name='Coach Evaluation',
+                        line_color='#f97316'
+                    ))
+                    fig_c.update_layout(
+                        paper_bgcolor='rgba(0,0,0,0)',
+                        plot_bgcolor='rgba(0,0,0,0)',
+                        font=dict(color='white'),
+                        polar=dict(
+                            bgcolor='rgba(0,0,0,0)',
+                            radialaxis=dict(visible=True, range=[0, 10], color='white', gridcolor='#334155'),
+                            angularaxis=dict(gridcolor='#334155')
+                        ),
+                        showlegend=False,
+                        height=380,
+                        margin=dict(l=30, r=30, t=20, b=20)
+                    )
+                    st.plotly_chart(fig_c, use_container_width=True, key=f"radar_coach_{p['fname']}_{p['lname']}")
+                
+                # Difference summary
+                st.markdown("---")
+                st.markdown("##### 📉 Differences (Self − Coach)")
+                diff_rows = []
+                for i, skill in enumerate(all_skills_labels):
+                    diff = player_full[i] - coach_full[i]
+                    if diff > 0:
+                        diff_display = f"<span style='color:#2ecc71; font-weight:bold;'>+{diff}</span>"
+                    elif diff < 0:
+                        diff_display = f"<span style='color:#e74c3c; font-weight:bold;'>{diff}</span>"
+                    else:
+                        diff_display = "<span style='color:#bdc3c7;'>0</span>"
+                    diff_rows.append({
+                        "Skill": skill,
+                        "Self": player_full[i],
+                        "Coach": coach_full[i],
+                        "Diff": diff_display
+                    })
+                df_diff = pd.DataFrame(diff_rows)
+                st.markdown(f"<div class='table-container'>{df_diff.to_html(escape=False, index=False, classes='custom-table')}</div>", unsafe_allow_html=True)
 
     with coach_tab_training:
         st.subheader(f"🎾 {lang_dict.get('training_title', 'Training Planning & Focus')}")
