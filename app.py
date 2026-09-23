@@ -5,6 +5,8 @@ import plotly.graph_objects as go
 from datetime import datetime, timedelta
 import json
 import os
+import psycopg2
+import psycopg2.extras
 
 # Streamlit page configuration
 st.set_page_config(
@@ -167,8 +169,44 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- GESTIONE PERSISTENZA AUTOMATICA SU SERVER ---
-DATA_FILE = "squad_data_persistence.json"
+# --- GESTIONE PERSISTENZA AUTOMATICA SU DATABASE (POSTGRES) ---
+# All app state (squad, trainings, matches, comments, activity log) is stored
+# as a single JSON document in a Postgres table, so it survives restarts and
+# redeploys instead of living in a local file on ephemeral disk.
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+
+def get_db_connection():
+    """Open a new connection to the Postgres database configured via DATABASE_URL.
+    Returns None if no database is configured (e.g. running locally without one)."""
+    if not DATABASE_URL:
+        return None
+    try:
+        return psycopg2.connect(DATABASE_URL, sslmode="require")
+    except Exception:
+        return None
+
+
+def init_db():
+    """Create the app_state table if it doesn't exist yet. Safe to call every run."""
+    conn = get_db_connection()
+    if conn is None:
+        return
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS app_state (
+                        id INTEGER PRIMARY KEY,
+                        data JSONB NOT NULL,
+                        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+                    )
+                """)
+    except Exception:
+        pass
+    finally:
+        conn.close()
+
 
 def log_activity(action, detail=""):
     """Append an entry to the activity log (Admin only view)."""
@@ -199,20 +237,39 @@ def save_data_to_server():
         "snp_lineups": st.session_state.get("snp_lineups", {}),
         "activity_log": st.session_state.get("activity_log", [])
     }
+    conn = get_db_connection()
+    if conn is None:
+        return
     try:
-        with open(DATA_FILE, "w", encoding="utf-8") as f:
-            json.dump(data_to_save, f, ensure_ascii=False, indent=4)
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO app_state (id, data, updated_at)
+                    VALUES (1, %s, NOW())
+                    ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data, updated_at = NOW()
+                    """,
+                    (psycopg2.extras.Json(data_to_save),)
+                )
     except Exception as e:
         pass
+    finally:
+        conn.close()
 
 def load_data_from_server():
-    if os.path.exists(DATA_FILE):
-        try:
-            with open(DATA_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception as e:
-            return None
-    return None
+    conn = get_db_connection()
+    if conn is None:
+        return None
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT data FROM app_state WHERE id = 1")
+                row = cur.fetchone()
+                return row[0] if row else None
+    except Exception as e:
+        return None
+    finally:
+        conn.close()
 
 # --- TRADUZIONI COMPLETE (6 LINGUE) ---
 translations = {
@@ -884,6 +941,7 @@ if "force_password_change" not in st.session_state:
     st.session_state.force_password_change = False
 
 # Caricamento dati salvati in precedenza sul server se esistono
+init_db()
 saved_server_data = load_data_from_server()
 
 if saved_server_data:
