@@ -282,8 +282,8 @@ def save_data_to_server(retries=3, delay=0.7):
             time.sleep(delay)
         finally:
             conn.close()
-    st.error(f"⚠️ Salvataggio NON riuscito: impossibile scrivere sul database ({last_error}). "
-              f"Le modifiche NON sono state salvate — riprova tra qualche secondo prima di uscire da questa pagina.")
+    _ld = translations.get(st.session_state.get("language", "English"), translations["English"])
+    st.error(_ld.get('save_failed_error', '⚠️ Save FAILED: unable to write to the database ({error}). Your changes were NOT saved — try again in a few seconds before leaving this page.').format(error=last_error))
     return False
 
 def load_data_from_server(retries=3, delay=0.7):
@@ -1129,6 +1129,1109 @@ SECURITY_TRANSLATIONS = {
 for _lang, _vals in SECURITY_TRANSLATIONS.items():
     translations.setdefault(_lang, {}).update(_vals)
 
+COACH_TRANSLATIONS = {
+    "Italiano": {
+        'first_login_title': '🔒 Primo Accesso: Imposta la tua Nuova Password',
+        'first_login_welcome': 'Benvenuto **{name}**! Per motivi di sicurezza, essendo il tuo primo accesso, devi impostare una password personale che solo tu conoscerai.',
+        'first_login_save_btn': 'Salva Password e Accedi',
+        'first_login_success': '✅ Password impostata e salvata correttamente!',
+        'first_login_hint_error': '❌ Primo accesso: inserisci il tuo nome di battesimo come password.',
+        'coach_wrong_pwd': '❌ Password errata! Riprova.',
+        'admin_pwd_label': 'Password Admin',
+        'admin_wrong_pwd': '❌ Password admin errata.',
+        'admin_pwd_mgmt_title': '🔑 Gestione Password Giocatori',
+        'admin_pwd_mgmt_desc': 'Visualizza e modifica la password di ciascun giocatore. Le password sono salvate in chiaro: usa questa funzione con cautela.',
+        'admin_pwd_mgmt_expander': 'Mostra / modifica tutte le password',
+        'admin_pwd_of': 'Password di {name}',
+        'admin_pwd_save_btn': '💾 Salva Tutte le Password',
+        'admin_pwd_updated': '✅ Password aggiornate per: {names}',
+        'no_changes_to_save': 'Nessuna modifica da salvare.',
+        'roster_modal_title': '👥 Pannello Gestione Rosa Giocatori (Aggiungi o Rimuovi)',
+        'roster_add_title': 'Aggiungi Nuovo Giocatore',
+        'roster_fname_lbl': 'Nome',
+        'roster_lname_lbl': 'Cognome',
+        'roster_dup_error': 'Un giocatore con questo nome e cognome esiste già nella rosa!',
+        'roster_add_success': 'Giocatore {name} aggiunto con successo!',
+        'roster_name_required': 'Nome e Cognome non possono essere vuoti.',
+        'roster_delete_title': 'Elimina Giocatore Esistente',
+        'roster_select_remove': 'Seleziona giocatore da rimuovere',
+        'roster_remove_success': 'Giocatore {name} rimosso con successo!',
+        'squad_save_btn': '💾 Salva Modifiche Rosa e Ruoli',
+        'squad_save_success': 'Tutte le modifiche alla rosa, ruoli e destri/mancini sono state salvate permanentemente!',
+        'roster_role_lbl': 'Posizione / Ruolo',
+        'roster_hand_lbl': 'Mano',
+        'roster_style_lbl': 'Stile di Gioco',
+        'roster_add_btn': '➕ Aggiungi Giocatore',
+        'roster_remove_btn': '🗑️ Rimuovi Giocatore',
+        'partner_prefs_title': '🏆 Preferenze Partner di **{name}**',
+        'total_players_present': 'Totale giocatori presenti: **{n}**',
+        'improvement_area': '📌 Area di miglioramento: **{skill}** ({n} giocatori)',
+        'grade_label': 'Voto: {val}',
+        'partner_prefs_desc': 'Ranking dei compagni con cui il giocatore preferisce giocare (impostato da lui nella sua area) e chi, tra gli altri, ha indicato lui come partner preferito. Utile per capire le affinità prima di valutare.',
+        'partner_prefs_own': '**{name}** preferisce giocare con:',
+        'partner_prefs_none': 'Nessuna preferenza impostata da questo giocatore.',
+        'partner_prefs_reverse_title': 'Chi ha indicato **{name}** come partner preferito:',
+        'partner_prefs_reverse_none': 'Nessun altro giocatore lo ha indicato come partner preferito.',
+        'col_partner': 'Compagno',
+        'col_score': 'Punteggio',
+        'col_player': 'Giocatore',
+        'training_system_analysis': 'Il sistema ha analizzato i voti del gruppo presente e suggerisce le seguenti 3 priorità:',
+        'training_priority_1': '🔥 1° Priorità Consigliata',
+        'training_priority_2': '⚡ 2° Priorità Consigliata',
+        'training_priority_3': '💡 3° Priorità Consigliata',
+        'avg_label': 'Media: {v}/10',
+        'training_customize_title': '✏️ Personalizzazione e Conferma del Coach',
+        'training_customize_desc': "Il coach può modificare le priorità dal menu a tendina e scegliere in quale data salvare l'allenamento nel calendario:",
+        'priority1_coach_lbl': '1° Priorità (Coach)',
+        'priority2_coach_lbl': '2° Priorità (Coach)',
+        'priority3_coach_lbl': '3° Priorità (Coach)',
+        'training_date_question': '📅 In quale data vuoi salvare questo allenamento?',
+        'training_confirm_btn': '✅ Conferma e Salva nel Calendario',
+        'training_saved_success': '🎉 Allenamento salvato con successo per il giorno {date}!',
+        'group_split_title': '👥 Suddivisione in Gruppi da 4 (in base alla debolezza)',
+        'group_split_desc': "I giocatori selezionati vengono raggruppati in **gruppi da 4** in base alla loro **debolezza principale**, così ogni gruppo può lavorare su un obiettivo specifico e mirato invece di un'unica priorità per tutti.",
+        'group_min_players': 'Servono almeno {n} giocatori disponibili per formare un gruppo. Al momento ce ne sono {m}.',
+        'group_label': 'Gruppo {i}',
+        'group_incomplete_suffix': ' (gruppo incompleto)',
+        'group_main_weakness': '🎯 Debolezza principale',
+        'group_focus_lbl': 'Focus allenamento — Gruppo {i}',
+        'group_date_question': '📅 In quale data vuoi salvare questi allenamenti di gruppo?',
+        'group_save_btn': '✅ Salva Allenamenti per Gruppo',
+        'group_saved_success': '🎉 {n} allenamenti di gruppo salvati per il giorno {date}!',
+        'training_history_title': '📅 Storico Calendario Allenamenti Pianificati',
+        'training_edit_title': '✏️ Modifica Allenamento',
+        'training_select_edit': 'Seleziona allenamento da modificare',
+        'priority1_lbl': '1° Priorità',
+        'priority2_lbl': '2° Priorità',
+        'priority3_lbl': '3° Priorità',
+        'training_date_lbl': '📅 Data allenamento',
+        'participants_lbl': 'Partecipanti',
+        'training_save_edit_btn': '💾 Salva Modifiche Allenamento',
+        'select_at_least_one_participant': 'Seleziona almeno un partecipante.',
+        'training_edit_success': 'Allenamento modificato con successo!',
+        'training_delete_title': '🗑️ Cancella Allenamento dal Calendario',
+        'training_select_delete': 'Seleziona allenamento da rimuovere',
+        'training_delete_btn': '🗑️ Elimina Allenamento Selezionato',
+        'training_delete_success': 'Allenamento del {date} eliminato con successo dal calendario!',
+        'no_trainings_saved': 'Nessun allenamento ancora confermato e salvato nel calendario.',
+        'snp_mgmt_title': '📅 Calendario & Registrazione Partite SNP',
+        'snp_mgmt_desc': 'Gestione delle **7 giornate SNP**. Per ogni incontro assegna i giocatori NAC e il **risultato di ogni pista**.',
+        'snp_select_day': '📆 Seleziona la giornata SNP',
+        'snp_formation_title': '1️⃣ Formazione',
+        'snp_formation_desc': 'Scegli 2 giocatori NAC per ogni pista. Potrai inserire il risultato in un secondo momento, quando la partita sarà giocata.',
+        'snp_notes_lbl': '📝 Note / Commenti giornata (opzionale)',
+        'snp_notes_placeholder': 'Osservazioni, infortuni, ecc.',
+        'snp_save_formation_btn': '💾 Salva Formazione',
+        'snp_formation_saved': '✅ Formazione salvata per **{label}**! Potrai inserire i risultati quando la partita sarà stata giocata.',
+        'snp_results_title': '2️⃣ Risultati',
+        'snp_no_lineup_info': 'ℹ️ Assegna prima i giocatori nella Formazione qui sopra: potrai poi inserire qui i risultati.',
+        'snp_results_desc': 'Inserisci il risultato di ogni pista quando disponibile. I giocatori restano quelli assegnati nella Formazione.',
+        'snp_save_results_btn': '🏆 Salva Risultati',
+        'snp_results_saved': '✅ Risultati salvati per **{label}**!',
+        'snp_summary_title': '📋 Riepilogo Completo Calendario SNP',
+        'snp_courts_filled': '{n}/5 piste compilate',
+        'snp_not_filled': 'Non compilata',
+        'snp_no_lineup_yet': 'Nessuna formazione ancora inserita per questa giornata.',
+        'snp_reset_expander': '🗑️ Reset dati SNP',
+        'snp_reset_btn': 'Cancella TUTTE le formazioni e risultati SNP',
+        'snp_reset_success': 'Dati SNP resettati.',
+        'pairing_confirm_btn': '✅ Conferma Selezione Pairing',
+        'pairing_confirm_success': 'Pairing confermato e salvato con successo!',
+        'save_failed_error': '⚠️ Salvataggio NON riuscito: impossibile scrivere sul database ({error}). Le modifiche NON sono state salvate — riprova tra qualche secondo prima di uscire da questa pagina.',
+        'db_unreachable_error': "⚠️ Impossibile connettersi al database. I tuoi dati salvati potrebbero non essere visibili in questo momento. Per proteggerli, l'app non prosegue con dati vuoti: ricarica la pagina tra qualche secondo. Se il problema persiste, contatta l'amministratore.",
+    },
+    "English": {
+        'first_login_title': '🔒 First Login: Set Your New Password',
+        'first_login_welcome': 'Welcome **{name}**! For security reasons, since this is your first login, you need to set a personal password that only you will know.',
+        'first_login_save_btn': 'Save Password and Login',
+        'first_login_success': '✅ Password set and saved successfully!',
+        'first_login_hint_error': '❌ First login: enter your first name as the password.',
+        'coach_wrong_pwd': '❌ Wrong password! Try again.',
+        'admin_pwd_label': 'Admin Password',
+        'admin_wrong_pwd': '❌ Wrong admin password.',
+        'admin_pwd_mgmt_title': '🔑 Player Password Management',
+        'admin_pwd_mgmt_desc': "View and edit each player's password. Passwords are stored in plain text: use this feature with caution.",
+        'admin_pwd_mgmt_expander': 'Show / edit all passwords',
+        'admin_pwd_of': 'Password for {name}',
+        'admin_pwd_save_btn': '💾 Save All Passwords',
+        'admin_pwd_updated': '✅ Passwords updated for: {names}',
+        'no_changes_to_save': 'No changes to save.',
+        'roster_modal_title': '👥 Squad Management Panel (Add or Remove)',
+        'roster_add_title': 'Add New Player',
+        'roster_fname_lbl': 'First Name',
+        'roster_lname_lbl': 'Last Name',
+        'roster_dup_error': 'A player with this first and last name already exists in the squad!',
+        'roster_add_success': 'Player {name} added successfully!',
+        'roster_name_required': 'First name and last name cannot be empty.',
+        'roster_delete_title': 'Remove Existing Player',
+        'roster_select_remove': 'Select player to remove',
+        'roster_remove_success': 'Player {name} removed successfully!',
+        'squad_save_btn': '💾 Save Squad and Role Changes',
+        'squad_save_success': 'All changes to the squad, roles and dominant hand have been saved permanently!',
+        'roster_role_lbl': 'Position / Role',
+        'roster_hand_lbl': 'Hand',
+        'roster_style_lbl': 'Play Style',
+        'roster_add_btn': '➕ Add Player',
+        'roster_remove_btn': '🗑️ Remove Player',
+        'partner_prefs_title': '🏆 Partner Preferences of **{name}**',
+        'total_players_present': 'Total players present: **{n}**',
+        'improvement_area': '📌 Improvement area: **{skill}** ({n} players)',
+        'grade_label': 'Grade: {val}',
+        'partner_prefs_desc': 'Ranking of the partners the player prefers to play with (set by them in their own area), and who among the others has ranked them as a preferred partner. Useful to understand affinities before grading.',
+        'partner_prefs_own': '**{name}** prefers to play with:',
+        'partner_prefs_none': "This player hasn't set any preferences.",
+        'partner_prefs_reverse_title': 'Who has ranked **{name}** as a preferred partner:',
+        'partner_prefs_reverse_none': 'No other player has ranked them as a preferred partner.',
+        'col_partner': 'Partner',
+        'col_score': 'Score',
+        'col_player': 'Player',
+        'training_system_analysis': 'The system analyzed the grades of the present group and suggests the following 3 priorities:',
+        'training_priority_1': '🔥 1st Recommended Priority',
+        'training_priority_2': '⚡ 2nd Recommended Priority',
+        'training_priority_3': '💡 3rd Recommended Priority',
+        'avg_label': 'Avg: {v}/10',
+        'training_customize_title': '✏️ Coach Customization & Confirmation',
+        'training_customize_desc': 'The coach can change the priorities from the dropdown menu and choose the date to save the training in the calendar:',
+        'priority1_coach_lbl': '1st Priority (Coach)',
+        'priority2_coach_lbl': '2nd Priority (Coach)',
+        'priority3_coach_lbl': '3rd Priority (Coach)',
+        'training_date_question': '📅 On which date do you want to save this training?',
+        'training_confirm_btn': '✅ Confirm and Save to Calendar',
+        'training_saved_success': '🎉 Training successfully saved for {date}!',
+        'group_split_title': '👥 Split into Groups of 4 (by weakness)',
+        'group_split_desc': 'The selected players are grouped into **groups of 4** based on their **main weakness**, so each group can work on a specific, targeted goal instead of a single priority for everyone.',
+        'group_min_players': 'At least {n} available players are needed to form a group. Currently there are {m}.',
+        'group_label': 'Group {i}',
+        'group_incomplete_suffix': ' (incomplete group)',
+        'group_main_weakness': '🎯 Main weakness',
+        'group_focus_lbl': 'Training focus — Group {i}',
+        'group_date_question': '📅 On which date do you want to save these group trainings?',
+        'group_save_btn': '✅ Save Trainings per Group',
+        'group_saved_success': '🎉 {n} group trainings saved for {date}!',
+        'training_history_title': '📅 Planned Training Calendar History',
+        'training_edit_title': '✏️ Edit Training',
+        'training_select_edit': 'Select training to edit',
+        'priority1_lbl': '1st Priority',
+        'priority2_lbl': '2nd Priority',
+        'priority3_lbl': '3rd Priority',
+        'training_date_lbl': '📅 Training date',
+        'participants_lbl': 'Participants',
+        'training_save_edit_btn': '💾 Save Training Changes',
+        'select_at_least_one_participant': 'Select at least one participant.',
+        'training_edit_success': 'Training edited successfully!',
+        'training_delete_title': '🗑️ Delete Training from Calendar',
+        'training_select_delete': 'Select training to remove',
+        'training_delete_btn': '🗑️ Delete Selected Training',
+        'training_delete_success': 'Training on {date} deleted successfully from the calendar!',
+        'no_trainings_saved': 'No training sessions confirmed and saved in the calendar yet.',
+        'snp_mgmt_title': '📅 SNP Match Calendar & Registration',
+        'snp_mgmt_desc': 'Manage the **7 SNP matchdays**. For each match, assign the NAC players and the **result of each court**.',
+        'snp_select_day': '📆 Select the SNP matchday',
+        'snp_formation_title': '1️⃣ Lineup',
+        'snp_formation_desc': "Choose 2 NAC players for each court. You'll be able to enter the result later, once the match has been played.",
+        'snp_notes_lbl': '📝 Matchday notes / comments (optional)',
+        'snp_notes_placeholder': 'Observations, injuries, etc.',
+        'snp_save_formation_btn': '💾 Save Lineup',
+        'snp_formation_saved': "✅ Lineup saved for **{label}**! You'll be able to enter the results once the match has been played.",
+        'snp_results_title': '2️⃣ Results',
+        'snp_no_lineup_info': "ℹ️ First assign the players in the Lineup above: you'll then be able to enter the results here.",
+        'snp_results_desc': 'Enter the result of each court when available. The players remain those assigned in the Lineup.',
+        'snp_save_results_btn': '🏆 Save Results',
+        'snp_results_saved': '✅ Results saved for **{label}**!',
+        'snp_summary_title': '📋 Full SNP Calendar Summary',
+        'snp_courts_filled': '{n}/5 courts filled',
+        'snp_not_filled': 'Not filled in',
+        'snp_no_lineup_yet': 'No lineup entered yet for this matchday.',
+        'snp_reset_expander': '🗑️ Reset SNP data',
+        'snp_reset_btn': 'Delete ALL SNP lineups and results',
+        'snp_reset_success': 'SNP data reset.',
+        'pairing_confirm_btn': '✅ Confirm Pairing Selection',
+        'pairing_confirm_success': 'Pairing confirmed and saved successfully!',
+        'save_failed_error': '⚠️ Save FAILED: unable to write to the database ({error}). Your changes were NOT saved — try again in a few seconds before leaving this page.',
+        'db_unreachable_error': '⚠️ Unable to connect to the database. Your saved data might not be visible right now. To protect it, the app will not proceed with empty data: reload the page in a few seconds. If the problem persists, contact the administrator.',
+    },
+    "Español": {
+        'first_login_title': '🔒 Primer Acceso: Establece tu Nueva Contraseña',
+        'first_login_welcome': '¡Bienvenido **{name}**! Por motivos de seguridad, al ser tu primer acceso, debes establecer una contraseña personal que solo tú conocerás.',
+        'first_login_save_btn': 'Guardar Contraseña y Acceder',
+        'first_login_success': '¡✅ Contraseña establecida y guardada correctamente!',
+        'first_login_hint_error': '❌ Primer acceso: introduce tu nombre de pila como contraseña.',
+        'coach_wrong_pwd': '❌ ¡Contraseña incorrecta! Inténtalo de nuevo.',
+        'admin_pwd_label': 'Contraseña de Admin',
+        'admin_wrong_pwd': '❌ Contraseña de admin incorrecta.',
+        'admin_pwd_mgmt_title': '🔑 Gestión de Contraseñas de Jugadores',
+        'admin_pwd_mgmt_desc': 'Consulta y edita la contraseña de cada jugador. Las contraseñas se guardan en texto sin cifrar: usa esta función con precaución.',
+        'admin_pwd_mgmt_expander': 'Mostrar / editar todas las contraseñas',
+        'admin_pwd_of': 'Contraseña de {name}',
+        'admin_pwd_save_btn': '💾 Guardar Todas las Contraseñas',
+        'admin_pwd_updated': '✅ Contraseñas actualizadas para: {names}',
+        'no_changes_to_save': 'No hay cambios que guardar.',
+        'roster_modal_title': '👥 Panel de Gestión de Plantilla (Añadir o Eliminar)',
+        'roster_add_title': 'Añadir Nuevo Jugador',
+        'roster_fname_lbl': 'Nombre',
+        'roster_lname_lbl': 'Apellido',
+        'roster_dup_error': '¡Ya existe un jugador con este nombre y apellido en la plantilla!',
+        'roster_add_success': '¡Jugador {name} añadido con éxito!',
+        'roster_name_required': 'El nombre y el apellido no pueden estar vacíos.',
+        'roster_delete_title': 'Eliminar Jugador Existente',
+        'roster_select_remove': 'Selecciona jugador a eliminar',
+        'roster_remove_success': '¡Jugador {name} eliminado con éxito!',
+        'squad_save_btn': '💾 Guardar Cambios de Plantilla y Roles',
+        'squad_save_success': '¡Todos los cambios en la plantilla, roles y mano dominante se han guardado permanentemente!',
+        'roster_role_lbl': 'Posición / Rol',
+        'roster_hand_lbl': 'Mano',
+        'roster_style_lbl': 'Estilo de Juego',
+        'roster_add_btn': '➕ Añadir Jugador',
+        'roster_remove_btn': '🗑️ Eliminar Jugador',
+        'partner_prefs_title': '🏆 Preferencias de Compañero de **{name}**',
+        'total_players_present': 'Total de jugadores presentes: **{n}**',
+        'improvement_area': '📌 Área de mejora: **{skill}** ({n} jugadores)',
+        'grade_label': 'Nota: {val}',
+        'partner_prefs_desc': 'Ranking de los compañeros con los que el jugador prefiere jugar (establecido por él en su propia área), y quién entre los demás lo ha clasificado como compañero preferido. Útil para entender las afinidades antes de evaluar.',
+        'partner_prefs_own': '**{name}** prefiere jugar con:',
+        'partner_prefs_none': 'Este jugador no ha establecido ninguna preferencia.',
+        'partner_prefs_reverse_title': 'Quién ha indicado a **{name}** como compañero preferido:',
+        'partner_prefs_reverse_none': 'Ningún otro jugador lo ha indicado como compañero preferido.',
+        'col_partner': 'Compañero',
+        'col_score': 'Puntuación',
+        'col_player': 'Jugador',
+        'training_system_analysis': 'El sistema ha analizado las notas del grupo presente y sugiere las siguientes 3 prioridades:',
+        'training_priority_1': '🔥 1ª Prioridad Recomendada',
+        'training_priority_2': '⚡ 2ª Prioridad Recomendada',
+        'training_priority_3': '💡 3ª Prioridad Recomendada',
+        'avg_label': 'Media: {v}/10',
+        'training_customize_title': '✏️ Personalización y Confirmación del Entrenador',
+        'training_customize_desc': 'El entrenador puede modificar las prioridades desde el menú desplegable y elegir la fecha para guardar el entrenamiento en el calendario:',
+        'priority1_coach_lbl': '1ª Prioridad (Entrenador)',
+        'priority2_coach_lbl': '2ª Prioridad (Entrenador)',
+        'priority3_coach_lbl': '3ª Prioridad (Entrenador)',
+        'training_date_question': '📅 ¿En qué fecha quieres guardar este entrenamiento?',
+        'training_confirm_btn': '✅ Confirmar y Guardar en el Calendario',
+        'training_saved_success': '🎉 ¡Entrenamiento guardado con éxito para el {date}!',
+        'group_split_title': '👥 División en Grupos de 4 (según la debilidad)',
+        'group_split_desc': 'Los jugadores seleccionados se agrupan en **grupos de 4** según su **debilidad principal**, para que cada grupo pueda trabajar en un objetivo específico en lugar de una única prioridad para todos.',
+        'group_min_players': 'Se necesitan al menos {n} jugadores disponibles para formar un grupo. Actualmente hay {m}.',
+        'group_label': 'Grupo {i}',
+        'group_incomplete_suffix': ' (grupo incompleto)',
+        'group_main_weakness': '🎯 Debilidad principal',
+        'group_focus_lbl': 'Enfoque de entrenamiento — Grupo {i}',
+        'group_date_question': '📅 ¿En qué fecha quieres guardar estos entrenamientos de grupo?',
+        'group_save_btn': '✅ Guardar Entrenamientos por Grupo',
+        'group_saved_success': '🎉 ¡{n} entrenamientos de grupo guardados para el {date}!',
+        'training_history_title': '📅 Historial del Calendario de Entrenamientos Planificados',
+        'training_edit_title': '✏️ Editar Entrenamiento',
+        'training_select_edit': 'Selecciona entrenamiento a editar',
+        'priority1_lbl': '1ª Prioridad',
+        'priority2_lbl': '2ª Prioridad',
+        'priority3_lbl': '3ª Prioridad',
+        'training_date_lbl': '📅 Fecha de entrenamiento',
+        'participants_lbl': 'Participantes',
+        'training_save_edit_btn': '💾 Guardar Cambios del Entrenamiento',
+        'select_at_least_one_participant': 'Selecciona al menos un participante.',
+        'training_edit_success': '¡Entrenamiento editado con éxito!',
+        'training_delete_title': '🗑️ Eliminar Entrenamiento del Calendario',
+        'training_select_delete': 'Selecciona entrenamiento a eliminar',
+        'training_delete_btn': '🗑️ Eliminar Entrenamiento Seleccionado',
+        'training_delete_success': '¡Entrenamiento del {date} eliminado con éxito del calendario!',
+        'no_trainings_saved': 'Aún no hay entrenamientos confirmados y guardados en el calendario.',
+        'snp_mgmt_title': '📅 Calendario y Registro de Partidos SNP',
+        'snp_mgmt_desc': 'Gestión de las **7 jornadas SNP**. Para cada partido, asigna los jugadores de NAC y el **resultado de cada pista**.',
+        'snp_select_day': '📆 Selecciona la jornada SNP',
+        'snp_formation_title': '1️⃣ Alineación',
+        'snp_formation_desc': 'Elige 2 jugadores de NAC para cada pista. Podrás introducir el resultado más adelante, una vez jugado el partido.',
+        'snp_notes_lbl': '📝 Notas / Comentarios de la jornada (opcional)',
+        'snp_notes_placeholder': 'Observaciones, lesiones, etc.',
+        'snp_save_formation_btn': '💾 Guardar Alineación',
+        'snp_formation_saved': '✅ ¡Alineación guardada para **{label}**! Podrás introducir los resultados una vez jugado el partido.',
+        'snp_results_title': '2️⃣ Resultados',
+        'snp_no_lineup_info': 'ℹ️ Primero asigna los jugadores en la Alineación de arriba: después podrás introducir aquí los resultados.',
+        'snp_results_desc': 'Introduce el resultado de cada pista cuando esté disponible. Los jugadores siguen siendo los asignados en la Alineación.',
+        'snp_save_results_btn': '🏆 Guardar Resultados',
+        'snp_results_saved': '✅ ¡Resultados guardados para **{label}**!',
+        'snp_summary_title': '📋 Resumen Completo del Calendario SNP',
+        'snp_courts_filled': '{n}/5 pistas completadas',
+        'snp_not_filled': 'No completada',
+        'snp_no_lineup_yet': 'Aún no se ha introducido ninguna alineación para esta jornada.',
+        'snp_reset_expander': '🗑️ Restablecer datos SNP',
+        'snp_reset_btn': 'Eliminar TODAS las alineaciones y resultados SNP',
+        'snp_reset_success': 'Datos SNP restablecidos.',
+        'pairing_confirm_btn': '✅ Confirmar Selección de Emparejamiento',
+        'pairing_confirm_success': '¡Emparejamiento confirmado y guardado con éxito!',
+        'save_failed_error': '⚠️ El guardado FALLÓ: no se pudo escribir en la base de datos ({error}). Tus cambios NO se guardaron — inténtalo de nuevo en unos segundos antes de salir de esta página.',
+        'db_unreachable_error': '⚠️ No se puede conectar con la base de datos. Es posible que tus datos guardados no sean visibles en este momento. Para protegerlos, la aplicación no continuará con datos vacíos: recarga la página en unos segundos. Si el problema persiste, contacta con el administrador.',
+    },
+    "Svenska": {
+        'first_login_title': '🔒 Första Inloggning: Ange ditt Nya Lösenord',
+        'first_login_welcome': 'Välkommen **{name}**! Av säkerhetsskäl, eftersom detta är din första inloggning, måste du ange ett personligt lösenord som bara du känner till.',
+        'first_login_save_btn': 'Spara Lösenord och Logga in',
+        'first_login_success': '✅ Lösenordet har angetts och sparats!',
+        'first_login_hint_error': '❌ Första inloggning: ange ditt förnamn som lösenord.',
+        'coach_wrong_pwd': '❌ Fel lösenord! Försök igen.',
+        'admin_pwd_label': 'Admin-lösenord',
+        'admin_wrong_pwd': '❌ Fel admin-lösenord.',
+        'admin_pwd_mgmt_title': '🔑 Hantering av Spelarlösenord',
+        'admin_pwd_mgmt_desc': 'Visa och redigera varje spelares lösenord. Lösenorden lagras i klartext: använd denna funktion med försiktighet.',
+        'admin_pwd_mgmt_expander': 'Visa / redigera alla lösenord',
+        'admin_pwd_of': 'Lösenord för {name}',
+        'admin_pwd_save_btn': '💾 Spara Alla Lösenord',
+        'admin_pwd_updated': '✅ Lösenord uppdaterade för: {names}',
+        'no_changes_to_save': 'Inga ändringar att spara.',
+        'roster_modal_title': '👥 Trupphanteringspanel (Lägg till eller Ta bort)',
+        'roster_add_title': 'Lägg till Ny Spelare',
+        'roster_fname_lbl': 'Förnamn',
+        'roster_lname_lbl': 'Efternamn',
+        'roster_dup_error': 'En spelare med detta för- och efternamn finns redan i truppen!',
+        'roster_add_success': 'Spelaren {name} har lagts till!',
+        'roster_name_required': 'För- och efternamn får inte vara tomma.',
+        'roster_delete_title': 'Ta bort Befintlig Spelare',
+        'roster_select_remove': 'Välj spelare att ta bort',
+        'roster_remove_success': 'Spelaren {name} har tagits bort!',
+        'squad_save_btn': '💾 Spara Trupp- och Rolländringar',
+        'squad_save_success': 'Alla ändringar av truppen, roller och dominant hand har sparats permanent!',
+        'roster_role_lbl': 'Position / Roll',
+        'roster_hand_lbl': 'Hand',
+        'roster_style_lbl': 'Spelstil',
+        'roster_add_btn': '➕ Lägg till Spelare',
+        'roster_remove_btn': '🗑️ Ta bort Spelare',
+        'partner_prefs_title': '🏆 Partnerpreferenser för **{name}**',
+        'total_players_present': 'Totalt antal närvarande spelare: **{n}**',
+        'improvement_area': '📌 Förbättringsområde: **{skill}** ({n} spelare)',
+        'grade_label': 'Betyg: {val}',
+        'partner_prefs_desc': 'Ranking av de partner spelaren föredrar att spela med (angett av spelaren själv), och vem bland de andra som har rankat honom/henne som en föredragen partner. Användbart för att förstå affiniteter innan betygsättning.',
+        'partner_prefs_own': '**{name}** föredrar att spela med:',
+        'partner_prefs_none': 'Denna spelare har inte angett några preferenser.',
+        'partner_prefs_reverse_title': 'Vem har rankat **{name}** som en föredragen partner:',
+        'partner_prefs_reverse_none': 'Ingen annan spelare har rankat honom/henne som en föredragen partner.',
+        'col_partner': 'Partner',
+        'col_score': 'Poäng',
+        'col_player': 'Spelare',
+        'training_system_analysis': 'Systemet har analyserat betygen för den närvarande gruppen och föreslår följande 3 prioriteringar:',
+        'training_priority_1': '🔥 1:a Rekommenderade Prioritet',
+        'training_priority_2': '⚡ 2:a Rekommenderade Prioritet',
+        'training_priority_3': '💡 3:e Rekommenderade Prioritet',
+        'avg_label': 'Snitt: {v}/10',
+        'training_customize_title': '✏️ Anpassning och Bekräftelse av Tränaren',
+        'training_customize_desc': 'Tränaren kan ändra prioriteringarna från rullgardinsmenyn och välja vilket datum träningen ska sparas i kalendern:',
+        'priority1_coach_lbl': '1:a Prioritet (Tränare)',
+        'priority2_coach_lbl': '2:a Prioritet (Tränare)',
+        'priority3_coach_lbl': '3:e Prioritet (Tränare)',
+        'training_date_question': '📅 Vilket datum vill du spara denna träning på?',
+        'training_confirm_btn': '✅ Bekräfta och Spara i Kalendern',
+        'training_saved_success': '🎉 Träningen har sparats för {date}!',
+        'group_split_title': '👥 Uppdelning i Grupper om 4 (efter svaghet)',
+        'group_split_desc': 'De valda spelarna grupperas i **grupper om 4** baserat på deras **huvudsvaghet**, så att varje grupp kan arbeta mot ett specifikt, riktat mål istället för en enda prioritet för alla.',
+        'group_min_players': 'Minst {n} tillgängliga spelare behövs för att bilda en grupp. För närvarande finns det {m}.',
+        'group_label': 'Grupp {i}',
+        'group_incomplete_suffix': ' (ofullständig grupp)',
+        'group_main_weakness': '🎯 Huvudsvaghet',
+        'group_focus_lbl': 'Träningsfokus — Grupp {i}',
+        'group_date_question': '📅 Vilket datum vill du spara dessa gruppträningar på?',
+        'group_save_btn': '✅ Spara Träningar per Grupp',
+        'group_saved_success': '🎉 {n} gruppträningar sparade för {date}!',
+        'training_history_title': '📅 Historik för Planerad Träningskalender',
+        'training_edit_title': '✏️ Redigera Träning',
+        'training_select_edit': 'Välj träning att redigera',
+        'priority1_lbl': '1:a Prioritet',
+        'priority2_lbl': '2:a Prioritet',
+        'priority3_lbl': '3:e Prioritet',
+        'training_date_lbl': '📅 Träningsdatum',
+        'participants_lbl': 'Deltagare',
+        'training_save_edit_btn': '💾 Spara Träningsändringar',
+        'select_at_least_one_participant': 'Välj minst en deltagare.',
+        'training_edit_success': 'Träningen har redigerats!',
+        'training_delete_title': '🗑️ Ta bort Träning från Kalendern',
+        'training_select_delete': 'Välj träning att ta bort',
+        'training_delete_btn': '🗑️ Ta bort Vald Träning',
+        'training_delete_success': 'Träningen den {date} har tagits bort från kalendern!',
+        'no_trainings_saved': 'Inga träningspass har ännu bekräftats och sparats i kalendern.',
+        'snp_mgmt_title': '📅 SNP-matchkalender & Registrering',
+        'snp_mgmt_desc': 'Hantering av de **7 SNP-matchdagarna**. För varje match, tilldela NAC-spelarna och **resultatet för varje bana**.',
+        'snp_select_day': '📆 Välj SNP-matchdag',
+        'snp_formation_title': '1️⃣ Laguppställning',
+        'snp_formation_desc': 'Välj 2 NAC-spelare för varje bana. Du kan ange resultatet senare, när matchen har spelats.',
+        'snp_notes_lbl': '📝 Anteckningar / Kommentarer för matchdagen (valfritt)',
+        'snp_notes_placeholder': 'Observationer, skador, etc.',
+        'snp_save_formation_btn': '💾 Spara Laguppställning',
+        'snp_formation_saved': '✅ Laguppställning sparad för **{label}**! Du kan ange resultaten när matchen har spelats.',
+        'snp_results_title': '2️⃣ Resultat',
+        'snp_no_lineup_info': 'ℹ️ Tilldela först spelarna i Laguppställningen ovan: du kan sedan ange resultaten här.',
+        'snp_results_desc': 'Ange resultatet för varje bana när det är tillgängligt. Spelarna förblir de som tilldelats i Laguppställningen.',
+        'snp_save_results_btn': '🏆 Spara Resultat',
+        'snp_results_saved': '✅ Resultat sparade för **{label}**!',
+        'snp_summary_title': '📋 Fullständig Sammanfattning av SNP-kalendern',
+        'snp_courts_filled': '{n}/5 banor ifyllda',
+        'snp_not_filled': 'Ej ifylld',
+        'snp_no_lineup_yet': 'Ingen laguppställning har angetts för denna matchdag ännu.',
+        'snp_reset_expander': '🗑️ Återställ SNP-data',
+        'snp_reset_btn': 'Ta bort ALLA SNP-laguppställningar och resultat',
+        'snp_reset_success': 'SNP-data har återställts.',
+        'pairing_confirm_btn': '✅ Bekräfta Parval',
+        'pairing_confirm_success': 'Parningen har bekräftats och sparats!',
+        'save_failed_error': '⚠️ Sparning MISSLYCKADES: kunde inte skriva till databasen ({error}). Dina ändringar sparades INTE — försök igen om några sekunder innan du lämnar denna sida.',
+        'db_unreachable_error': '⚠️ Det går inte att ansluta till databasen. Dina sparade data kanske inte är synliga just nu. För att skydda dem fortsätter appen inte med tomma data: ladda om sidan om några sekunder. Om problemet kvarstår, kontakta administratören.',
+    },
+    "Nederlands": {
+        'first_login_title': '🔒 Eerste Keer Inloggen: Stel je Nieuwe Wachtwoord in',
+        'first_login_welcome': 'Welkom **{name}**! Om veiligheidsredenen moet je, omdat dit je eerste keer inloggen is, een persoonlijk wachtwoord instellen dat alleen jij kent.',
+        'first_login_save_btn': 'Wachtwoord Opslaan en Inloggen',
+        'first_login_success': '✅ Wachtwoord ingesteld en succesvol opgeslagen!',
+        'first_login_hint_error': '❌ Eerste keer inloggen: voer je voornaam in als wachtwoord.',
+        'coach_wrong_pwd': '❌ Verkeerd wachtwoord! Probeer het opnieuw.',
+        'admin_pwd_label': 'Adminwachtwoord',
+        'admin_wrong_pwd': '❌ Verkeerd adminwachtwoord.',
+        'admin_pwd_mgmt_title': '🔑 Beheer van Spelerswachtwoorden',
+        'admin_pwd_mgmt_desc': 'Bekijk en bewerk het wachtwoord van elke speler. Wachtwoorden worden onversleuteld opgeslagen: gebruik deze functie met voorzichtigheid.',
+        'admin_pwd_mgmt_expander': 'Toon / bewerk alle wachtwoorden',
+        'admin_pwd_of': 'Wachtwoord van {name}',
+        'admin_pwd_save_btn': '💾 Alle Wachtwoorden Opslaan',
+        'admin_pwd_updated': '✅ Wachtwoorden bijgewerkt voor: {names}',
+        'no_changes_to_save': 'Geen wijzigingen om op te slaan.',
+        'roster_modal_title': '👥 Selectiebeheerpaneel (Toevoegen of Verwijderen)',
+        'roster_add_title': 'Nieuwe Speler Toevoegen',
+        'roster_fname_lbl': 'Voornaam',
+        'roster_lname_lbl': 'Achternaam',
+        'roster_dup_error': 'Er bestaat al een speler met deze voor- en achternaam in de selectie!',
+        'roster_add_success': 'Speler {name} succesvol toegevoegd!',
+        'roster_name_required': 'Voor- en achternaam mogen niet leeg zijn.',
+        'roster_delete_title': 'Bestaande Speler Verwijderen',
+        'roster_select_remove': 'Selecteer speler om te verwijderen',
+        'roster_remove_success': 'Speler {name} succesvol verwijderd!',
+        'squad_save_btn': '💾 Selectie- en Rolwijzigingen Opslaan',
+        'squad_save_success': 'Alle wijzigingen aan de selectie, rollen en dominante hand zijn permanent opgeslagen!',
+        'roster_role_lbl': 'Positie / Rol',
+        'roster_hand_lbl': 'Hand',
+        'roster_style_lbl': 'Speelstijl',
+        'roster_add_btn': '➕ Speler Toevoegen',
+        'roster_remove_btn': '🗑️ Speler Verwijderen',
+        'partner_prefs_title': '🏆 Partnervoorkeuren van **{name}**',
+        'total_players_present': 'Totaal aantal aanwezige spelers: **{n}**',
+        'improvement_area': '📌 Verbeterpunt: **{skill}** ({n} spelers)',
+        'grade_label': 'Cijfer: {val}',
+        'partner_prefs_desc': 'Ranglijst van de partners met wie de speler het liefst speelt (door hemzelf ingesteld in zijn eigen omgeving), en wie van de anderen hem/haar als voorkeurspartner heeft aangegeven. Handig om affiniteiten te begrijpen vóór het beoordelen.',
+        'partner_prefs_own': '**{name}** speelt het liefst met:',
+        'partner_prefs_none': 'Deze speler heeft geen voorkeuren ingesteld.',
+        'partner_prefs_reverse_title': 'Wie heeft **{name}** als voorkeurspartner aangegeven:',
+        'partner_prefs_reverse_none': 'Geen enkele andere speler heeft hem/haar als voorkeurspartner aangegeven.',
+        'col_partner': 'Partner',
+        'col_score': 'Score',
+        'col_player': 'Speler',
+        'training_system_analysis': 'Het systeem heeft de cijfers van de aanwezige groep geanalyseerd en stelt de volgende 3 prioriteiten voor:',
+        'training_priority_1': '🔥 1e Aanbevolen Prioriteit',
+        'training_priority_2': '⚡ 2e Aanbevolen Prioriteit',
+        'training_priority_3': '💡 3e Aanbevolen Prioriteit',
+        'avg_label': 'Gem: {v}/10',
+        'training_customize_title': '✏️ Aanpassing en Bevestiging door de Coach',
+        'training_customize_desc': 'De coach kan de prioriteiten wijzigen via het dropdownmenu en de datum kiezen om de training in de kalender op te slaan:',
+        'priority1_coach_lbl': '1e Prioriteit (Coach)',
+        'priority2_coach_lbl': '2e Prioriteit (Coach)',
+        'priority3_coach_lbl': '3e Prioriteit (Coach)',
+        'training_date_question': '📅 Op welke datum wil je deze training opslaan?',
+        'training_confirm_btn': '✅ Bevestigen en Opslaan in de Kalender',
+        'training_saved_success': '🎉 Training succesvol opgeslagen voor {date}!',
+        'group_split_title': '👥 Verdeling in Groepen van 4 (op basis van zwakte)',
+        'group_split_desc': 'De geselecteerde spelers worden ingedeeld in **groepen van 4** op basis van hun **belangrijkste zwakte**, zodat elke groep aan een specifiek, gericht doel kan werken in plaats van één prioriteit voor iedereen.',
+        'group_min_players': 'Er zijn minstens {n} beschikbare spelers nodig om een groep te vormen. Momenteel zijn er {m}.',
+        'group_label': 'Groep {i}',
+        'group_incomplete_suffix': ' (onvolledige groep)',
+        'group_main_weakness': '🎯 Belangrijkste zwakte',
+        'group_focus_lbl': 'Trainingsfocus — Groep {i}',
+        'group_date_question': '📅 Op welke datum wil je deze groepstrainingen opslaan?',
+        'group_save_btn': '✅ Trainingen per Groep Opslaan',
+        'group_saved_success': '🎉 {n} groepstrainingen opgeslagen voor {date}!',
+        'training_history_title': '📅 Geschiedenis van Geplande Trainingskalender',
+        'training_edit_title': '✏️ Training Bewerken',
+        'training_select_edit': 'Selecteer training om te bewerken',
+        'priority1_lbl': '1e Prioriteit',
+        'priority2_lbl': '2e Prioriteit',
+        'priority3_lbl': '3e Prioriteit',
+        'training_date_lbl': '📅 Trainingsdatum',
+        'participants_lbl': 'Deelnemers',
+        'training_save_edit_btn': '💾 Trainingswijzigingen Opslaan',
+        'select_at_least_one_participant': 'Selecteer minstens één deelnemer.',
+        'training_edit_success': 'Training succesvol bewerkt!',
+        'training_delete_title': '🗑️ Training uit Kalender Verwijderen',
+        'training_select_delete': 'Selecteer training om te verwijderen',
+        'training_delete_btn': '🗑️ Geselecteerde Training Verwijderen',
+        'training_delete_success': 'Training van {date} succesvol uit de kalender verwijderd!',
+        'no_trainings_saved': 'Er zijn nog geen trainingen bevestigd en opgeslagen in de kalender.',
+        'snp_mgmt_title': '📅 SNP-wedstrijdkalender & Registratie',
+        'snp_mgmt_desc': 'Beheer van de **7 SNP-wedstrijddagen**. Wijs voor elke wedstrijd de NAC-spelers en de **uitslag van elke baan** toe.',
+        'snp_select_day': '📆 Selecteer de SNP-wedstrijddag',
+        'snp_formation_title': '1️⃣ Opstelling',
+        'snp_formation_desc': 'Kies 2 NAC-spelers voor elke baan. Je kunt de uitslag later invoeren, zodra de wedstrijd is gespeeld.',
+        'snp_notes_lbl': '📝 Notities / opmerkingen wedstrijddag (optioneel)',
+        'snp_notes_placeholder': 'Opmerkingen, blessures, enz.',
+        'snp_save_formation_btn': '💾 Opstelling Opslaan',
+        'snp_formation_saved': '✅ Opstelling opgeslagen voor **{label}**! Je kunt de resultaten invoeren zodra de wedstrijd is gespeeld.',
+        'snp_results_title': '2️⃣ Resultaten',
+        'snp_no_lineup_info': 'ℹ️ Wijs eerst de spelers toe in de Opstelling hierboven: daarna kun je hier de resultaten invoeren.',
+        'snp_results_desc': 'Voer de uitslag van elke baan in zodra deze beschikbaar is. De spelers blijven degenen die in de Opstelling zijn toegewezen.',
+        'snp_save_results_btn': '🏆 Resultaten Opslaan',
+        'snp_results_saved': '✅ Resultaten opgeslagen voor **{label}**!',
+        'snp_summary_title': '📋 Volledig Overzicht SNP-kalender',
+        'snp_courts_filled': '{n}/5 banen ingevuld',
+        'snp_not_filled': 'Niet ingevuld',
+        'snp_no_lineup_yet': 'Er is nog geen opstelling ingevoerd voor deze wedstrijddag.',
+        'snp_reset_expander': '🗑️ SNP-gegevens Resetten',
+        'snp_reset_btn': 'Verwijder ALLE SNP-opstellingen en resultaten',
+        'snp_reset_success': 'SNP-gegevens gereset.',
+        'pairing_confirm_btn': '✅ Koppelselectie Bevestigen',
+        'pairing_confirm_success': 'Koppeling bevestigd en succesvol opgeslagen!',
+        'save_failed_error': '⚠️ Opslaan MISLUKT: kan niet naar de database schrijven ({error}). Je wijzigingen zijn NIET opgeslagen — probeer het over een paar seconden opnieuw voordat je deze pagina verlaat.',
+        'db_unreachable_error': '⚠️ Kan geen verbinding maken met de database. Je opgeslagen gegevens zijn mogelijk nu niet zichtbaar. Om ze te beschermen gaat de app niet verder met lege gegevens: herlaad de pagina over een paar seconden. Als het probleem aanhoudt, neem contact op met de beheerder.',
+    },
+    "Dansk": {
+        'first_login_title': '🔒 Første Login: Angiv din Nye Adgangskode',
+        'first_login_welcome': 'Velkommen **{name}**! Af sikkerhedsmæssige årsager skal du, da dette er din første login, angive en personlig adgangskode, som kun du kender.',
+        'first_login_save_btn': 'Gem Adgangskode og Log ind',
+        'first_login_success': '✅ Adgangskode angivet og gemt!',
+        'first_login_hint_error': '❌ Første login: indtast dit fornavn som adgangskode.',
+        'coach_wrong_pwd': '❌ Forkert adgangskode! Prøv igen.',
+        'admin_pwd_label': 'Adminadgangskode',
+        'admin_wrong_pwd': '❌ Forkert adminadgangskode.',
+        'admin_pwd_mgmt_title': '🔑 Håndtering af Spilleradgangskoder',
+        'admin_pwd_mgmt_desc': 'Se og rediger hver spillers adgangskode. Adgangskoderne gemmes i klartekst: brug denne funktion med forsigtighed.',
+        'admin_pwd_mgmt_expander': 'Vis / rediger alle adgangskoder',
+        'admin_pwd_of': 'Adgangskode for {name}',
+        'admin_pwd_save_btn': '💾 Gem Alle Adgangskoder',
+        'admin_pwd_updated': '✅ Adgangskoder opdateret for: {names}',
+        'no_changes_to_save': 'Ingen ændringer at gemme.',
+        'roster_modal_title': '👥 Trupstyringspanel (Tilføj eller Fjern)',
+        'roster_add_title': 'Tilføj Ny Spiller',
+        'roster_fname_lbl': 'Fornavn',
+        'roster_lname_lbl': 'Efternavn',
+        'roster_dup_error': 'Der findes allerede en spiller med dette for- og efternavn i truppen!',
+        'roster_add_success': 'Spilleren {name} er tilføjet!',
+        'roster_name_required': 'For- og efternavn må ikke være tomme.',
+        'roster_delete_title': 'Fjern Eksisterende Spiller',
+        'roster_select_remove': 'Vælg spiller, der skal fjernes',
+        'roster_remove_success': 'Spilleren {name} er fjernet!',
+        'squad_save_btn': '💾 Gem Trup- og Rolleændringer',
+        'squad_save_success': 'Alle ændringer af truppen, roller og dominerende hånd er gemt permanent!',
+        'roster_role_lbl': 'Position / Rolle',
+        'roster_hand_lbl': 'Hånd',
+        'roster_style_lbl': 'Spillestil',
+        'roster_add_btn': '➕ Tilføj Spiller',
+        'roster_remove_btn': '🗑️ Fjern Spiller',
+        'partner_prefs_title': '🏆 Partnerpræferencer for **{name}**',
+        'total_players_present': 'Samlet antal tilstedeværende spillere: **{n}**',
+        'improvement_area': '📌 Forbedringsområde: **{skill}** ({n} spillere)',
+        'grade_label': 'Karakter: {val}',
+        'partner_prefs_desc': 'Rangering af de partnere, spilleren foretrækker at spille med (angivet af spilleren selv), og hvem blandt de andre der har rangeret vedkommende som foretrukken partner. Nyttigt til at forstå affiniteter før bedømmelse.',
+        'partner_prefs_own': '**{name}** foretrækker at spille med:',
+        'partner_prefs_none': 'Denne spiller har ikke angivet nogen præferencer.',
+        'partner_prefs_reverse_title': 'Hvem har angivet **{name}** som foretrukken partner:',
+        'partner_prefs_reverse_none': 'Ingen anden spiller har angivet vedkommende som foretrukken partner.',
+        'col_partner': 'Partner',
+        'col_score': 'Point',
+        'col_player': 'Spiller',
+        'training_system_analysis': 'Systemet har analyseret karaktererne for den tilstedeværende gruppe og foreslår følgende 3 prioriteter:',
+        'training_priority_1': '🔥 1. Anbefalede Prioritet',
+        'training_priority_2': '⚡ 2. Anbefalede Prioritet',
+        'training_priority_3': '💡 3. Anbefalede Prioritet',
+        'avg_label': 'Gns: {v}/10',
+        'training_customize_title': '✏️ Tilpasning og Bekræftelse fra Træneren',
+        'training_customize_desc': 'Træneren kan ændre prioriteterne fra rullemenuen og vælge, hvilken dato træningen skal gemmes i kalenderen:',
+        'priority1_coach_lbl': '1. Prioritet (Træner)',
+        'priority2_coach_lbl': '2. Prioritet (Træner)',
+        'priority3_coach_lbl': '3. Prioritet (Træner)',
+        'training_date_question': '📅 På hvilken dato vil du gemme denne træning?',
+        'training_confirm_btn': '✅ Bekræft og Gem i Kalenderen',
+        'training_saved_success': '🎉 Træningen er gemt for {date}!',
+        'group_split_title': '👥 Opdeling i Grupper á 4 (efter svaghed)',
+        'group_split_desc': 'De valgte spillere grupperes i **grupper á 4** baseret på deres **primære svaghed**, så hver gruppe kan arbejde mod et specifikt, målrettet mål i stedet for én prioritet for alle.',
+        'group_min_players': 'Der kræves mindst {n} tilgængelige spillere for at danne en gruppe. Der er i øjeblikket {m}.',
+        'group_label': 'Gruppe {i}',
+        'group_incomplete_suffix': ' (ufuldstændig gruppe)',
+        'group_main_weakness': '🎯 Primær svaghed',
+        'group_focus_lbl': 'Træningsfokus — Gruppe {i}',
+        'group_date_question': '📅 På hvilken dato vil du gemme disse gruppetræninger?',
+        'group_save_btn': '✅ Gem Træninger pr. Gruppe',
+        'group_saved_success': '🎉 {n} gruppetræninger gemt for {date}!',
+        'training_history_title': '📅 Historik for Planlagt Træningskalender',
+        'training_edit_title': '✏️ Rediger Træning',
+        'training_select_edit': 'Vælg træning, der skal redigeres',
+        'priority1_lbl': '1. Prioritet',
+        'priority2_lbl': '2. Prioritet',
+        'priority3_lbl': '3. Prioritet',
+        'training_date_lbl': '📅 Træningsdato',
+        'participants_lbl': 'Deltagere',
+        'training_save_edit_btn': '💾 Gem Træningsændringer',
+        'select_at_least_one_participant': 'Vælg mindst én deltager.',
+        'training_edit_success': 'Træningen er redigeret!',
+        'training_delete_title': '🗑️ Slet Træning fra Kalenderen',
+        'training_select_delete': 'Vælg træning, der skal fjernes',
+        'training_delete_btn': '🗑️ Slet Valgt Træning',
+        'training_delete_success': 'Træningen den {date} er slettet fra kalenderen!',
+        'no_trainings_saved': 'Ingen træningspas er endnu bekræftet og gemt i kalenderen.',
+        'snp_mgmt_title': '📅 SNP-kampkalender & Registrering',
+        'snp_mgmt_desc': 'Håndtering af de **7 SNP-kampdage**. Tildel for hver kamp NAC-spillerne og **resultatet for hver bane**.',
+        'snp_select_day': '📆 Vælg SNP-kampdag',
+        'snp_formation_title': '1️⃣ Holdopstilling',
+        'snp_formation_desc': 'Vælg 2 NAC-spillere til hver bane. Du kan indtaste resultatet senere, når kampen er spillet.',
+        'snp_notes_lbl': '📝 Noter / kommentarer til kampdagen (valgfrit)',
+        'snp_notes_placeholder': 'Observationer, skader, osv.',
+        'snp_save_formation_btn': '💾 Gem Holdopstilling',
+        'snp_formation_saved': '✅ Holdopstilling gemt for **{label}**! Du kan indtaste resultaterne, når kampen er spillet.',
+        'snp_results_title': '2️⃣ Resultater',
+        'snp_no_lineup_info': 'ℹ️ Tildel først spillerne i Holdopstillingen ovenfor: derefter kan du indtaste resultaterne her.',
+        'snp_results_desc': 'Indtast resultatet for hver bane, når det er tilgængeligt. Spillerne forbliver dem, der er tildelt i Holdopstillingen.',
+        'snp_save_results_btn': '🏆 Gem Resultater',
+        'snp_results_saved': '✅ Resultater gemt for **{label}**!',
+        'snp_summary_title': '📋 Fuldstændigt Resumé af SNP-kalenderen',
+        'snp_courts_filled': '{n}/5 baner udfyldt',
+        'snp_not_filled': 'Ikke udfyldt',
+        'snp_no_lineup_yet': 'Der er endnu ikke angivet nogen holdopstilling for denne kampdag.',
+        'snp_reset_expander': '🗑️ Nulstil SNP-data',
+        'snp_reset_btn': 'Slet ALLE SNP-holdopstillinger og resultater',
+        'snp_reset_success': 'SNP-data nulstillet.',
+        'pairing_confirm_btn': '✅ Bekræft Parvalg',
+        'pairing_confirm_success': 'Parring bekræftet og gemt!',
+        'save_failed_error': '⚠️ Gemning MISLYKKEDES: kunne ikke skrive til databasen ({error}). Dine ændringer blev IKKE gemt — prøv igen om et par sekunder, før du forlader denne side.',
+        'db_unreachable_error': '⚠️ Kan ikke oprette forbindelse til databasen. Dine gemte data er muligvis ikke synlige lige nu. For at beskytte dem fortsætter appen ikke med tomme data: genindlæs siden om et par sekunder. Hvis problemet fortsætter, skal du kontakte administratoren.',
+    },
+}
+for _lang, _vals in COACH_TRANSLATIONS.items():
+    translations.setdefault(_lang, {}).update(_vals)
+
+TRAINING_SNP_TRANSLATIONS = {
+    "Italiano": {
+        'training_system_intro': 'Il sistema ha analizzato i voti del gruppo presente e suggerisce le seguenti 3 priorità:',
+        'training_priority_1_label': '🔥 1° Priorità Consigliata',
+        'training_priority_2_label': '⚡ 2° Priorità Consigliata',
+        'training_priority_3_label': '💡 3° Priorità Consigliata',
+        'training_avg_label': 'Media: {val}/10',
+        'training_custom_title': '✏️ Personalizzazione e Conferma del Coach',
+        'training_custom_desc': 'Il coach può modificare le priorità dal menu a tendina e scegliere in quale data salvare l\'allenamento nel calendario:',
+        'training_coach_p1_label': '1° Priorità (Coach)',
+        'training_coach_p2_label': '2° Priorità (Coach)',
+        'training_coach_p3_label': '3° Priorità (Coach)',
+        'training_date_question': '📅 In quale data vuoi salvare questo allenamento?',
+        'training_confirm_btn': '✅ Conferma e Salva nel Calendario',
+        'training_saved_success': '🎉 Allenamento salvato con successo per il giorno {date}!',
+        'groups_split_title': '👥 Suddivisione in Gruppi da 4 (in base alla debolezza)',
+        'groups_split_desc': 'I giocatori selezionati vengono raggruppati in **gruppi da 4** in base alla loro **debolezza principale**, così ogni gruppo può lavorare su un obiettivo specifico e mirato invece di un\'unica priorità per tutti.',
+        'groups_min_players_warning': 'Servono almeno {n} giocatori disponibili per formare un gruppo. Al momento ce ne sono {count}.',
+        'group_label_prefix': 'Gruppo {n}',
+        'group_incomplete_suffix': ' (gruppo incompleto)',
+        'group_weak_metric_label': '🎯 Debolezza principale',
+        'group_focus_label': 'Focus allenamento — Gruppo {n}',
+        'group_date_question': '📅 In quale data vuoi salvare questi allenamenti di gruppo?',
+        'group_save_btn': '✅ Salva Allenamenti per Gruppo',
+        'group_saved_success': '🎉 {n} allenamenti di gruppo salvati per il giorno {date}!',
+        'training_history_title': '📅 Storico Calendario Allenamenti Pianificati',
+        'training_edit_title': '✏️ Modifica Allenamento',
+        'training_select_edit': 'Seleziona allenamento da modificare',
+        'training_edit_date_label': '📅 Data allenamento',
+        'training_participants_label': 'Partecipanti',
+        'training_edit_save_btn': '💾 Salva Modifiche Allenamento',
+        'training_select_participant_warning': 'Seleziona almeno un partecipante.',
+        'training_edit_success': 'Allenamento modificato con successo!',
+        'training_delete_title': '🗑️ Cancella Allenamento dal Calendario',
+        'training_select_delete': 'Seleziona allenamento da rimuovere',
+        'training_delete_btn': '🗑️ Elimina Allenamento Selezionato',
+        'training_delete_success': 'Allenamento del {date} eliminato con successo dal calendario!',
+        'training_none_saved': 'Nessun allenamento ancora confermato e salvato nel calendario.',
+        'priority1_label': '1° Priorità',
+        'priority2_label': '2° Priorità',
+        'priority3_label': '3° Priorità',
+        'snp_title': '📅 Calendario & Registrazione Partite SNP',
+        'snp_desc': 'Gestione delle **7 giornate SNP**. Per ogni incontro assegna i giocatori NAC e il **risultato di ogni pista**.',
+        'snp_select_day': '📆 Seleziona la giornata SNP',
+        'snp_formation_title': '1️⃣ Formazione',
+        'snp_formation_desc': 'Scegli 2 giocatori NAC per ogni pista. Potrai inserire il risultato in un secondo momento, quando la partita sarà giocata.',
+        'snp_court_label': 'Pista {n}',
+        'snp_player1_court': 'Giocatore 1 - Pista {n}',
+        'snp_player2_court': 'Giocatore 2 - Pista {n}',
+        'snp_notes_label': '📝 Note / Commenti giornata (opzionale)',
+        'snp_notes_placeholder': 'Osservazioni, infortuni, ecc.',
+        'snp_save_formation_btn': '💾 Salva Formazione',
+        'snp_formation_saved': '✅ Formazione salvata per **{day}**! Potrai inserire i risultati quando la partita sarà stata giocata.',
+        'snp_results_title': '2️⃣ Risultati',
+        'snp_results_no_lineup': 'ℹ️ Assegna prima i giocatori nella Formazione qui sopra: potrai poi inserire qui i risultati.',
+        'snp_results_desc': 'Inserisci il risultato di ogni pista quando disponibile. I giocatori restano quelli assegnati nella Formazione.',
+        'snp_result_court_label': 'Risultato Pista {n}',
+        'snp_result_placeholder': 'es. 6-4, 6-2',
+        'snp_save_results_btn': '🏆 Salva Risultati',
+        'snp_results_saved': '✅ Risultati salvati per **{day}**!',
+        'snp_summary_title': '📋 Riepilogo Completo Calendario SNP',
+        'snp_courts_filled': '{n}/5 piste compilate',
+        'snp_not_filled': 'Non compilata',
+        'snp_col_court': 'Pista',
+        'snp_col_player1': 'Giocatore 1',
+        'snp_col_player2': 'Giocatore 2',
+        'snp_col_result': 'Risultato',
+        'snp_notes_display': '**Note:** {notes}',
+        'snp_no_lineup_yet': 'Nessuna formazione ancora inserita per questa giornata.',
+        'snp_reset_expander': '🗑️ Reset dati SNP',
+        'snp_reset_btn': 'Cancella TUTTE le formazioni e risultati SNP',
+        'snp_reset_success': 'Dati SNP resettati.',
+    },
+    "English": {
+        'training_system_intro': 'The system has analyzed the grades of the group present and suggests the following 3 priorities:',
+        'training_priority_1_label': '🔥 1st Recommended Priority',
+        'training_priority_2_label': '⚡ 2nd Recommended Priority',
+        'training_priority_3_label': '💡 3rd Recommended Priority',
+        'training_avg_label': 'Average: {val}/10',
+        'training_custom_title': '✏️ Coach Customization and Confirmation',
+        'training_custom_desc': 'The coach can change the priorities from the dropdown menu and choose which date to save the training in the calendar:',
+        'training_coach_p1_label': '1st Priority (Coach)',
+        'training_coach_p2_label': '2nd Priority (Coach)',
+        'training_coach_p3_label': '3rd Priority (Coach)',
+        'training_date_question': '📅 On which date do you want to save this training?',
+        'training_confirm_btn': '✅ Confirm and Save to Calendar',
+        'training_saved_success': '🎉 Training saved successfully for {date}!',
+        'groups_split_title': '👥 Split into Groups of 4 (based on weakness)',
+        'groups_split_desc': 'The selected players are grouped into **groups of 4** based on their **main weakness**, so each group can work on a specific and targeted goal instead of a single priority for everyone.',
+        'groups_min_players_warning': 'At least {n} available players are needed to form a group. There are currently {count}.',
+        'group_label_prefix': 'Group {n}',
+        'group_incomplete_suffix': ' (incomplete group)',
+        'group_weak_metric_label': '🎯 Main weakness',
+        'group_focus_label': 'Training focus — Group {n}',
+        'group_date_question': '📅 On which date do you want to save these group trainings?',
+        'group_save_btn': '✅ Save Group Trainings',
+        'group_saved_success': '🎉 {n} group trainings saved for {date}!',
+        'training_history_title': '📅 Planned Trainings Calendar History',
+        'training_edit_title': '✏️ Edit Training',
+        'training_select_edit': 'Select training to edit',
+        'training_edit_date_label': '📅 Training date',
+        'training_participants_label': 'Participants',
+        'training_edit_save_btn': '💾 Save Training Changes',
+        'training_select_participant_warning': 'Select at least one participant.',
+        'training_edit_success': 'Training edited successfully!',
+        'training_delete_title': '🗑️ Delete Training from Calendar',
+        'training_select_delete': 'Select training to remove',
+        'training_delete_btn': '🗑️ Delete Selected Training',
+        'training_delete_success': 'Training on {date} removed successfully from the calendar!',
+        'training_none_saved': 'No training confirmed and saved to the calendar yet.',
+        'priority1_label': '1st Priority',
+        'priority2_label': '2nd Priority',
+        'priority3_label': '3rd Priority',
+        'snp_title': '📅 Calendar & SNP Match Registration',
+        'snp_desc': 'Management of the **7 SNP matchdays**. For each fixture, assign the NAC players and the **result of each court**.',
+        'snp_select_day': '📆 Select the SNP matchday',
+        'snp_formation_title': '1️⃣ Lineup',
+        'snp_formation_desc': 'Choose 2 NAC players for each court. You can enter the result later, once the match has been played.',
+        'snp_court_label': 'Court {n}',
+        'snp_player1_court': 'Player 1 - Court {n}',
+        'snp_player2_court': 'Player 2 - Court {n}',
+        'snp_notes_label': '📝 Matchday notes / comments (optional)',
+        'snp_notes_placeholder': 'Observations, injuries, etc.',
+        'snp_save_formation_btn': '💾 Save Lineup',
+        'snp_formation_saved': '✅ Lineup saved for **{day}**! You can enter results once the match has been played.',
+        'snp_results_title': '2️⃣ Results',
+        'snp_results_no_lineup': 'ℹ️ First assign the players in the Lineup above: you can then enter the results here.',
+        'snp_results_desc': 'Enter the result of each court when available. The players remain those assigned in the Lineup.',
+        'snp_result_court_label': 'Result Court {n}',
+        'snp_result_placeholder': 'e.g. 6-4, 6-2',
+        'snp_save_results_btn': '🏆 Save Results',
+        'snp_results_saved': '✅ Results saved for **{day}**!',
+        'snp_summary_title': '📋 Complete SNP Calendar Summary',
+        'snp_courts_filled': '{n}/5 courts filled',
+        'snp_not_filled': 'Not filled in',
+        'snp_col_court': 'Court',
+        'snp_col_player1': 'Player 1',
+        'snp_col_player2': 'Player 2',
+        'snp_col_result': 'Result',
+        'snp_notes_display': '**Notes:** {notes}',
+        'snp_no_lineup_yet': 'No lineup entered yet for this matchday.',
+        'snp_reset_expander': '🗑️ Reset SNP data',
+        'snp_reset_btn': 'Delete ALL SNP lineups and results',
+        'snp_reset_success': 'SNP data reset.',
+    },
+    "Español": {
+        'training_system_intro': 'El sistema ha analizado las calificaciones del grupo presente y sugiere las siguientes 3 prioridades:',
+        'training_priority_1_label': '🔥 1ª Prioridad Recomendada',
+        'training_priority_2_label': '⚡ 2ª Prioridad Recomendada',
+        'training_priority_3_label': '💡 3ª Prioridad Recomendada',
+        'training_avg_label': 'Media: {val}/10',
+        'training_custom_title': '✏️ Personalización y Confirmación del Entrenador',
+        'training_custom_desc': 'El entrenador puede modificar las prioridades desde el menú desplegable y elegir en qué fecha guardar el entrenamiento en el calendario:',
+        'training_coach_p1_label': '1ª Prioridad (Entrenador)',
+        'training_coach_p2_label': '2ª Prioridad (Entrenador)',
+        'training_coach_p3_label': '3ª Prioridad (Entrenador)',
+        'training_date_question': '📅 ¿En qué fecha quieres guardar este entrenamiento?',
+        'training_confirm_btn': '✅ Confirmar y Guardar en el Calendario',
+        'training_saved_success': '🎉 ¡Entrenamiento guardado con éxito para el día {date}!',
+        'groups_split_title': '👥 División en Grupos de 4 (según debilidad)',
+        'groups_split_desc': 'Los jugadores seleccionados se agrupan en **grupos de 4** según su **debilidad principal**, para que cada grupo pueda trabajar en un objetivo específico en lugar de una única prioridad para todos.',
+        'groups_min_players_warning': 'Se necesitan al menos {n} jugadores disponibles para formar un grupo. Actualmente hay {count}.',
+        'group_label_prefix': 'Grupo {n}',
+        'group_incomplete_suffix': ' (grupo incompleto)',
+        'group_weak_metric_label': '🎯 Debilidad principal',
+        'group_focus_label': 'Enfoque de entrenamiento — Grupo {n}',
+        'group_date_question': '📅 ¿En qué fecha quieres guardar estos entrenamientos de grupo?',
+        'group_save_btn': '✅ Guardar Entrenamientos por Grupo',
+        'group_saved_success': '🎉 ¡{n} entrenamientos de grupo guardados para el día {date}!',
+        'training_history_title': '📅 Historial del Calendario de Entrenamientos Planificados',
+        'training_edit_title': '✏️ Editar Entrenamiento',
+        'training_select_edit': 'Selecciona entrenamiento a editar',
+        'training_edit_date_label': '📅 Fecha de entrenamiento',
+        'training_participants_label': 'Participantes',
+        'training_edit_save_btn': '💾 Guardar Cambios de Entrenamiento',
+        'training_select_participant_warning': 'Selecciona al menos un participante.',
+        'training_edit_success': '¡Entrenamiento editado con éxito!',
+        'training_delete_title': '🗑️ Eliminar Entrenamiento del Calendario',
+        'training_select_delete': 'Selecciona entrenamiento a eliminar',
+        'training_delete_btn': '🗑️ Eliminar Entrenamiento Seleccionado',
+        'training_delete_success': '¡Entrenamiento del {date} eliminado con éxito del calendario!',
+        'training_none_saved': 'Aún no hay ningún entrenamiento confirmado y guardado en el calendario.',
+        'priority1_label': '1ª Prioridad',
+        'priority2_label': '2ª Prioridad',
+        'priority3_label': '3ª Prioridad',
+        'snp_title': '📅 Calendario y Registro de Partidos SNP',
+        'snp_desc': 'Gestión de las **7 jornadas SNP**. Para cada encuentro asigna los jugadores NAC y el **resultado de cada pista**.',
+        'snp_select_day': '📆 Selecciona la jornada SNP',
+        'snp_formation_title': '1️⃣ Alineación',
+        'snp_formation_desc': 'Elige 2 jugadores NAC para cada pista. Podrás introducir el resultado más adelante, cuando se haya jugado el partido.',
+        'snp_court_label': 'Pista {n}',
+        'snp_player1_court': 'Jugador 1 - Pista {n}',
+        'snp_player2_court': 'Jugador 2 - Pista {n}',
+        'snp_notes_label': '📝 Notas / Comentarios de la jornada (opcional)',
+        'snp_notes_placeholder': 'Observaciones, lesiones, etc.',
+        'snp_save_formation_btn': '💾 Guardar Alineación',
+        'snp_formation_saved': '✅ ¡Alineación guardada para **{day}**! Podrás introducir los resultados cuando se haya jugado el partido.',
+        'snp_results_title': '2️⃣ Resultados',
+        'snp_results_no_lineup': 'ℹ️ Primero asigna a los jugadores en la Alineación de arriba: luego podrás introducir aquí los resultados.',
+        'snp_results_desc': 'Introduce el resultado de cada pista cuando esté disponible. Los jugadores siguen siendo los asignados en la Alineación.',
+        'snp_result_court_label': 'Resultado Pista {n}',
+        'snp_result_placeholder': 'ej. 6-4, 6-2',
+        'snp_save_results_btn': '🏆 Guardar Resultados',
+        'snp_results_saved': '✅ ¡Resultados guardados para **{day}**!',
+        'snp_summary_title': '📋 Resumen Completo del Calendario SNP',
+        'snp_courts_filled': '{n}/5 pistas completadas',
+        'snp_not_filled': 'No completada',
+        'snp_col_court': 'Pista',
+        'snp_col_player1': 'Jugador 1',
+        'snp_col_player2': 'Jugador 2',
+        'snp_col_result': 'Resultado',
+        'snp_notes_display': '**Notas:** {notes}',
+        'snp_no_lineup_yet': 'Aún no se ha introducido ninguna alineación para esta jornada.',
+        'snp_reset_expander': '🗑️ Restablecer datos SNP',
+        'snp_reset_btn': 'Eliminar TODAS las alineaciones y resultados SNP',
+        'snp_reset_success': 'Datos SNP restablecidos.',
+    },
+    "Svenska": {
+        'training_system_intro': 'Systemet har analyserat betygen för den närvarande gruppen och föreslår följande 3 prioriteringar:',
+        'training_priority_1_label': '🔥 1:a Rekommenderad Prioritet',
+        'training_priority_2_label': '⚡ 2:a Rekommenderad Prioritet',
+        'training_priority_3_label': '💡 3:e Rekommenderad Prioritet',
+        'training_avg_label': 'Snitt: {val}/10',
+        'training_custom_title': '✏️ Coachens Anpassning och Bekräftelse',
+        'training_custom_desc': 'Coachen kan ändra prioriteringarna från rullgardinsmenyn och välja vilket datum träningen ska sparas i kalendern:',
+        'training_coach_p1_label': '1:a Prioritet (Coach)',
+        'training_coach_p2_label': '2:a Prioritet (Coach)',
+        'training_coach_p3_label': '3:e Prioritet (Coach)',
+        'training_date_question': '📅 Vilket datum vill du spara denna träning på?',
+        'training_confirm_btn': '✅ Bekräfta och Spara i Kalendern',
+        'training_saved_success': '🎉 Träningen sparades framgångsrikt för {date}!',
+        'groups_split_title': '👥 Uppdelning i Grupper om 4 (baserat på svaghet)',
+        'groups_split_desc': 'De valda spelarna grupperas i **grupper om 4** baserat på deras **huvudsakliga svaghet**, så att varje grupp kan arbeta mot ett specifikt mål istället för en enda prioritet för alla.',
+        'groups_min_players_warning': 'Minst {n} tillgängliga spelare krävs för att bilda en grupp. Just nu finns det {count}.',
+        'group_label_prefix': 'Grupp {n}',
+        'group_incomplete_suffix': ' (ofullständig grupp)',
+        'group_weak_metric_label': '🎯 Huvudsaklig svaghet',
+        'group_focus_label': 'Träningsfokus — Grupp {n}',
+        'group_date_question': '📅 Vilket datum vill du spara dessa gruppträningar på?',
+        'group_save_btn': '✅ Spara Gruppträningar',
+        'group_saved_success': '🎉 {n} gruppträningar sparade för {date}!',
+        'training_history_title': '📅 Historik för Planerade Träningar',
+        'training_edit_title': '✏️ Redigera Träning',
+        'training_select_edit': 'Välj träning att redigera',
+        'training_edit_date_label': '📅 Träningsdatum',
+        'training_participants_label': 'Deltagare',
+        'training_edit_save_btn': '💾 Spara Träningsändringar',
+        'training_select_participant_warning': 'Välj minst en deltagare.',
+        'training_edit_success': 'Träningen redigerades!',
+        'training_delete_title': '🗑️ Ta bort Träning från Kalendern',
+        'training_select_delete': 'Välj träning att ta bort',
+        'training_delete_btn': '🗑️ Ta bort Vald Träning',
+        'training_delete_success': 'Träningen den {date} togs bort från kalendern!',
+        'training_none_saved': 'Ingen träning har ännu bekräftats och sparats i kalendern.',
+        'priority1_label': '1:a Prioritet',
+        'priority2_label': '2:a Prioritet',
+        'priority3_label': '3:e Prioritet',
+        'snp_title': '📅 Kalender & SNP-matchregistrering',
+        'snp_desc': 'Hantering av de **7 SNP-omgångarna**. Tilldela NAC-spelarna och **resultatet för varje bana** för varje match.',
+        'snp_select_day': '📆 Välj SNP-omgången',
+        'snp_formation_title': '1️⃣ Uppställning',
+        'snp_formation_desc': 'Välj 2 NAC-spelare för varje bana. Du kan ange resultatet senare, när matchen har spelats.',
+        'snp_court_label': 'Bana {n}',
+        'snp_player1_court': 'Spelare 1 - Bana {n}',
+        'snp_player2_court': 'Spelare 2 - Bana {n}',
+        'snp_notes_label': '📝 Anteckningar/kommentarer för omgången (valfritt)',
+        'snp_notes_placeholder': 'Observationer, skador, etc.',
+        'snp_save_formation_btn': '💾 Spara Uppställning',
+        'snp_formation_saved': '✅ Uppställning sparad för **{day}**! Du kan ange resultat när matchen har spelats.',
+        'snp_results_title': '2️⃣ Resultat',
+        'snp_results_no_lineup': 'ℹ️ Tilldela först spelarna i Uppställningen ovan: du kan sedan ange resultaten här.',
+        'snp_results_desc': 'Ange resultatet för varje bana när det är tillgängligt. Spelarna förblir de som tilldelats i Uppställningen.',
+        'snp_result_court_label': 'Resultat Bana {n}',
+        'snp_result_placeholder': 't.ex. 6-4, 6-2',
+        'snp_save_results_btn': '🏆 Spara Resultat',
+        'snp_results_saved': '✅ Resultat sparade för **{day}**!',
+        'snp_summary_title': '📋 Fullständig Sammanfattning av SNP-kalendern',
+        'snp_courts_filled': '{n}/5 banor ifyllda',
+        'snp_not_filled': 'Ej ifylld',
+        'snp_col_court': 'Bana',
+        'snp_col_player1': 'Spelare 1',
+        'snp_col_player2': 'Spelare 2',
+        'snp_col_result': 'Resultat',
+        'snp_notes_display': '**Anteckningar:** {notes}',
+        'snp_no_lineup_yet': 'Ingen uppställning har ännu angetts för denna omgång.',
+        'snp_reset_expander': '🗑️ Återställ SNP-data',
+        'snp_reset_btn': 'Ta bort ALLA SNP-uppställningar och resultat',
+        'snp_reset_success': 'SNP-data återställd.',
+    },
+    "Nederlands": {
+        'training_system_intro': 'Het systeem heeft de cijfers van de aanwezige groep geanalyseerd en stelt de volgende 3 prioriteiten voor:',
+        'training_priority_1_label': '🔥 1e Aanbevolen Prioriteit',
+        'training_priority_2_label': '⚡ 2e Aanbevolen Prioriteit',
+        'training_priority_3_label': '💡 3e Aanbevolen Prioriteit',
+        'training_avg_label': 'Gemiddeld: {val}/10',
+        'training_custom_title': '✏️ Aanpassing en Bevestiging door Coach',
+        'training_custom_desc': 'De coach kan de prioriteiten wijzigen via het vervolgkeuzemenu en kiezen op welke datum de training in de kalender wordt opgeslagen:',
+        'training_coach_p1_label': '1e Prioriteit (Coach)',
+        'training_coach_p2_label': '2e Prioriteit (Coach)',
+        'training_coach_p3_label': '3e Prioriteit (Coach)',
+        'training_date_question': '📅 Op welke datum wil je deze training opslaan?',
+        'training_confirm_btn': '✅ Bevestigen en Opslaan in Kalender',
+        'training_saved_success': '🎉 Training succesvol opgeslagen voor {date}!',
+        'groups_split_title': '👥 Verdeling in Groepen van 4 (op basis van zwakte)',
+        'groups_split_desc': 'De geselecteerde spelers worden ingedeeld in **groepen van 4** op basis van hun **belangrijkste zwakte**, zodat elke groep aan een specifiek doel kan werken in plaats van één prioriteit voor iedereen.',
+        'groups_min_players_warning': 'Er zijn minstens {n} beschikbare spelers nodig om een groep te vormen. Er zijn er momenteel {count}.',
+        'group_label_prefix': 'Groep {n}',
+        'group_incomplete_suffix': ' (onvolledige groep)',
+        'group_weak_metric_label': '🎯 Belangrijkste zwakte',
+        'group_focus_label': 'Trainingsfocus — Groep {n}',
+        'group_date_question': '📅 Op welke datum wil je deze groepstrainingen opslaan?',
+        'group_save_btn': '✅ Groepstrainingen Opslaan',
+        'group_saved_success': '🎉 {n} groepstrainingen opgeslagen voor {date}!',
+        'training_history_title': '📅 Geschiedenis Geplande Trainingen',
+        'training_edit_title': '✏️ Training Bewerken',
+        'training_select_edit': 'Selecteer training om te bewerken',
+        'training_edit_date_label': '📅 Trainingsdatum',
+        'training_participants_label': 'Deelnemers',
+        'training_edit_save_btn': '💾 Trainingswijzigingen Opslaan',
+        'training_select_participant_warning': 'Selecteer minstens één deelnemer.',
+        'training_edit_success': 'Training succesvol bewerkt!',
+        'training_delete_title': '🗑️ Training uit Kalender Verwijderen',
+        'training_select_delete': 'Selecteer training om te verwijderen',
+        'training_delete_btn': '🗑️ Geselecteerde Training Verwijderen',
+        'training_delete_success': 'Training van {date} succesvol verwijderd uit de kalender!',
+        'training_none_saved': 'Nog geen training bevestigd en opgeslagen in de kalender.',
+        'priority1_label': '1e Prioriteit',
+        'priority2_label': '2e Prioriteit',
+        'priority3_label': '3e Prioriteit',
+        'snp_title': '📅 Kalender & SNP-wedstrijdregistratie',
+        'snp_desc': 'Beheer van de **7 SNP-speeldagen**. Wijs voor elke wedstrijd de NAC-spelers en het **resultaat van elke baan** toe.',
+        'snp_select_day': '📆 Selecteer de SNP-speeldag',
+        'snp_formation_title': '1️⃣ Opstelling',
+        'snp_formation_desc': 'Kies 2 NAC-spelers voor elke baan. Je kunt het resultaat later invoeren, zodra de wedstrijd is gespeeld.',
+        'snp_court_label': 'Baan {n}',
+        'snp_player1_court': 'Speler 1 - Baan {n}',
+        'snp_player2_court': 'Speler 2 - Baan {n}',
+        'snp_notes_label': '📝 Notities/opmerkingen speeldag (optioneel)',
+        'snp_notes_placeholder': 'Opmerkingen, blessures, enz.',
+        'snp_save_formation_btn': '💾 Opstelling Opslaan',
+        'snp_formation_saved': '✅ Opstelling opgeslagen voor **{day}**! Je kunt de resultaten invoeren zodra de wedstrijd is gespeeld.',
+        'snp_results_title': '2️⃣ Resultaten',
+        'snp_results_no_lineup': 'ℹ️ Wijs eerst de spelers toe in de Opstelling hierboven: je kunt hier daarna de resultaten invoeren.',
+        'snp_results_desc': 'Voer het resultaat van elke baan in wanneer beschikbaar. De spelers blijven degenen die zijn toegewezen in de Opstelling.',
+        'snp_result_court_label': 'Resultaat Baan {n}',
+        'snp_result_placeholder': 'bijv. 6-4, 6-2',
+        'snp_save_results_btn': '🏆 Resultaten Opslaan',
+        'snp_results_saved': '✅ Resultaten opgeslagen voor **{day}**!',
+        'snp_summary_title': '📋 Volledig Overzicht SNP-kalender',
+        'snp_courts_filled': '{n}/5 banen ingevuld',
+        'snp_not_filled': 'Niet ingevuld',
+        'snp_col_court': 'Baan',
+        'snp_col_player1': 'Speler 1',
+        'snp_col_player2': 'Speler 2',
+        'snp_col_result': 'Resultaat',
+        'snp_notes_display': '**Notities:** {notes}',
+        'snp_no_lineup_yet': 'Nog geen opstelling ingevoerd voor deze speeldag.',
+        'snp_reset_expander': '🗑️ SNP-gegevens resetten',
+        'snp_reset_btn': 'ALLE SNP-opstellingen en resultaten verwijderen',
+        'snp_reset_success': 'SNP-gegevens gereset.',
+    },
+    "Dansk": {
+        'training_system_intro': 'Systemet har analyseret karaktererne for den tilstedeværende gruppe og foreslår følgende 3 prioriteter:',
+        'training_priority_1_label': '🔥 1. Anbefalede Prioritet',
+        'training_priority_2_label': '⚡ 2. Anbefalede Prioritet',
+        'training_priority_3_label': '💡 3. Anbefalede Prioritet',
+        'training_avg_label': 'Gennemsnit: {val}/10',
+        'training_custom_title': '✏️ Trænerens Tilpasning og Bekræftelse',
+        'training_custom_desc': 'Træneren kan ændre prioriteterne fra rullemenuen og vælge, hvilken dato træningen skal gemmes i kalenderen:',
+        'training_coach_p1_label': '1. Prioritet (Træner)',
+        'training_coach_p2_label': '2. Prioritet (Træner)',
+        'training_coach_p3_label': '3. Prioritet (Træner)',
+        'training_date_question': '📅 Hvilken dato vil du gemme denne træning på?',
+        'training_confirm_btn': '✅ Bekræft og Gem i Kalenderen',
+        'training_saved_success': '🎉 Træning gemt for {date}!',
+        'groups_split_title': '👥 Opdeling i Grupper på 4 (baseret på svaghed)',
+        'groups_split_desc': 'De valgte spillere grupperes i **grupper på 4** baseret på deres **primære svaghed**, så hver gruppe kan arbejde med et specifikt mål i stedet for én prioritet for alle.',
+        'groups_min_players_warning': 'Der kræves mindst {n} tilgængelige spillere for at danne en gruppe. Der er i øjeblikket {count}.',
+        'group_label_prefix': 'Gruppe {n}',
+        'group_incomplete_suffix': ' (ufuldstændig gruppe)',
+        'group_weak_metric_label': '🎯 Primær svaghed',
+        'group_focus_label': 'Træningsfokus — Gruppe {n}',
+        'group_date_question': '📅 Hvilken dato vil du gemme disse gruppetræninger på?',
+        'group_save_btn': '✅ Gem Gruppetræninger',
+        'group_saved_success': '🎉 {n} gruppetræninger gemt for {date}!',
+        'training_history_title': '📅 Historik for Planlagte Træninger',
+        'training_edit_title': '✏️ Rediger Træning',
+        'training_select_edit': 'Vælg træning der skal redigeres',
+        'training_edit_date_label': '📅 Træningsdato',
+        'training_participants_label': 'Deltagere',
+        'training_edit_save_btn': '💾 Gem Træningsændringer',
+        'training_select_participant_warning': 'Vælg mindst én deltager.',
+        'training_edit_success': 'Træning redigeret!',
+        'training_delete_title': '🗑️ Slet Træning fra Kalenderen',
+        'training_select_delete': 'Vælg træning der skal fjernes',
+        'training_delete_btn': '🗑️ Slet Valgt Træning',
+        'training_delete_success': 'Træningen den {date} blev fjernet fra kalenderen!',
+        'training_none_saved': 'Ingen træning er endnu bekræftet og gemt i kalenderen.',
+        'priority1_label': '1. Prioritet',
+        'priority2_label': '2. Prioritet',
+        'priority3_label': '3. Prioritet',
+        'snp_title': '📅 Kalender & SNP-kampregistrering',
+        'snp_desc': 'Håndtering af de **7 SNP-spilledage**. Tildel NAC-spillerne og **resultatet for hver bane** for hver kamp.',
+        'snp_select_day': '📆 Vælg SNP-spilledagen',
+        'snp_formation_title': '1️⃣ Opstilling',
+        'snp_formation_desc': 'Vælg 2 NAC-spillere til hver bane. Du kan indtaste resultatet senere, når kampen er spillet.',
+        'snp_court_label': 'Bane {n}',
+        'snp_player1_court': 'Spiller 1 - Bane {n}',
+        'snp_player2_court': 'Spiller 2 - Bane {n}',
+        'snp_notes_label': '📝 Noter/kommentarer til spilledagen (valgfrit)',
+        'snp_notes_placeholder': 'Observationer, skader osv.',
+        'snp_save_formation_btn': '💾 Gem Opstilling',
+        'snp_formation_saved': '✅ Opstilling gemt for **{day}**! Du kan indtaste resultater, når kampen er spillet.',
+        'snp_results_title': '2️⃣ Resultater',
+        'snp_results_no_lineup': 'ℹ️ Tildel først spillerne i Opstillingen ovenfor: du kan derefter indtaste resultaterne her.',
+        'snp_results_desc': 'Indtast resultatet for hver bane, når det er tilgængeligt. Spillerne forbliver dem, der er tildelt i Opstillingen.',
+        'snp_result_court_label': 'Resultat Bane {n}',
+        'snp_result_placeholder': 'f.eks. 6-4, 6-2',
+        'snp_save_results_btn': '🏆 Gem Resultater',
+        'snp_results_saved': '✅ Resultater gemt for **{day}**!',
+        'snp_summary_title': '📋 Komplet Oversigt over SNP-kalenderen',
+        'snp_courts_filled': '{n}/5 baner udfyldt',
+        'snp_not_filled': 'Ikke udfyldt',
+        'snp_col_court': 'Bane',
+        'snp_col_player1': 'Spiller 1',
+        'snp_col_player2': 'Spiller 2',
+        'snp_col_result': 'Resultat',
+        'snp_notes_display': '**Noter:** {notes}',
+        'snp_no_lineup_yet': 'Ingen opstilling er endnu indtastet for denne spilledag.',
+        'snp_reset_expander': '🗑️ Nulstil SNP-data',
+        'snp_reset_btn': 'Slet ALLE SNP-opstillinger og resultater',
+        'snp_reset_success': 'SNP-data nulstillet.',
+    },
+}
+
+for _lang, _vals in TRAINING_SNP_TRANSLATIONS.items():
+    translations.setdefault(_lang, {}).update(_vals)
+
 MAX_RECOVERY_ATTEMPTS = 5
 
 
@@ -1223,9 +2326,7 @@ if not db_reachable and "squad_data" not in st.session_state:
     # the hardcoded default roster here: that would silently discard real saved
     # data, and a later "Save" click would overwrite it permanently. Stop and
     # tell the user instead, so nothing is lost.
-    st.error("⚠️ Impossibile connettersi al database. I tuoi dati salvati potrebbero non essere "
-              "visibili in questo momento. Per proteggerli, l'app non prosegue con dati vuoti: "
-              "ricarica la pagina tra qualche secondo. Se il problema persiste, contatta l'amministratore.")
+    st.error(lang_dict.get('db_unreachable_error', "⚠️ Unable to connect to the database. Your saved data might not be visible right now. To protect it, the app will not proceed with empty data: reload the page in a few seconds. If the problem persists, contact the administrator."))
     st.stop()
 
 if saved_server_data:
@@ -1337,24 +2438,24 @@ ALL_SKILLS = TECH_SKILLS + MENTAL_SKILLS
 # --- CONTROLLO FORZATURA CAMBIO PASSWORD (PRIMO ACCESSO) ---
 if st.session_state.get("force_password_change", False):
     current_player = next((p for p in squad_players if p['fname'] == st.session_state.authenticated_player), None)
-    st.title("🔒 Primo Accesso: Imposta la tua Nuova Password")
-    st.markdown(f"Benvenuto **{current_player['fname']}**! Per motivi di sicurezza, essendo il tuo primo accesso, devi impostare una password personale che solo tu conoscerai.")
-    
+    st.title(lang_dict.get('first_login_title', '🔒 First Login: Set Your New Password'))
+    st.markdown(lang_dict.get('first_login_welcome', "Welcome **{name}**! For security reasons, since this is your first login, you need to set a personal password that only you will know.").format(name=current_player['fname']))
+
     with st.form("change_pwd_form"):
-        new_pwd1 = st.text_input("Nuova Password Personale", type="password")
-        new_pwd2 = st.text_input("Conferma Nuova Password", type="password")
-        
+        new_pwd1 = st.text_input(lang_dict.get('forgot_new_pwd', 'New password'), type="password")
+        new_pwd2 = st.text_input(lang_dict.get('forgot_confirm_pwd', 'Confirm new password'), type="password")
+
         st.markdown("---")
         st.markdown(f"**🔐 {lang_dict.get('sec_section_title', 'Security question')}**")
         st.caption(lang_dict.get('sec_section_desc', ''))
         fl_q_key, fl_custom, fl_answer = security_question_inputs(lang_dict, "first_login_sec", current_player)
-        
-        if st.form_submit_button("Salva Password e Accedi", type="primary"):
+
+        if st.form_submit_button(lang_dict.get('first_login_save_btn', 'Save Password and Login'), type="primary"):
             sec_error = validate_security_inputs(fl_q_key, fl_custom, fl_answer, lang_dict)
             if not new_pwd1.strip():
-                st.warning("La password non può essere vuota.")
+                st.warning(lang_dict.get('pwd_empty', "The password can't be empty."))
             elif new_pwd1 != new_pwd2:
-                st.error("Le password non coincidono. Riprova.")
+                st.error(lang_dict.get('pwd_mismatch', "The passwords don't match. Try again."))
             elif sec_error:
                 st.warning(sec_error)
             else:
@@ -1364,7 +2465,7 @@ if st.session_state.get("force_password_change", False):
                 if save_data_to_server():
                     st.session_state.force_password_change = False
                     st.session_state.nav_mode = "Player_Dashboard"
-                    st.success("✅ Password impostata e salvata correttamente!")
+                    st.success(lang_dict.get('first_login_success', '✅ Password set and saved successfully!'))
                     st.rerun()
 
 # --- HOME SELECTION ---
@@ -1423,7 +2524,7 @@ elif st.session_state.nav_mode == "Player_Login":
                         log_activity("Player login (first access)", f"{player_obj['fname']} {player_obj['lname']}")
                         st.rerun()
                     else:
-                        st.error("❌ Primo accesso: inserisci il tuo nome di battesimo come password.")
+                        st.error(lang_dict.get('first_login_hint_error', '❌ First login: enter your first name as the password.'))
                 else:
                     if player_pwd_input == current_saved_pwd:
                         st.session_state.authenticated_player = selected_fname
@@ -1503,7 +2604,7 @@ elif st.session_state.nav_mode == "Coach_Login":
                     st.session_state.nav_mode = "Coach"
                     st.rerun()
             else:
-                st.error("❌ Password errata! Riprova.")
+                st.error(lang_dict.get('coach_wrong_pwd', '❌ Wrong password! Try again.'))
     with col_btn2:
         if st.button(lang_dict.get('back_home', 'Back'), use_container_width=True, key="coach_login_back"):
             st.session_state.nav_mode = "Home"
@@ -1515,7 +2616,7 @@ elif st.session_state.nav_mode == "Admin_Login":
     st.markdown("Full access to all app features (squad, evaluations, matches, players).")
     
     ADMIN_PASSWORD = "nacadmin2026"
-    admin_pwd = st.text_input("Admin Password", type="password", key="admin_pwd_input")
+    admin_pwd = st.text_input(lang_dict.get('admin_pwd_label', 'Admin Password'), type="password", key="admin_pwd_input")
     
     col_a1, col_a2 = st.columns(2)
     with col_a1:
@@ -1528,7 +2629,7 @@ elif st.session_state.nav_mode == "Admin_Login":
                     st.session_state.nav_mode = "Coach"
                     st.rerun()
             else:
-                st.error("❌ Wrong admin password.")
+                st.error(lang_dict.get('admin_wrong_pwd', '❌ Wrong admin password.'))
     with col_a2:
         if st.button(lang_dict.get('back_home', 'Back'), use_container_width=True, key="admin_login_back"):
             st.session_state.nav_mode = "Home"
@@ -1776,7 +2877,7 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                 
         st.markdown(f"### {lang_dict.get('current_ranking', 'Current Ranking:')}")
         if current_player.get("partners"):
-            df_part = pd.DataFrame(list(current_player["partners"].keys()), columns=["Compagno"]).reset_index(drop=True)
+            df_part = pd.DataFrame(list(current_player["partners"].keys()), columns=[lang_dict.get('col_partner', 'Partner')]).reset_index(drop=True)
             df_part.index = df_part.index + 1
             st.markdown(f"<div class='table-container'>{df_part.to_html(escape=False, index=True, classes='custom-table')}</div>", unsafe_allow_html=True)
         else:
@@ -2012,9 +3113,9 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     st.rerun()
 
         st.markdown("---")
-        st.markdown("### 🔑 Gestione Password Giocatori")
-        st.caption("Visualizza e modifica la password di ciascun giocatore. Le password sono salvate in chiaro: usa questa funzione con cautela.")
-        with st.expander("Mostra / modifica tutte le password", expanded=False):
+        st.markdown(f"### {lang_dict.get('admin_pwd_mgmt_title', '🔑 Player Password Management')}")
+        st.caption(lang_dict.get('admin_pwd_mgmt_desc', "View and edit each player's password. Passwords are stored in plain text: use this feature with caution."))
+        with st.expander(lang_dict.get('admin_pwd_mgmt_expander', 'Show / edit all passwords'), expanded=False):
             with st.form("admin_manage_passwords_form"):
                 new_pwd_values = {}
                 for p in squad_players:
@@ -2023,12 +3124,12 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         st.markdown(f"**{p['fname']} {p['lname']}**")
                     with col_pw2:
                         new_pwd_values[p['fname']] = st.text_input(
-                            f"Password di {p['fname']}",
+                            lang_dict.get('admin_pwd_of', 'Password for {name}').format(name=p['fname']),
                             value=p.get("password", p["fname"]),
                             key=f"admin_pwd_{p['fname']}_{p['lname']}",
                             label_visibility="collapsed"
                         )
-                if st.form_submit_button("💾 Salva Tutte le Password", type="primary"):
+                if st.form_submit_button(lang_dict.get('admin_pwd_save_btn', '💾 Save All Passwords'), type="primary"):
                     changed = []
                     for p in squad_players:
                         new_val = new_pwd_values.get(p['fname'], "").strip()
@@ -2039,31 +3140,31 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     if changed:
                         log_activity("Admin updated player password(s)", ", ".join(changed))
                         if save_data_to_server():
-                            st.success(f"✅ Password aggiornate per: {', '.join(changed)}")
+                            st.success(lang_dict.get('admin_pwd_updated', '✅ Passwords updated for: {names}').format(names=', '.join(changed)))
                             st.rerun()
                     else:
-                        st.info("Nessuna modifica da salvare.")
+                        st.info(lang_dict.get('no_changes_to_save', 'No changes to save.'))
 
     if st.session_state.show_roster_modal:
         st.markdown("---")
-        st.markdown("### 👥 Pannello Gestione Rosa Giocatori (Aggiungi o Rimuovi)")
+        st.markdown(f"### {lang_dict.get('roster_modal_title', '👥 Squad Management Panel (Add or Remove)')}")
         with st.container():
             col_add_m, col_del_m = st.columns(2)
-            
+
             with col_add_m:
-                st.markdown("#### Aggiungi Nuovo Giocatore")
+                st.markdown(f"#### {lang_dict.get('roster_add_title', 'Add New Player')}")
                 with st.form("modal_add_player_form"):
-                    new_fname = st.text_input("Nome")
-                    new_lname = st.text_input("Cognome")
-                    new_side = st.selectbox("Posizione / Ruolo", ["Left", "Right"])
-                    new_hand = st.selectbox("Mano", ["Destro", "Mancino"])
-                    new_style = st.selectbox("Stile di Gioco", ["Offensive", "Defensive", "Equilibrated", "Counterattack"])
-                    
-                    if st.form_submit_button("➕ Aggiungi Giocatore", type="primary"):
+                    new_fname = st.text_input(lang_dict.get('roster_fname_lbl', 'First Name'))
+                    new_lname = st.text_input(lang_dict.get('roster_lname_lbl', 'Last Name'))
+                    new_side = st.selectbox(lang_dict.get('roster_role_lbl', 'Position / Role'), ["Left", "Right"])
+                    new_hand = st.selectbox(lang_dict.get('roster_hand_lbl', 'Hand'), ["Destro", "Mancino"])
+                    new_style = st.selectbox(lang_dict.get('roster_style_lbl', 'Play Style'), ["Offensive", "Defensive", "Equilibrated", "Counterattack"])
+
+                    if st.form_submit_button(lang_dict.get('roster_add_btn', '➕ Add Player'), type="primary"):
                         if new_fname.strip() and new_lname.strip():
                             exists = any(p['fname'].lower() == new_fname.strip().lower() and p['lname'].lower() == new_lname.strip().lower() for p in st.session_state.squad_data)
                             if exists:
-                                st.error("Un giocatore con questo nome e cognome esiste già nella rosa!")
+                                st.error(lang_dict.get('roster_dup_error', 'A player with this first and last name already exists in the squad!'))
                             else:
                                 st.session_state.squad_data.append({
                                     "fname": new_fname.strip(),
@@ -2087,21 +3188,21 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                                 })
                                 log_activity("Player added", f"{new_fname.strip()} {new_lname.strip()} ({new_side})")
                                 if save_data_to_server():
-                                    st.success(f"Giocatore {new_fname} {new_lname} aggiunto con successo!")
+                                    st.success(lang_dict.get('roster_add_success', 'Player {name} added successfully!').format(name=f"{new_fname} {new_lname}"))
                                     st.rerun()
                         else:
-                            st.warning("Nome e Cognome non possono essere vuoti.")
-            
+                            st.warning(lang_dict.get('roster_name_required', "First and last name can't be empty."))
+
             with col_del_m:
-                st.markdown("#### Elimina Giocatore Esistente")
+                st.markdown(f"#### {lang_dict.get('roster_delete_title', 'Remove Existing Player')}")
                 with st.form("modal_delete_player_form"):
-                    player_to_delete = st.selectbox("Seleziona giocatore da rimuovere", [f"{p['fname']} {p['lname']}" for p in st.session_state.squad_data])
-                    
-                    if st.form_submit_button("🗑️ Rimuovi Giocatore", type="secondary"):
+                    player_to_delete = st.selectbox(lang_dict.get('roster_select_remove', 'Select player to remove'), [f"{p['fname']} {p['lname']}" for p in st.session_state.squad_data])
+
+                    if st.form_submit_button(lang_dict.get('roster_remove_btn', '🗑️ Remove Player'), type="secondary"):
                         st.session_state.squad_data = [p for p in st.session_state.squad_data if f"{p['fname']} {p['lname']}" != player_to_delete]
                         log_activity("Player removed", player_to_delete)
                         if save_data_to_server():
-                            st.success(f"Giocatore {player_to_delete} rimosso con successo!")
+                            st.success(lang_dict.get('roster_remove_success', 'Player {name} removed successfully!').format(name=player_to_delete))
                             st.rerun()
         st.markdown("---")
         
@@ -2130,7 +3231,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
     
     with coach_tab1:
         st.subheader(f"👥 {lang_dict.get('coach_tab_squad', 'Squad Management & Attendance')}")
-        st.markdown(f"Totale giocatori presenti: **{len(squad_players)}**")
+        st.markdown(lang_dict.get('total_players_present', 'Total players present: **{n}**').format(n=len(squad_players)))
         st.markdown(lang_dict.get('squad_desc', ''))
         
         st.session_state.squad_data = sorted(st.session_state.squad_data, key=lambda x: x['fname'])
@@ -2192,10 +3293,10 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 p["participated"] = calc_participated
 
             st.markdown("<br>", unsafe_allow_html=True)
-            if st.form_submit_button("💾 Salva Modifiche Rosa e Ruoli", type="primary"):
+            if st.form_submit_button(lang_dict.get('squad_save_btn', '💾 Save Squad and Role Changes'), type="primary"):
                 log_activity("Squad roles/styles updated", f"{len(squad_players)} players")
                 if save_data_to_server():
-                    st.success("Tutte le modifiche alla rosa, ruoli e destri/mancini sono state salvate permanentemente!")
+                    st.success(lang_dict.get('squad_save_success', 'All changes to the squad, roles and dominant hand have been saved permanently!'))
                     st.rerun()
 
         st.markdown("---")
@@ -2207,7 +3308,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             p_coach_vals = p['c_tech'] + p['c_mental']
             for i, skill in enumerate(ALL_SKILLS):
                 if p_coach_vals[i] <= 6:
-                    skill_groups[skill].append(f"{p['fname']} {p['lname']} (Voto: {p_coach_vals[i]})")
+                    skill_groups[skill].append(f"{p['fname']} {p['lname']} ({lang_dict.get('grade_label', 'Grade: {val}').format(val=p_coach_vals[i])})")
                     
         active_groups = {k: v for k, v in skill_groups.items() if len(v) > 0}
         
@@ -2216,7 +3317,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             col_idx = 0
             for skill, members in active_groups.items():
                 with cols[col_idx % 2]:
-                    with st.expander(f"📌 Area di miglioramento: **{skill}** ({len(members)} giocatori)"):
+                    with st.expander(lang_dict.get('improvement_area', '📌 Improvement area: **{skill}** ({n} players)').format(skill=skill, n=len(members))):
                         for m in members:
                             st.markdown(f"- {m}")
                 col_idx += 1
@@ -2231,22 +3332,22 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         p_obj = next((p for p in squad_players if f"{p['fname']} {p['lname']}" == selected_player_name), None)
 
         if p_obj:
-            st.markdown(f"### 🏆 Preferenze Partner di **{selected_player_name}**")
-            st.caption("Ranking dei compagni con cui il giocatore preferisce giocare (impostato da lui nella sua area) e chi, tra gli altri, ha indicato lui come partner preferito. Utile per capire le affinità prima di valutare.")
+            st.markdown(f"### {lang_dict.get('partner_prefs_title', '🏆 Partner Preferences of **{name}**').format(name=selected_player_name)}")
+            st.caption(lang_dict.get('partner_prefs_desc', 'Ranking of the partners the player prefers to play with (set by them in their own area), and who among the others has ranked them as a preferred partner. Useful to understand affinities before grading.'))
             col_pref1, col_pref2 = st.columns(2)
 
             with col_pref1:
-                st.markdown(f"**{selected_player_name} preferisce giocare con:**")
+                st.markdown(lang_dict.get('partner_prefs_own', '**{name}** prefers to play with:').format(name=selected_player_name))
                 own_partners = p_obj.get("partners", {})
                 if own_partners:
                     sorted_own = sorted(own_partners.items(), key=lambda x: x[1], reverse=True)
-                    df_own_partners = pd.DataFrame(sorted_own, columns=["Compagno", "Punteggio"])
+                    df_own_partners = pd.DataFrame(sorted_own, columns=[lang_dict.get('col_partner', 'Partner'), lang_dict.get('col_score', 'Score')])
                     st.markdown(f"<div class='table-container'>{df_own_partners.to_html(escape=False, index=False, classes='custom-table')}</div>", unsafe_allow_html=True)
                 else:
-                    st.info("Nessuna preferenza impostata da questo giocatore.")
+                    st.info(lang_dict.get('partner_prefs_none', "This player hasn't set any preferences."))
 
             with col_pref2:
-                st.markdown(f"**Chi ha indicato {selected_player_name} come partner preferito:**")
+                st.markdown(lang_dict.get('partner_prefs_reverse_title', 'Who has ranked **{name}** as a preferred partner:').format(name=selected_player_name))
                 reverse_prefs = []
                 for other in squad_players:
                     if other['fname'] == p_obj['fname'] and other['lname'] == p_obj['lname']:
@@ -2256,10 +3357,10 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         reverse_prefs.append((f"{other['fname']} {other['lname']}", score))
                 if reverse_prefs:
                     reverse_prefs.sort(key=lambda x: x[1], reverse=True)
-                    df_reverse_prefs = pd.DataFrame(reverse_prefs, columns=["Giocatore", "Punteggio"])
+                    df_reverse_prefs = pd.DataFrame(reverse_prefs, columns=[lang_dict.get('col_player', 'Player'), lang_dict.get('col_score', 'Score')])
                     st.markdown(f"<div class='table-container'>{df_reverse_prefs.to_html(escape=False, index=False, classes='custom-table')}</div>", unsafe_allow_html=True)
                 else:
-                    st.info("Nessun altro giocatore lo ha indicato come partner preferito.")
+                    st.info(lang_dict.get('partner_prefs_reverse_none', 'No other player has ranked them as a preferred partner.'))
 
             st.markdown("---")
 
@@ -2505,42 +3606,42 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             
             st.markdown("---")
             st.markdown(f"### {lang_dict.get('training_priorities', 'System Recommended Priority Areas')}")
-            st.markdown("Il sistema ha analizzato i voti del gruppo presente e suggerisce le seguenti 3 priorità:")
-            
+            st.markdown(lang_dict.get('training_system_intro', 'The system has analyzed the grades of the group present and suggests the following 3 priorities:'))
+
             col_p1, col_p2, col_p3 = st.columns(3)
             with col_p1:
                 if len(sorted_skills) > 0:
-                    st.metric(label="🔥 1° Priorità Consigliata", value=sorted_skills[0][0], delta=f"Media: {round(sorted_skills[0][1], 1)}/10", delta_color="inverse")
+                    st.metric(label=lang_dict.get('training_priority_1_label', '🔥 1st Recommended Priority'), value=sorted_skills[0][0], delta=lang_dict.get('training_avg_label', 'Average: {val}/10').format(val=round(sorted_skills[0][1], 1)), delta_color="inverse")
             with col_p2:
                 if len(sorted_skills) > 1:
-                    st.metric(label="⚡ 2° Priorità Consigliata", value=sorted_skills[1][0], delta=f"Media: {round(sorted_skills[1][1], 1)}/10", delta_color="inverse")
+                    st.metric(label=lang_dict.get('training_priority_2_label', '⚡ 2nd Recommended Priority'), value=sorted_skills[1][0], delta=lang_dict.get('training_avg_label', 'Average: {val}/10').format(val=round(sorted_skills[1][1], 1)), delta_color="inverse")
             with col_p3:
                 if len(sorted_skills) > 2:
-                    st.metric(label="💡 3° Priorità Consigliata", value=sorted_skills[2][0], delta=f"Media: {round(sorted_skills[2][1], 1)}/10", delta_color="inverse")
-            
+                    st.metric(label=lang_dict.get('training_priority_3_label', '💡 3rd Recommended Priority'), value=sorted_skills[2][0], delta=lang_dict.get('training_avg_label', 'Average: {val}/10').format(val=round(sorted_skills[2][1], 1)), delta_color="inverse")
+
             st.markdown("---")
-            st.markdown("### ✏️ Personalizzazione e Conferma del Coach")
-            st.markdown("Il coach può modificare le priorità dal menu a tendina e scegliere in quale data salvare l'allenamento nel calendario:")
-            
+            st.markdown(f"### {lang_dict.get('training_custom_title', '✏️ Coach Customization and Confirmation')}")
+            st.markdown(lang_dict.get('training_custom_desc', 'The coach can change the priorities from the dropdown menu and choose which date to save the training in the calendar:'))
+
             with st.form("coach_training_confirmation_form"):
                 col_m1, col_m2, col_m3 = st.columns(3)
-                
+
                 default_p1_idx = ALL_SKILLS.index(top_priorities_system[0]) if top_priorities_system[0] in ALL_SKILLS else 0
                 default_p2_idx = ALL_SKILLS.index(top_priorities_system[1]) if len(top_priorities_system) > 1 and top_priorities_system[1] in ALL_SKILLS else 1
                 default_p3_idx = ALL_SKILLS.index(top_priorities_system[2]) if len(top_priorities_system) > 2 and top_priorities_system[2] in ALL_SKILLS else 2
-                
+
                 with col_m1:
-                    coach_choice_p1 = st.selectbox("1° Priorità (Coach)", options=ALL_SKILLS, index=default_p1_idx)
+                    coach_choice_p1 = st.selectbox(lang_dict.get('training_coach_p1_label', '1st Priority (Coach)'), options=ALL_SKILLS, index=default_p1_idx)
                 with col_m2:
-                    coach_choice_p2 = st.selectbox("2° Priorità (Coach)", options=ALL_SKILLS, index=default_p2_idx)
+                    coach_choice_p2 = st.selectbox(lang_dict.get('training_coach_p2_label', '2nd Priority (Coach)'), options=ALL_SKILLS, index=default_p2_idx)
                 with col_m3:
-                    coach_choice_p3 = st.selectbox("3° Priorità (Coach)", options=ALL_SKILLS, index=default_p3_idx)
-                
+                    coach_choice_p3 = st.selectbox(lang_dict.get('training_coach_p3_label', '3rd Priority (Coach)'), options=ALL_SKILLS, index=default_p3_idx)
+
                 st.markdown("<br>", unsafe_allow_html=True)
-                training_date = st.date_input("📅 In quale data vuoi salvare questo allenamento?", datetime.now() + timedelta(days=2))
-                
-                submit_training = st.form_submit_button("✅ Conferma e Salva nel Calendario", type="primary")
-                
+                training_date = st.date_input(lang_dict.get('training_date_question', '📅 On which date do you want to save this training?'), datetime.now() + timedelta(days=2))
+
+                submit_training = st.form_submit_button(lang_dict.get('training_confirm_btn', '✅ Confirm and Save to Calendar'), type="primary")
+
                 if submit_training:
                     st.session_state.planned_trainings.append({
                         "Data": str(training_date),
@@ -2551,12 +3652,12 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     })
                     log_activity("Training planned", f"{training_date} – {coach_choice_p1}, {coach_choice_p2}, {coach_choice_p3}")
                     if save_data_to_server():
-                        st.success(f"🎉 Allenamento salvato con successo per il giorno {training_date}!")
+                        st.success(lang_dict.get('training_saved_success', '🎉 Training saved successfully for {date}!').format(date=training_date))
                         st.rerun()
 
             st.markdown("---")
-            st.markdown("### 👥 Suddivisione in Gruppi da 4 (in base alla debolezza)")
-            st.markdown("I giocatori selezionati vengono raggruppati in **gruppi da 4** in base alla loro **debolezza principale**, così ogni gruppo può lavorare su un obiettivo specifico e mirato invece di un'unica priorità per tutti.")
+            st.markdown(f"### {lang_dict.get('groups_split_title', '👥 Split into Groups of 4 (based on weakness)')}")
+            st.markdown(lang_dict.get('groups_split_desc', "The selected players are grouped into **groups of 4** based on their **main weakness**, so each group can work on a specific and targeted goal instead of a single priority for everyone."))
 
             def _player_weakest_skill(p):
                 p_vals = p['c_tech'] + p['c_mental']
@@ -2585,7 +3686,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             ]
 
             if len(attending_players) < GROUP_SIZE:
-                st.info(f"Servono almeno {GROUP_SIZE} giocatori disponibili per formare un gruppo. Al momento ce ne sono {len(attending_players)}.")
+                st.info(lang_dict.get('groups_min_players_warning', 'At least {n} available players are needed to form a group. There are currently {count}.').format(n=GROUP_SIZE, count=len(attending_players)))
             else:
                 with st.form("group_training_form"):
                     group_focus_selections = []
@@ -2599,16 +3700,16 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         sorted_group_skills = sorted(group_avgs.items(), key=lambda x: x[1])
                         top_skill, top_val = sorted_group_skills[0]
 
-                        title_suffix = " (gruppo incompleto)" if is_partial else ""
-                        st.markdown(f"**Gruppo {gi + 1}{title_suffix}** — {names}")
+                        title_suffix = lang_dict.get('group_incomplete_suffix', ' (incomplete group)') if is_partial else ""
+                        st.markdown(f"**{lang_dict.get('group_label_prefix', 'Group {n}').format(n=gi + 1)}{title_suffix}** — {names}")
 
                         col_g1, col_g2 = st.columns([1, 1.6])
                         with col_g1:
-                            st.metric(label="🎯 Debolezza principale", value=top_skill, delta=f"Media: {round(top_val, 1)}/10", delta_color="inverse")
+                            st.metric(label=lang_dict.get('group_weak_metric_label', '🎯 Main weakness'), value=top_skill, delta=lang_dict.get('training_avg_label', 'Average: {val}/10').format(val=round(top_val, 1)), delta_color="inverse")
                         with col_g2:
                             default_idx = ALL_SKILLS.index(top_skill) if top_skill in ALL_SKILLS else 0
                             chosen_focus = st.selectbox(
-                                f"Focus allenamento — Gruppo {gi + 1}",
+                                lang_dict.get('group_focus_label', 'Training focus — Group {n}').format(n=gi + 1),
                                 options=ALL_SKILLS,
                                 index=default_idx,
                                 key=f"group_focus_{gi}"
@@ -2617,12 +3718,12 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         st.markdown("---")
 
                     group_training_date = st.date_input(
-                        "📅 In quale data vuoi salvare questi allenamenti di gruppo?",
+                        lang_dict.get('group_date_question', '📅 On which date do you want to save these group trainings?'),
                         datetime.now() + timedelta(days=2),
                         key="group_training_date"
                     )
 
-                    submit_groups = st.form_submit_button("✅ Salva Allenamenti per Gruppo", type="primary")
+                    submit_groups = st.form_submit_button(lang_dict.get('group_save_btn', '✅ Save Group Trainings'), type="primary")
 
                     if submit_groups:
                         for gi, (group_players, chosen_focus) in enumerate(group_focus_selections):
@@ -2636,19 +3737,19 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                             })
                         log_activity("Group trainings planned", f"{group_training_date} – {len(group_focus_selections)} gruppi")
                         if save_data_to_server():
-                            st.success(f"🎉 {len(group_focus_selections)} allenamenti di gruppo salvati per il giorno {group_training_date}!")
+                            st.success(lang_dict.get('group_saved_success', '🎉 {n} group trainings saved for {date}!').format(n=len(group_focus_selections), date=group_training_date))
                             st.rerun()
 
             st.markdown("---")
-            st.markdown("### 📅 Storico Calendario Allenamenti Pianificati")
+            st.markdown(f"### {lang_dict.get('training_history_title', '📅 Planned Trainings Calendar History')}")
             if st.session_state.planned_trainings:
                 df_planned = pd.DataFrame(st.session_state.planned_trainings).sort_values(by="Data").reset_index(drop=True)
                 st.markdown(f"<div class='table-container'>{df_planned.to_html(escape=False, index=False, classes='custom-table')}</div>", unsafe_allow_html=True)
-                
-                st.markdown("#### ✏️ Modifica Allenamento")
+
+                st.markdown(f"#### {lang_dict.get('training_edit_title', '✏️ Edit Training')}")
                 training_options_edit = [f"{t['Data']} - {t['1° Priorità']} ({t['Partecipanti'][:25]}...)" for t in st.session_state.planned_trainings]
                 selected_training_to_edit_label = st.selectbox(
-                    "Seleziona allenamento da modificare",
+                    lang_dict.get('training_select_edit', 'Select training to edit'),
                     training_options_edit,
                     key="edit_training_select"
                 )
@@ -2660,13 +3761,13 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         default_edit_date = datetime.strptime(training_to_edit["Data"], "%Y-%m-%d").date()
                     except (ValueError, TypeError):
                         default_edit_date = datetime.now().date()
-                    edit_date = st.date_input("📅 Data allenamento", default_edit_date, key="edit_training_date")
+                    edit_date = st.date_input(lang_dict.get('training_edit_date_label', '📅 Training date'), default_edit_date, key="edit_training_date")
 
                     all_player_names_edit = [f"{p['fname']} {p['lname']}" for p in squad_players]
                     current_participant_fnames = [x.strip() for x in training_to_edit.get("Partecipanti", "").split(",") if x.strip()]
                     default_selected_full = [name for name in all_player_names_edit if name.split(" ")[0] in current_participant_fnames]
                     edit_attendees = st.multiselect(
-                        "Partecipanti",
+                        lang_dict.get('training_participants_label', 'Participants'),
                         options=all_player_names_edit,
                         default=default_selected_full,
                         key="edit_training_attendees"
@@ -2675,13 +3776,13 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     edit_p1_default = training_to_edit.get("1° Priorità")
                     edit_p2_default = training_to_edit.get("2° Priorità")
                     edit_p3_default = training_to_edit.get("3° Priorità")
-                    edit_p1 = st.selectbox("1° Priorità", options=ALL_SKILLS, index=ALL_SKILLS.index(edit_p1_default) if edit_p1_default in ALL_SKILLS else 0, key="edit_training_p1")
-                    edit_p2 = st.selectbox("2° Priorità", options=ALL_SKILLS, index=ALL_SKILLS.index(edit_p2_default) if edit_p2_default in ALL_SKILLS else 1, key="edit_training_p2")
-                    edit_p3 = st.selectbox("3° Priorità", options=ALL_SKILLS, index=ALL_SKILLS.index(edit_p3_default) if edit_p3_default in ALL_SKILLS else 2, key="edit_training_p3")
+                    edit_p1 = st.selectbox(lang_dict.get('priority1_label', '1st Priority'), options=ALL_SKILLS, index=ALL_SKILLS.index(edit_p1_default) if edit_p1_default in ALL_SKILLS else 0, key="edit_training_p1")
+                    edit_p2 = st.selectbox(lang_dict.get('priority2_label', '2nd Priority'), options=ALL_SKILLS, index=ALL_SKILLS.index(edit_p2_default) if edit_p2_default in ALL_SKILLS else 1, key="edit_training_p2")
+                    edit_p3 = st.selectbox(lang_dict.get('priority3_label', '3rd Priority'), options=ALL_SKILLS, index=ALL_SKILLS.index(edit_p3_default) if edit_p3_default in ALL_SKILLS else 2, key="edit_training_p3")
 
-                    if st.form_submit_button("💾 Salva Modifiche Allenamento", type="primary"):
+                    if st.form_submit_button(lang_dict.get('training_edit_save_btn', '💾 Save Training Changes'), type="primary"):
                         if not edit_attendees:
-                            st.warning("Seleziona almeno un partecipante.")
+                            st.warning(lang_dict.get('training_select_participant_warning', 'Select at least one participant.'))
                         else:
                             st.session_state.planned_trainings[edit_index] = {
                                 "Data": str(edit_date),
@@ -2692,44 +3793,44 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                             }
                             log_activity("Training edited", f"{edit_date} – {edit_p1}, {edit_p2}, {edit_p3}")
                             if save_data_to_server():
-                                st.success("Allenamento modificato con successo!")
+                                st.success(lang_dict.get('training_edit_success', 'Training edited successfully!'))
                                 st.rerun()
 
-                st.markdown("#### 🗑️ Cancella Allenamento dal Calendario")
+                st.markdown(f"#### {lang_dict.get('training_delete_title', '🗑️ Delete Training from Calendar')}")
                 with st.form("delete_training_form"):
                     training_options = [f"{t['Data']} - {t['1° Priorità']} ({t['Partecipanti'][:25]}...)" for t in st.session_state.planned_trainings]
-                    selected_training_to_delete = st.selectbox("Seleziona allenamento da rimuovere", training_options, key="delete_training_select")
+                    selected_training_to_delete = st.selectbox(lang_dict.get('training_select_delete', 'Select training to remove'), training_options, key="delete_training_select")
 
-                    if st.form_submit_button("🗑️ Elimina Allenamento Selezionato", type="secondary"):
+                    if st.form_submit_button(lang_dict.get('training_delete_btn', '🗑️ Delete Selected Training'), type="secondary"):
                         selected_index = training_options.index(selected_training_to_delete)
                         removed_training = st.session_state.planned_trainings.pop(selected_index)
                         if save_data_to_server():
-                            st.success(f"Allenamento del {removed_training['Data']} eliminato con successo dal calendario!")
+                            st.success(lang_dict.get('training_delete_success', 'Training on {date} removed successfully from the calendar!').format(date=removed_training['Data']))
                             st.rerun()
             else:
-                st.info("Nessun allenamento ancora confermato e salvato nel calendario.")
+                st.info(lang_dict.get('training_none_saved', 'No training confirmed and saved to the calendar yet.'))
             
         else:
             st.info(lang_dict.get('training_no_attendees', 'Select at least one player.'))
 
     with coach_tab2:
-        st.subheader("📅 Calendario & Registrazione Partite SNP")
-        st.markdown("Gestione delle **7 giornate SNP**. Per ogni incontro assegna i giocatori NAC e il **risultato di ogni pista**.")
-        
+        st.subheader(lang_dict.get('snp_title', '📅 Calendar & SNP Match Registration'))
+        st.markdown(lang_dict.get('snp_desc', 'Management of the **7 SNP matchdays**. For each fixture, assign the NAC players and the **result of each court**.'))
+
         all_players_list = [f"{p['fname']} {p['lname']}" for p in squad_players]
-        
-        
+
+
         # Inizializza storage delle formazioni SNP se non esiste
         if "snp_lineups" not in st.session_state:
             st.session_state.snp_lineups = {}
         st.session_state.snp_lineups = normalize_snp_lineups(st.session_state.snp_lineups)
-        
+
         # Selettore giornata
         day_labels = [d["label"] for d in SNP_CALENDAR]
-        selected_label = st.selectbox("📆 Seleziona la giornata SNP", day_labels)
+        selected_label = st.selectbox(lang_dict.get('snp_select_day', '📆 Select the SNP matchday'), day_labels)
         selected_day = next(d for d in SNP_CALENDAR if d["label"] == selected_label)
         day_id = selected_day["id"]
-        
+
         st.markdown(f"### {selected_day['label']}")
 
         # Carica lineup esistente se presente
@@ -2759,14 +3860,14 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     })
 
         # --- STEP 1: Formazione — assegna i giocatori alle piste ---
-        st.markdown("#### 1️⃣ Formazione")
-        st.caption("Scegli 2 giocatori NAC per ogni pista. Potrai inserire il risultato in un secondo momento, quando la partita sarà giocata.")
+        st.markdown(f"#### {lang_dict.get('snp_formation_title', '1️⃣ Lineup')}")
+        st.caption(lang_dict.get('snp_formation_desc', 'Choose 2 NAC players for each court. You can enter the result later, once the match has been played.'))
 
         with st.form(f"snp_lineup_form_{day_id}"):
             lineup_inputs = {}
 
             for pista in range(1, 6):
-                st.markdown(f"**Pista {pista}**")
+                st.markdown(f"**{lang_dict.get('snp_court_label', 'Court {n}').format(n=pista)}**")
                 c1, c2 = st.columns([2, 2])
 
                 default_p1 = existing.get(f"pista_{pista}_p1", "")
@@ -2776,7 +3877,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     opts1 = [""] + all_players_list
                     idx1 = opts1.index(default_p1) if default_p1 in opts1 else 0
                     p1 = st.selectbox(
-                        f"Giocatore 1 - Pista {pista}",
+                        lang_dict.get('snp_player1_court', 'Player 1 - Court {n}').format(n=pista),
                         options=opts1,
                         index=idx1,
                         key=f"lineup_day{day_id}_pista{pista}_p1",
@@ -2786,7 +3887,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     opts2 = [""] + all_players_list
                     idx2 = opts2.index(default_p2) if default_p2 in opts2 else 0
                     p2 = st.selectbox(
-                        f"Giocatore 2 - Pista {pista}",
+                        lang_dict.get('snp_player2_court', 'Player 2 - Court {n}').format(n=pista),
                         options=opts2,
                         index=idx2,
                         key=f"lineup_day{day_id}_pista{pista}_p2",
@@ -2797,13 +3898,13 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
 
             st.markdown("---")
             note_giornata = st.text_area(
-                "📝 Note / Commenti giornata (opzionale)",
+                lang_dict.get('snp_notes_label', '📝 Matchday notes / comments (optional)'),
                 value=existing.get("note", ""),
-                placeholder="Osservazioni, infortuni, ecc.",
+                placeholder=lang_dict.get('snp_notes_placeholder', 'Observations, injuries, etc.'),
                 key=f"lineup_note_{day_id}"
             )
 
-            lineup_submitted = st.form_submit_button("💾 Salva Formazione", type="primary")
+            lineup_submitted = st.form_submit_button(lang_dict.get('snp_save_formation_btn', '💾 Save Lineup'), type="primary")
 
             if lineup_submitted:
                 lineup_data = {
@@ -2825,21 +3926,21 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
 
                 log_activity("SNP lineup saved", selected_day["label"])
                 if save_data_to_server():
-                    st.success(f"✅ Formazione salvata per **{selected_day['label']}**! Potrai inserire i risultati quando la partita sarà stata giocata.")
+                    st.success(lang_dict.get('snp_formation_saved', '✅ Lineup saved for **{day}**! You can enter results once the match has been played.').format(day=selected_day['label']))
                     st.rerun()
 
         st.markdown("---")
 
         # --- STEP 2: Risultati — solo per le piste già assegnate ---
-        st.markdown("#### 2️⃣ Risultati")
+        st.markdown(f"#### {lang_dict.get('snp_results_title', '2️⃣ Results')}")
 
         existing = st.session_state.snp_lineups.get(day_id, {})
         pistas_con_giocatori = [p for p in range(1, 6) if existing.get(f"pista_{p}_p1") or existing.get(f"pista_{p}_p2")]
 
         if not pistas_con_giocatori:
-            st.info("ℹ️ Assegna prima i giocatori nella Formazione qui sopra: potrai poi inserire qui i risultati.")
+            st.info(lang_dict.get('snp_results_no_lineup', 'ℹ️ First assign the players in the Lineup above: you can then enter the results here.'))
         else:
-            st.caption("Inserisci il risultato di ogni pista quando disponibile. I giocatori restano quelli assegnati nella Formazione.")
+            st.caption(lang_dict.get('snp_results_desc', 'Enter the result of each court when available. The players remain those assigned in the Lineup.'))
             with st.form(f"snp_results_form_{day_id}"):
                 result_inputs = {}
 
@@ -2850,18 +3951,18 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
 
                     c1, c2 = st.columns([2, 1.5])
                     with c1:
-                        st.markdown(f"**Pista {pista}** — {p1_label} / {p2_label}")
+                        st.markdown(f"**{lang_dict.get('snp_court_label', 'Court {n}').format(n=pista)}** — {p1_label} / {p2_label}")
                     with c2:
                         res = st.text_input(
-                            f"Risultato Pista {pista}",
+                            lang_dict.get('snp_result_court_label', 'Result Court {n}').format(n=pista),
                             value=default_res,
-                            placeholder="es. 6-4, 6-2",
+                            placeholder=lang_dict.get('snp_result_placeholder', 'e.g. 6-4, 6-2'),
                             key=f"results_day{day_id}_pista{pista}_res",
                             label_visibility="collapsed"
                         )
                     result_inputs[pista] = res
 
-                results_submitted = st.form_submit_button("🏆 Salva Risultati", type="primary")
+                results_submitted = st.form_submit_button(lang_dict.get('snp_save_results_btn', '🏆 Save Results'), type="primary")
 
                 if results_submitted:
                     lineup_data = dict(existing)
@@ -2873,21 +3974,21 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
 
                     log_activity("SNP results saved", selected_day["label"])
                     if save_data_to_server():
-                        st.success(f"✅ Risultati salvati per **{selected_day['label']}**!")
+                        st.success(lang_dict.get('snp_results_saved', '✅ Results saved for **{day}**!').format(day=selected_day['label']))
                         st.rerun()
 
         # --- Riepilogo completo delle 7 giornate ---
         st.markdown("---")
-        st.markdown("### 📋 Riepilogo Completo Calendario SNP")
-        
+        st.markdown(f"### {lang_dict.get('snp_summary_title', '📋 Complete SNP Calendar Summary')}")
+
         for day in SNP_CALENDAR:
             did = day["id"]
             data = st.session_state.snp_lineups.get(did, {})
-            
+
             # Conta quante piste hanno risultato
             piste_con_risultato = sum(1 for p in range(1, 6) if data.get(f"pista_{p}_risultato", "").strip())
-            summary = f"{piste_con_risultato}/5 piste compilate" if data else "Non compilata"
-            
+            summary = lang_dict.get('snp_courts_filled', '{n}/5 courts filled').format(n=piste_con_risultato) if data else lang_dict.get('snp_not_filled', 'Not filled in')
+
             with st.expander(f"**{day['label']}**   →   {summary}", expanded=False):
                 if data:
                     rows = []
@@ -2896,26 +3997,26 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         p2 = data.get(f"pista_{pista}_p2", "")
                         res = data.get(f"pista_{pista}_risultato", "")
                         rows.append({
-                            "Pista": f"Pista {pista}",
-                            "Giocatore 1": p1 or "—",
-                            "Giocatore 2": p2 or "—",
-                            "Risultato": res or "—"
+                            lang_dict.get('snp_col_court', 'Court'): lang_dict.get('snp_court_label', 'Court {n}').format(n=pista),
+                            lang_dict.get('snp_col_player1', 'Player 1'): p1 or "—",
+                            lang_dict.get('snp_col_player2', 'Player 2'): p2 or "—",
+                            lang_dict.get('snp_col_result', 'Result'): res or "—"
                         })
                     df_day = pd.DataFrame(rows)
                     st.markdown(f"<div class='table-container'>{df_day.to_html(escape=False, index=False, classes='custom-table')}</div>", unsafe_allow_html=True)
-                    
+
                     if data.get("note"):
-                        st.markdown(f"**Note:** {data['note']}")
+                        st.markdown(lang_dict.get('snp_notes_display', '**Notes:** {notes}').format(notes=data['note']))
                 else:
-                    st.info("Nessuna formazione ancora inserita per questa giornata.")
-        
+                    st.info(lang_dict.get('snp_no_lineup_yet', 'No lineup entered yet for this matchday.'))
+
         # Pulsante reset
-        with st.expander("🗑️ Reset dati SNP"):
-            if st.button("Cancella TUTTE le formazioni e risultati SNP", type="secondary"):
+        with st.expander(lang_dict.get('snp_reset_expander', '🗑️ Reset SNP data')):
+            if st.button(lang_dict.get('snp_reset_btn', 'Delete ALL SNP lineups and results'), type="secondary"):
                 st.session_state.snp_lineups = {}
                 st.session_state.match_results = [m for m in st.session_state.match_results if m.get("Tipo") != "SNP"]
                 if save_data_to_server():
-                    st.success("Dati SNP resettati.")
+                    st.success(lang_dict.get('snp_reset_success', 'SNP data reset.'))
                     st.rerun()
 
     with coach_tab3:
@@ -3086,9 +4187,9 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             
             st.markdown("<br>", unsafe_allow_html=True)
             
-            if st.button("✅ Conferma Selezione Pairing", type="primary"):
+            if st.button(lang_dict.get('pairing_confirm_btn', '✅ Confirm Pairing Selection'), type="primary"):
                 st.session_state.confirmed_pairing = pd.DataFrame(new_confirmed_pairs)
-                st.success("Pairing confermato e salvato con successo!")
+                st.success(lang_dict.get('pairing_confirm_success', 'Pairing confirmed and saved successfully!'))
                 
             if "unmatched_cache" in st.session_state and st.session_state.unmatched_cache:
                 st.warning(f"⚠️ {lang_dict.get('unmatched_warn', 'Unmatched warning')}")
