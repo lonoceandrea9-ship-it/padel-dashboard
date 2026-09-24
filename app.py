@@ -1420,6 +1420,7 @@ elif st.session_state.nav_mode == "Player_Login":
                     if player_pwd_input.strip().lower() == player_obj["fname"].lower():
                         st.session_state.authenticated_player = selected_fname
                         st.session_state.force_password_change = True
+                        log_activity("Player login (first access)", f"{player_obj['fname']} {player_obj['lname']}")
                         st.rerun()
                     else:
                         st.error("❌ Primo accesso: inserisci il tuo nome di battesimo come password.")
@@ -1428,6 +1429,7 @@ elif st.session_state.nav_mode == "Player_Login":
                         st.session_state.authenticated_player = selected_fname
                         st.session_state.force_password_change = False
                         st.session_state.nav_mode = "Player_Dashboard"
+                        log_activity("Player login", f"{player_obj['fname']} {player_obj['lname']}")
                         st.rerun()
                     else:
                         st.error(f"❌ {lang_dict.get('wrong_pwd', 'Wrong password')}")
@@ -2008,7 +2010,40 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 if save_data_to_server():
                     st.session_state.nav_mode = "Player_Dashboard"
                     st.rerun()
-            
+
+        st.markdown("---")
+        st.markdown("### 🔑 Gestione Password Giocatori")
+        st.caption("Visualizza e modifica la password di ciascun giocatore. Le password sono salvate in chiaro: usa questa funzione con cautela.")
+        with st.expander("Mostra / modifica tutte le password", expanded=False):
+            with st.form("admin_manage_passwords_form"):
+                new_pwd_values = {}
+                for p in squad_players:
+                    col_pw1, col_pw2 = st.columns([2, 2])
+                    with col_pw1:
+                        st.markdown(f"**{p['fname']} {p['lname']}**")
+                    with col_pw2:
+                        new_pwd_values[p['fname']] = st.text_input(
+                            f"Password di {p['fname']}",
+                            value=p.get("password", p["fname"]),
+                            key=f"admin_pwd_{p['fname']}_{p['lname']}",
+                            label_visibility="collapsed"
+                        )
+                if st.form_submit_button("💾 Salva Tutte le Password", type="primary"):
+                    changed = []
+                    for p in squad_players:
+                        new_val = new_pwd_values.get(p['fname'], "").strip()
+                        if new_val and new_val != p.get("password", p["fname"]):
+                            p["password"] = new_val
+                            p["first_login_done"] = True
+                            changed.append(f"{p['fname']} {p['lname']}")
+                    if changed:
+                        log_activity("Admin updated player password(s)", ", ".join(changed))
+                        if save_data_to_server():
+                            st.success(f"✅ Password aggiornate per: {', '.join(changed)}")
+                            st.rerun()
+                    else:
+                        st.info("Nessuna modifica da salvare.")
+
     if st.session_state.show_roster_modal:
         st.markdown("---")
         st.markdown("### 👥 Pannello Gestione Rosa Giocatori (Aggiungi o Rimuovi)")
@@ -2488,6 +2523,91 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         st.rerun()
 
             st.markdown("---")
+            st.markdown("### 👥 Suddivisione in Gruppi da 4 (in base alla debolezza)")
+            st.markdown("I giocatori selezionati vengono raggruppati in **gruppi da 4** in base alla loro **debolezza principale**, così ogni gruppo può lavorare su un obiettivo specifico e mirato invece di un'unica priorità per tutti.")
+
+            def _player_weakest_skill(p):
+                p_vals = p['c_tech'] + p['c_mental']
+                min_idx = min(range(len(p_vals)), key=lambda i: p_vals[i])
+                return ALL_SKILLS[min_idx], p_vals[min_idx]
+
+            def _group_skill_averages(group_players):
+                averages = {}
+                for idx, skill in enumerate(ALL_SKILLS):
+                    vals = [(gp['c_tech'] + gp['c_mental'])[idx] for gp in group_players]
+                    averages[skill] = sum(vals) / len(vals) if vals else 0.0
+                return averages
+
+            players_with_weakness = []
+            for p in attending_players:
+                skill_name, skill_val = _player_weakest_skill(p)
+                players_with_weakness.append({"player": p, "weak_skill": skill_name, "weak_val": skill_val})
+
+            # Raggruppa vicino chi condivide la stessa debolezza principale, poi divide in blocchi da 4
+            players_with_weakness.sort(key=lambda x: (x["weak_skill"], x["weak_val"]))
+
+            GROUP_SIZE = 4
+            training_groups = [
+                players_with_weakness[i:i + GROUP_SIZE]
+                for i in range(0, len(players_with_weakness), GROUP_SIZE)
+            ]
+
+            if len(attending_players) < GROUP_SIZE:
+                st.info(f"Servono almeno {GROUP_SIZE} giocatori disponibili per formare un gruppo. Al momento ce ne sono {len(attending_players)}.")
+            else:
+                with st.form("group_training_form"):
+                    group_focus_selections = []
+
+                    for gi, group in enumerate(training_groups):
+                        group_players = [g["player"] for g in group]
+                        names = ", ".join(f"{gp['fname']} {gp['lname']}" for gp in group_players)
+                        is_partial = len(group_players) < GROUP_SIZE
+
+                        group_avgs = _group_skill_averages(group_players)
+                        sorted_group_skills = sorted(group_avgs.items(), key=lambda x: x[1])
+                        top_skill, top_val = sorted_group_skills[0]
+
+                        title_suffix = " (gruppo incompleto)" if is_partial else ""
+                        st.markdown(f"**Gruppo {gi + 1}{title_suffix}** — {names}")
+
+                        col_g1, col_g2 = st.columns([1, 1.6])
+                        with col_g1:
+                            st.metric(label="🎯 Debolezza principale", value=top_skill, delta=f"Media: {round(top_val, 1)}/10", delta_color="inverse")
+                        with col_g2:
+                            default_idx = ALL_SKILLS.index(top_skill) if top_skill in ALL_SKILLS else 0
+                            chosen_focus = st.selectbox(
+                                f"Focus allenamento — Gruppo {gi + 1}",
+                                options=ALL_SKILLS,
+                                index=default_idx,
+                                key=f"group_focus_{gi}"
+                            )
+                        group_focus_selections.append((group_players, chosen_focus))
+                        st.markdown("---")
+
+                    group_training_date = st.date_input(
+                        "📅 In quale data vuoi salvare questi allenamenti di gruppo?",
+                        datetime.now() + timedelta(days=2),
+                        key="group_training_date"
+                    )
+
+                    submit_groups = st.form_submit_button("✅ Salva Allenamenti per Gruppo", type="primary")
+
+                    if submit_groups:
+                        for gi, (group_players, chosen_focus) in enumerate(group_focus_selections):
+                            st.session_state.planned_trainings.append({
+                                "Data": str(group_training_date),
+                                "Partecipanti": ", ".join(gp['fname'] for gp in group_players),
+                                "1° Priorità": chosen_focus,
+                                "2° Priorità": "-",
+                                "3° Priorità": "-",
+                                "Gruppo": f"Gruppo {gi + 1}"
+                            })
+                        log_activity("Group trainings planned", f"{group_training_date} – {len(group_focus_selections)} gruppi")
+                        if save_data_to_server():
+                            st.success(f"🎉 {len(group_focus_selections)} allenamenti di gruppo salvati per il giorno {group_training_date}!")
+                            st.rerun()
+
+            st.markdown("---")
             st.markdown("### 📅 Storico Calendario Allenamenti Pianificati")
             if st.session_state.planned_trainings:
                 df_planned = pd.DataFrame(st.session_state.planned_trainings).sort_values(by="Data").reset_index(drop=True)
@@ -2579,22 +2699,47 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         day_id = selected_day["id"]
         
         st.markdown(f"### {selected_day['label']}")
-        st.caption("Per ogni pista: scegli 2 giocatori NAC + inserisci il risultato della pista")
-        
+
         # Carica lineup esistente se presente
         existing = st.session_state.snp_lineups.get(day_id, {})
-        
-        with st.form(f"snp_day_form_{day_id}"):
-            piste_data = {}
-            
+
+        def _sync_snp_match_results(day_id, selected_day, lineup_data):
+            """Ricostruisce le righe di match_results per questa giornata SNP a partire dal lineup corrente."""
+            st.session_state.match_results = [
+                m for m in st.session_state.match_results
+                if not (m.get("Tipo") == "SNP" and m.get("Giornata_ID") == day_id)
+            ]
+            for pista in range(1, 6):
+                p1 = lineup_data.get(f"pista_{pista}_p1", "")
+                p2 = lineup_data.get(f"pista_{pista}_p2", "")
+                res = lineup_data.get(f"pista_{pista}_risultato", "")
+                if p1 or p2 or res:
+                    st.session_state.match_results.append({
+                        "Data": selected_day["date"],
+                        "Tipo": "SNP",
+                        "Giornata_ID": day_id,
+                        "Incontro": selected_day["label"],
+                        "Casa": selected_day["home"],
+                        "Trasferta": selected_day["away"],
+                        "Pista": f"Pista {pista}",
+                        "Giocatori_NAC": f"{p1} / {p2}" if p1 and p2 else (p1 or p2 or "—"),
+                        "Risultato_Pista": res or "—"
+                    })
+
+        # --- STEP 1: Formazione — assegna i giocatori alle piste ---
+        st.markdown("#### 1️⃣ Formazione")
+        st.caption("Scegli 2 giocatori NAC per ogni pista. Potrai inserire il risultato in un secondo momento, quando la partita sarà giocata.")
+
+        with st.form(f"snp_lineup_form_{day_id}"):
+            lineup_inputs = {}
+
             for pista in range(1, 6):
                 st.markdown(f"**Pista {pista}**")
-                c1, c2, c3 = st.columns([2, 2, 1.5])
-                
+                c1, c2 = st.columns([2, 2])
+
                 default_p1 = existing.get(f"pista_{pista}_p1", "")
                 default_p2 = existing.get(f"pista_{pista}_p2", "")
-                default_res = existing.get(f"pista_{pista}_risultato", "")
-                
+
                 with c1:
                     opts1 = [""] + all_players_list
                     idx1 = opts1.index(default_p1) if default_p1 in opts1 else 0
@@ -2602,7 +2747,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         f"Giocatore 1 - Pista {pista}",
                         options=opts1,
                         index=idx1,
-                        key=f"day{day_id}_pista{pista}_p1",
+                        key=f"lineup_day{day_id}_pista{pista}_p1",
                         label_visibility="collapsed"
                     )
                 with c2:
@@ -2612,41 +2757,23 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         f"Giocatore 2 - Pista {pista}",
                         options=opts2,
                         index=idx2,
-                        key=f"day{day_id}_pista{pista}_p2",
+                        key=f"lineup_day{day_id}_pista{pista}_p2",
                         label_visibility="collapsed"
                     )
-                with c3:
-                    res = st.text_input(
-                        f"Risultato Pista {pista}",
-                        value=default_res,
-                        placeholder="es. 6-4, 6-2",
-                        key=f"day{day_id}_pista{pista}_res",
-                        label_visibility="collapsed"
-                    )
-                
-                piste_data[pista] = {"p1": p1, "p2": p2, "risultato": res}
-            
+
+                lineup_inputs[pista] = {"p1": p1, "p2": p2}
+
             st.markdown("---")
             note_giornata = st.text_area(
                 "📝 Note / Commenti giornata (opzionale)",
                 value=existing.get("note", ""),
-                placeholder="Osservazioni, infortuni, ecc."
+                placeholder="Osservazioni, infortuni, ecc.",
+                key=f"lineup_note_{day_id}"
             )
-            
-            submitted = st.form_submit_button("💾 Salva Formazioni e Risultati di tutte le Piste", type="primary")
-            
-            if submitted:
-                # Calcola risultato complessivo della giornata (vittorie piste)
-                vittorie_nac = 0
-                sconfitte_nac = 0
-                for pista, info in piste_data.items():
-                    r = info["risultato"].strip().lower()
-                    if r:
-                        # Heuristica semplice: se inizia con 6 o 7 e contiene "-" conta come possibile vittoria
-                        # L'utente inserisce il risultato dal punto di vista NAC
-                        # Per semplicità lasciamo il conteggio manuale, ma mostriamo i singoli risultati
-                        pass
-                
+
+            lineup_submitted = st.form_submit_button("💾 Salva Formazione", type="primary")
+
+            if lineup_submitted:
                 lineup_data = {
                     "date": selected_day["date"],
                     "home": selected_day["home"],
@@ -2654,39 +2781,69 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     "label": selected_day["label"],
                     "note": note_giornata.strip()
                 }
-                
-                for pista, info in piste_data.items():
+
+                for pista, info in lineup_inputs.items():
                     lineup_data[f"pista_{pista}_p1"] = info["p1"]
                     lineup_data[f"pista_{pista}_p2"] = info["p2"]
-                    lineup_data[f"pista_{pista}_risultato"] = info["risultato"].strip()
-                
+                    # Il risultato non si tocca qui: si inserisce nello step 2, più avanti
+                    lineup_data[f"pista_{pista}_risultato"] = existing.get(f"pista_{pista}_risultato", "")
+
                 st.session_state.snp_lineups[day_id] = lineup_data
-                
-                # Aggiorna match_results per lo storico
-                st.session_state.match_results = [
-                    m for m in st.session_state.match_results
-                    if not (m.get("Tipo") == "SNP" and m.get("Giornata_ID") == day_id)
-                ]
-                
-                for pista, info in piste_data.items():
-                    if info["p1"] or info["p2"] or info["risultato"].strip():
-                        st.session_state.match_results.append({
-                            "Data": selected_day["date"],
-                            "Tipo": "SNP",
-                            "Giornata_ID": day_id,
-                            "Incontro": selected_day["label"],
-                            "Casa": selected_day["home"],
-                            "Trasferta": selected_day["away"],
-                            "Pista": f"Pista {pista}",
-                            "Giocatori_NAC": f"{info['p1']} / {info['p2']}" if info["p1"] and info["p2"] else (info["p1"] or info["p2"] or "—"),
-                            "Risultato_Pista": info["risultato"].strip() or "—"
-                        })
-                
-                log_activity("SNP lineup & results saved", selected_day["label"])
+                _sync_snp_match_results(day_id, selected_day, lineup_data)
+
+                log_activity("SNP lineup saved", selected_day["label"])
                 if save_data_to_server():
-                    st.success(f"✅ Formazioni e risultati di tutte le piste salvati per **{selected_day['label']}**!")
+                    st.success(f"✅ Formazione salvata per **{selected_day['label']}**! Potrai inserire i risultati quando la partita sarà stata giocata.")
                     st.rerun()
-        
+
+        st.markdown("---")
+
+        # --- STEP 2: Risultati — solo per le piste già assegnate ---
+        st.markdown("#### 2️⃣ Risultati")
+
+        existing = st.session_state.snp_lineups.get(day_id, {})
+        pistas_con_giocatori = [p for p in range(1, 6) if existing.get(f"pista_{p}_p1") or existing.get(f"pista_{p}_p2")]
+
+        if not pistas_con_giocatori:
+            st.info("ℹ️ Assegna prima i giocatori nella Formazione qui sopra: potrai poi inserire qui i risultati.")
+        else:
+            st.caption("Inserisci il risultato di ogni pista quando disponibile. I giocatori restano quelli assegnati nella Formazione.")
+            with st.form(f"snp_results_form_{day_id}"):
+                result_inputs = {}
+
+                for pista in pistas_con_giocatori:
+                    p1_label = existing.get(f"pista_{pista}_p1", "") or "—"
+                    p2_label = existing.get(f"pista_{pista}_p2", "") or "—"
+                    default_res = existing.get(f"pista_{pista}_risultato", "")
+
+                    c1, c2 = st.columns([2, 1.5])
+                    with c1:
+                        st.markdown(f"**Pista {pista}** — {p1_label} / {p2_label}")
+                    with c2:
+                        res = st.text_input(
+                            f"Risultato Pista {pista}",
+                            value=default_res,
+                            placeholder="es. 6-4, 6-2",
+                            key=f"results_day{day_id}_pista{pista}_res",
+                            label_visibility="collapsed"
+                        )
+                    result_inputs[pista] = res
+
+                results_submitted = st.form_submit_button("🏆 Salva Risultati", type="primary")
+
+                if results_submitted:
+                    lineup_data = dict(existing)
+                    for pista, res in result_inputs.items():
+                        lineup_data[f"pista_{pista}_risultato"] = res.strip()
+
+                    st.session_state.snp_lineups[day_id] = lineup_data
+                    _sync_snp_match_results(day_id, selected_day, lineup_data)
+
+                    log_activity("SNP results saved", selected_day["label"])
+                    if save_data_to_server():
+                        st.success(f"✅ Risultati salvati per **{selected_day['label']}**!")
+                        st.rerun()
+
         # --- Riepilogo completo delle 7 giornate ---
         st.markdown("---")
         st.markdown("### 📋 Riepilogo Completo Calendario SNP")
