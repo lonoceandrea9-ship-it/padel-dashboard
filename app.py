@@ -1420,6 +1420,7 @@ elif st.session_state.nav_mode == "Player_Login":
                     if player_pwd_input.strip().lower() == player_obj["fname"].lower():
                         st.session_state.authenticated_player = selected_fname
                         st.session_state.force_password_change = True
+                        log_activity("Player login (first access)", f"{player_obj['fname']} {player_obj['lname']}")
                         st.rerun()
                     else:
                         st.error("❌ Primo accesso: inserisci il tuo nome di battesimo come password.")
@@ -1428,6 +1429,7 @@ elif st.session_state.nav_mode == "Player_Login":
                         st.session_state.authenticated_player = selected_fname
                         st.session_state.force_password_change = False
                         st.session_state.nav_mode = "Player_Dashboard"
+                        log_activity("Player login", f"{player_obj['fname']} {player_obj['lname']}")
                         st.rerun()
                     else:
                         st.error(f"❌ {lang_dict.get('wrong_pwd', 'Wrong password')}")
@@ -2008,7 +2010,40 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 if save_data_to_server():
                     st.session_state.nav_mode = "Player_Dashboard"
                     st.rerun()
-            
+
+        st.markdown("---")
+        st.markdown("### 🔑 Gestione Password Giocatori")
+        st.caption("Visualizza e modifica la password di ciascun giocatore. Le password sono salvate in chiaro: usa questa funzione con cautela.")
+        with st.expander("Mostra / modifica tutte le password", expanded=False):
+            with st.form("admin_manage_passwords_form"):
+                new_pwd_values = {}
+                for p in squad_players:
+                    col_pw1, col_pw2 = st.columns([2, 2])
+                    with col_pw1:
+                        st.markdown(f"**{p['fname']} {p['lname']}**")
+                    with col_pw2:
+                        new_pwd_values[p['fname']] = st.text_input(
+                            f"Password di {p['fname']}",
+                            value=p.get("password", p["fname"]),
+                            key=f"admin_pwd_{p['fname']}_{p['lname']}",
+                            label_visibility="collapsed"
+                        )
+                if st.form_submit_button("💾 Salva Tutte le Password", type="primary"):
+                    changed = []
+                    for p in squad_players:
+                        new_val = new_pwd_values.get(p['fname'], "").strip()
+                        if new_val and new_val != p.get("password", p["fname"]):
+                            p["password"] = new_val
+                            p["first_login_done"] = True
+                            changed.append(f"{p['fname']} {p['lname']}")
+                    if changed:
+                        log_activity("Admin updated player password(s)", ", ".join(changed))
+                        if save_data_to_server():
+                            st.success(f"✅ Password aggiornate per: {', '.join(changed)}")
+                            st.rerun()
+                    else:
+                        st.info("Nessuna modifica da salvare.")
+
     if st.session_state.show_roster_modal:
         st.markdown("---")
         st.markdown("### 👥 Pannello Gestione Rosa Giocatori (Aggiungi o Rimuovi)")
