@@ -192,10 +192,14 @@ def get_db_connection():
     """Open a new connection to the Postgres database configured via DATABASE_URL.
     Returns None if no database is configured (e.g. running locally without one)."""
     if not DATABASE_URL:
+        print("[DB] DATABASE_URL is not set (empty/None) in this container's environment.", flush=True)
         return None
     try:
         return psycopg2.connect(DATABASE_URL, sslmode="require")
-    except Exception:
+    except Exception as e:
+        # Print (not just swallow) so the real cause shows up in `railway logs` /
+        # the Railway deploy-log viewer instead of being invisible.
+        print(f"[DB] Connection failed: {type(e).__name__}: {e}", flush=True)
         return None
 
 
@@ -273,6 +277,7 @@ def save_data_to_server(retries=3, delay=0.7):
             return True
         except Exception as e:
             last_error = str(e)
+            print(f"[DB] Save query failed: {type(e).__name__}: {e}", flush=True)
             time.sleep(delay)
         finally:
             conn.close()
@@ -302,6 +307,7 @@ def load_data_from_server(retries=3, delay=0.7):
                     return True, (row[0] if row else None)
         except Exception as e:
             last_error = str(e)
+            print(f"[DB] Load query failed: {type(e).__name__}: {e}", flush=True)
             time.sleep(delay)
         finally:
             conn.close()
@@ -977,8 +983,10 @@ if "force_password_change" not in st.session_state:
     st.session_state.force_password_change = False
 
 # Caricamento dati salvati in precedenza sul server se esistono
+print(f"[DB] DATABASE_URL present at startup: {bool(DATABASE_URL)}", flush=True)
 init_db()
 db_reachable, saved_server_data = load_data_from_server()
+print(f"[DB] Startup load: reachable={db_reachable}", flush=True)
 
 if not db_reachable and "squad_data" not in st.session_state:
     # The database could not be reached even after retries. Do NOT fall back to
