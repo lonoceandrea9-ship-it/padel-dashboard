@@ -2057,11 +2057,61 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 df_planned = pd.DataFrame(st.session_state.planned_trainings).sort_values(by="Data").reset_index(drop=True)
                 st.markdown(f"<div class='table-container'>{df_planned.to_html(escape=False, index=False, classes='custom-table')}</div>", unsafe_allow_html=True)
                 
+                st.markdown("#### ✏️ Modifica Allenamento")
+                training_options_edit = [f"{t['Data']} - {t['1° Priorità']} ({t['Partecipanti'][:25]}...)" for t in st.session_state.planned_trainings]
+                selected_training_to_edit_label = st.selectbox(
+                    "Seleziona allenamento da modificare",
+                    training_options_edit,
+                    key="edit_training_select"
+                )
+                edit_index = training_options_edit.index(selected_training_to_edit_label)
+                training_to_edit = st.session_state.planned_trainings[edit_index]
+
+                with st.form("edit_training_form"):
+                    try:
+                        default_edit_date = datetime.strptime(training_to_edit["Data"], "%Y-%m-%d").date()
+                    except (ValueError, TypeError):
+                        default_edit_date = datetime.now().date()
+                    edit_date = st.date_input("📅 Data allenamento", default_edit_date, key="edit_training_date")
+
+                    all_player_names_edit = [f"{p['fname']} {p['lname']}" for p in squad_players]
+                    current_participant_fnames = [x.strip() for x in training_to_edit.get("Partecipanti", "").split(",") if x.strip()]
+                    default_selected_full = [name for name in all_player_names_edit if name.split(" ")[0] in current_participant_fnames]
+                    edit_attendees = st.multiselect(
+                        "Partecipanti",
+                        options=all_player_names_edit,
+                        default=default_selected_full,
+                        key="edit_training_attendees"
+                    )
+
+                    edit_p1_default = training_to_edit.get("1° Priorità")
+                    edit_p2_default = training_to_edit.get("2° Priorità")
+                    edit_p3_default = training_to_edit.get("3° Priorità")
+                    edit_p1 = st.selectbox("1° Priorità", options=ALL_SKILLS, index=ALL_SKILLS.index(edit_p1_default) if edit_p1_default in ALL_SKILLS else 0, key="edit_training_p1")
+                    edit_p2 = st.selectbox("2° Priorità", options=ALL_SKILLS, index=ALL_SKILLS.index(edit_p2_default) if edit_p2_default in ALL_SKILLS else 1, key="edit_training_p2")
+                    edit_p3 = st.selectbox("3° Priorità", options=ALL_SKILLS, index=ALL_SKILLS.index(edit_p3_default) if edit_p3_default in ALL_SKILLS else 2, key="edit_training_p3")
+
+                    if st.form_submit_button("💾 Salva Modifiche Allenamento", type="primary"):
+                        if not edit_attendees:
+                            st.warning("Seleziona almeno un partecipante.")
+                        else:
+                            st.session_state.planned_trainings[edit_index] = {
+                                "Data": str(edit_date),
+                                "Partecipanti": ", ".join([p.split(" ")[0] for p in edit_attendees]),
+                                "1° Priorità": edit_p1,
+                                "2° Priorità": edit_p2,
+                                "3° Priorità": edit_p3
+                            }
+                            log_activity("Training edited", f"{edit_date} – {edit_p1}, {edit_p2}, {edit_p3}")
+                            if save_data_to_server():
+                                st.success("Allenamento modificato con successo!")
+                                st.rerun()
+
                 st.markdown("#### 🗑️ Cancella Allenamento dal Calendario")
                 with st.form("delete_training_form"):
                     training_options = [f"{t['Data']} - {t['1° Priorità']} ({t['Partecipanti'][:25]}...)" for t in st.session_state.planned_trainings]
-                    selected_training_to_delete = st.selectbox("Seleziona allenamento da rimuovere", training_options)
-                    
+                    selected_training_to_delete = st.selectbox("Seleziona allenamento da rimuovere", training_options, key="delete_training_select")
+
                     if st.form_submit_button("🗑️ Elimina Allenamento Selezionato", type="secondary"):
                         selected_index = training_options.index(selected_training_to_delete)
                         removed_training = st.session_state.planned_trainings.pop(selected_index)
