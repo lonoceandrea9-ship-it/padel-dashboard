@@ -12,7 +12,7 @@ import psycopg2.extras
 
 # Streamlit page configuration
 st.set_page_config(
-    page_title="Nac Team Performance App",
+    page_title="PadelAI",
     page_icon="🎾",
     layout="wide",
     initial_sidebar_state="auto"
@@ -317,7 +317,7 @@ def load_data_from_server(retries=3, delay=0.7):
 # --- TRADUZIONI COMPLETE (6 LINGUE) ---
 translations = {
     "Italiano": {
-        "welcome": "Nac Team Performance App",
+        "welcome": "PadelAI",
         "select_area": "Seleziona la tua area di accesso per continuare:",
         "player_area": "Area Giocatore",
         "player_desc": "Accedi alla tua scheda personale protetta da password per visualizzare e aggiornare le tue valutazioni.",
@@ -423,7 +423,7 @@ translations = {
         "unmatched_warn": "Giocatori selezionati ma rimasti esclusi in questo turno per sbilanciamento numerico tra Destra e Sinistra:"
     },
     "English": {
-        "welcome": "Nac Team Performance App",
+        "welcome": "PadelAI",
         "select_area": "Select your access area to continue:",
         "player_area": "Player Area",
         "player_desc": "Access your password-protected personal card to view and update your evaluations.",
@@ -529,7 +529,7 @@ translations = {
         "unmatched_warn": "Selected players left out in this round due to numerical imbalance between Right and Left:"
     },
     "Español": {
-        "welcome": "Nac Team Performance App",
+        "welcome": "PadelAI",
         "select_area": "Selecciona tu área de acceso para continuar:",
         "player_area": "Área de Jugador",
         "player_desc": "Accede a tu ficha personal protegida con contraseña para ver y actualizar tus valoraciones.",
@@ -635,7 +635,7 @@ translations = {
         "unmatched_warn": "Jugadores seleccionados pero excluidos en esta ronda por desequilibrio numérico entre Derecha e Izquierda:"
     },
     "Svenska": {
-        "welcome": "Nac Team Performance App",
+        "welcome": "PadelAI",
         "select_area": "Välj ditt åtkomstområde för att fortsätta:",
         "player_area": "Spelarområde",
         "player_desc": "Gå till ditt lösenordsskyddade personliga kort för att visa och uppdatera dina utvärderingar.",
@@ -741,7 +741,7 @@ translations = {
         "unmatched_warn": "Spelare som valdes men utelämnades denna omgång på grund av numerisk obalans mellan Höger och Vänster:"
     },
     "Nederlands": {
-        "welcome": "Nac Team Performance App",
+        "welcome": "PadelAI",
         "select_area": "Selecteer je toegangsgebied om door te gaan:",
         "player_area": "Spelersgebied",
         "player_desc": "Ga naar je met een wachtwoord beveiligde persoonlijke kaart om je evaluaties te bekijken en bij te werken.",
@@ -847,7 +847,7 @@ translations = {
         "unmatched_warn": "Geselecteerde spelers weggelaten in deze ronde vanwege numeriek evenwicht tussen Rechts en Links:"
     },
     "Dansk": {
-        "welcome": "Nac Team Performance App",
+        "welcome": "PadelAI",
         "select_area": "Vælg dit adgangsområde for at fortsætte:",
         "player_area": "Spillerområde",
         "player_desc": "Gå til dit adgangskodebeskyttede personlige kort for at se og opdatere dine evalueringer.",
@@ -1369,7 +1369,7 @@ if st.session_state.get("force_password_change", False):
 
 # --- HOME SELECTION ---
 elif st.session_state.nav_mode == "Home":
-    st.title(f"🎾 {lang_dict.get('welcome', 'Nac Team Performance App')}")
+    st.title(f"🎾 {lang_dict.get('welcome', 'PadelAI')}")
     st.markdown(lang_dict.get('select_area', 'Select area:'))
     
     col_home1, col_home2 = st.columns(2)
