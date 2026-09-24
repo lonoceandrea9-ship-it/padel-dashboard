@@ -166,6 +166,17 @@ st.markdown("""
         color: #64748b !important;
         -webkit-text-fill-color: #64748b !important;
     }
+    /* Date input: black text on white background (was unreadable white-on-white) */
+    div[data-testid="stDateInput"] input,
+    div[data-testid="stDateInput"] div[data-baseweb="input"],
+    div[data-testid="stDateInput"] div[data-baseweb="input"] > div {
+        background-color: #ffffff !important;
+    }
+    div[data-testid="stDateInput"] input,
+    div[data-testid="stDateInput"] * {
+        color: #000000 !important;
+        -webkit-text-fill-color: #000000 !important;
+    }
     </style>
 """, unsafe_allow_html=True)
 
