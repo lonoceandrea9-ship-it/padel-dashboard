@@ -5,6 +5,7 @@ import plotly.graph_objects as go
 from datetime import datetime, timedelta
 import json
 import os
+import time
 import psycopg2
 import psycopg2.extras
 
@@ -240,7 +241,10 @@ def log_activity(action, detail=""):
     # Keep last 500 entries
     st.session_state.activity_log = st.session_state.activity_log[:500]
 
-def save_data_to_server():
+def save_data_to_server(retries=3, delay=0.7):
+    """Persist current session data to Postgres.
+    Returns True on confirmed success, False on failure (and shows a visible
+    error so a failed save is never mistaken for a successful one)."""
     data_to_save = {
         "squad_data": st.session_state.squad_data,
         "planned_trainings": st.session_state.planned_trainings,
@@ -248,39 +252,60 @@ def save_data_to_server():
         "snp_lineups": st.session_state.get("snp_lineups", {}),
         "activity_log": st.session_state.get("activity_log", [])
     }
-    conn = get_db_connection()
-    if conn is None:
-        return
-    try:
-        with conn:
-            with conn.cursor() as cur:
-                cur.execute(
-                    """
-                    INSERT INTO app_state (id, data, updated_at)
-                    VALUES (1, %s, NOW())
-                    ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data, updated_at = NOW()
-                    """,
-                    (psycopg2.extras.Json(data_to_save),)
-                )
-    except Exception as e:
-        pass
-    finally:
-        conn.close()
+    last_error = None
+    for attempt in range(retries):
+        conn = get_db_connection()
+        if conn is None:
+            last_error = "connessione al database non disponibile"
+            time.sleep(delay)
+            continue
+        try:
+            with conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        """
+                        INSERT INTO app_state (id, data, updated_at)
+                        VALUES (1, %s, NOW())
+                        ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data, updated_at = NOW()
+                        """,
+                        (psycopg2.extras.Json(data_to_save),)
+                    )
+            return True
+        except Exception as e:
+            last_error = str(e)
+            time.sleep(delay)
+        finally:
+            conn.close()
+    st.error(f"⚠️ Salvataggio NON riuscito: impossibile scrivere sul database ({last_error}). "
+              f"Le modifiche NON sono state salvate — riprova tra qualche secondo prima di uscire da questa pagina.")
+    return False
 
-def load_data_from_server():
-    conn = get_db_connection()
-    if conn is None:
-        return None
-    try:
-        with conn:
-            with conn.cursor() as cur:
-                cur.execute("SELECT data FROM app_state WHERE id = 1")
-                row = cur.fetchone()
-                return row[0] if row else None
-    except Exception as e:
-        return None
-    finally:
-        conn.close()
+def load_data_from_server(retries=3, delay=0.7):
+    """Load persisted data from Postgres.
+    Returns (True, data) where data is the saved dict, or (True, None) if the
+    database is reachable but genuinely has no saved data yet.
+    Returns (False, None) if the database could not be reached/read after
+    retries — callers must NOT treat this the same as 'no data exists yet',
+    since doing so risks overwriting real saved data with blank defaults."""
+    last_error = None
+    for attempt in range(retries):
+        conn = get_db_connection()
+        if conn is None:
+            last_error = "connessione al database non disponibile"
+            time.sleep(delay)
+            continue
+        try:
+            with conn:
+                with conn.cursor() as cur:
+                    cur.execute("SELECT data FROM app_state WHERE id = 1")
+                    row = cur.fetchone()
+                    return True, (row[0] if row else None)
+        except Exception as e:
+            last_error = str(e)
+            time.sleep(delay)
+        finally:
+            conn.close()
+    return False, None
 
 # --- TRADUZIONI COMPLETE (6 LINGUE) ---
 translations = {
@@ -953,7 +978,17 @@ if "force_password_change" not in st.session_state:
 
 # Caricamento dati salvati in precedenza sul server se esistono
 init_db()
-saved_server_data = load_data_from_server()
+db_reachable, saved_server_data = load_data_from_server()
+
+if not db_reachable and "squad_data" not in st.session_state:
+    # The database could not be reached even after retries. Do NOT fall back to
+    # the hardcoded default roster here: that would silently discard real saved
+    # data, and a later "Save" click would overwrite it permanently. Stop and
+    # tell the user instead, so nothing is lost.
+    st.error("⚠️ Impossibile connettersi al database. I tuoi dati salvati potrebbero non essere "
+              "visibili in questo momento. Per proteggerli, l'app non prosegue con dati vuoti: "
+              "ricarica la pagina tra qualche secondo. Se il problema persiste, contatta l'amministratore.")
+    st.stop()
 
 if saved_server_data:
     if "squad_data" not in st.session_state:
@@ -1078,11 +1113,11 @@ if st.session_state.get("force_password_change", False):
             else:
                 current_player["password"] = new_pwd1
                 current_player["first_login_done"] = True
-                save_data_to_server()
-                st.session_state.force_password_change = False
-                st.session_state.nav_mode = "Player_Dashboard"
-                st.success("Password impostata con successo!")
-                st.rerun()
+                if save_data_to_server():
+                    st.session_state.force_password_change = False
+                    st.session_state.nav_mode = "Player_Dashboard"
+                    st.success("✅ Password impostata e salvata correttamente!")
+                    st.rerun()
 
 # --- HOME SELECTION ---
 elif st.session_state.nav_mode == "Home":
@@ -1167,9 +1202,9 @@ elif st.session_state.nav_mode == "Coach_Login":
             if pwd_input == COACH_PASSWORD:
                 st.session_state.authenticated_coach = True
                 log_activity("Coach login", "Coach accessed the system")
-                save_data_to_server()
-                st.session_state.nav_mode = "Coach"
-                st.rerun()
+                if save_data_to_server():
+                    st.session_state.nav_mode = "Coach"
+                    st.rerun()
             else:
                 st.error("❌ Password errata! Riprova.")
     with col_btn2:
@@ -1192,9 +1227,9 @@ elif st.session_state.nav_mode == "Admin_Login":
                 st.session_state.authenticated_admin = True
                 st.session_state.authenticated_coach = True  # full coach privileges
                 log_activity("Admin login", "Admin accessed the system")
-                save_data_to_server()
-                st.session_state.nav_mode = "Coach"
-                st.rerun()
+                if save_data_to_server():
+                    st.session_state.nav_mode = "Coach"
+                    st.rerun()
             else:
                 st.error("❌ Wrong admin password.")
     with col_a2:
@@ -1281,9 +1316,9 @@ elif st.session_state.nav_mode == "Player_Dashboard":
             current_player['mental'] = new_mental_vals
             current_player['player_play_style'] = new_player_style
             log_activity("Self-evaluation saved", f"{current_player['fname']} {current_player['lname']} – style: {new_player_style}")
-            save_data_to_server()
-            st.success(lang_dict.get('eval_saved', 'Saved!'))
-            st.rerun()
+            if save_data_to_server():
+                st.success(lang_dict.get('eval_saved', 'Saved!'))
+                st.rerun()
 
         st.markdown("---")
         st.subheader(f"🕸️ {lang_dict.get('radar_title', 'Radar Charts')}")
@@ -1416,9 +1451,9 @@ elif st.session_state.nav_mode == "Player_Dashboard":
             if st.form_submit_button(lang_dict.get('save_partners', 'Save Partners'), type="primary"):
                 current_player["partners"] = new_partners_dict
                 log_activity("Partner ranking updated", f"{current_player['fname']} {current_player['lname']}")
-                save_data_to_server()
-                st.success(lang_dict.get('partners_saved', 'Saved!'))
-                st.rerun()
+                if save_data_to_server():
+                    st.success(lang_dict.get('partners_saved', 'Saved!'))
+                    st.rerun()
                 
         st.markdown(f"### {lang_dict.get('current_ranking', 'Current Ranking:')}")
         if current_player.get("partners"):
@@ -1466,8 +1501,8 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                         "date": datetime.now().strftime("%Y-%m-%d %H:%M")
                     })
                     log_activity("Peer feedback sent", f"From {current_player['fname']} to {selected_target}")
-                    save_data_to_server()
-                    st.success(lang_dict.get('note_sent', 'Sent!'))
+                    if save_data_to_server():
+                        st.success(lang_dict.get('note_sent', 'Sent!'))
             else:
                 st.warning(lang_dict.get('empty_note_warn', 'Cannot be empty.'))
         
@@ -1526,9 +1561,9 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 st.session_state.admin_viewing_player = True
                 st.session_state.force_password_change = False
                 log_activity("Admin opened player profile", selected_admin_player)
-                save_data_to_server()
-                st.session_state.nav_mode = "Player_Dashboard"
-                st.rerun()
+                if save_data_to_server():
+                    st.session_state.nav_mode = "Player_Dashboard"
+                    st.rerun()
             
     if st.session_state.show_roster_modal:
         st.markdown("---")
@@ -1572,9 +1607,9 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                                     "first_login_done": False
                                 })
                                 log_activity("Player added", f"{new_fname.strip()} {new_lname.strip()} ({new_side})")
-                                save_data_to_server()
-                                st.success(f"Giocatore {new_fname} {new_lname} aggiunto con successo!")
-                                st.rerun()
+                                if save_data_to_server():
+                                    st.success(f"Giocatore {new_fname} {new_lname} aggiunto con successo!")
+                                    st.rerun()
                         else:
                             st.warning("Nome e Cognome non possono essere vuoti.")
             
@@ -1586,9 +1621,9 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     if st.form_submit_button("🗑️ Rimuovi Giocatore", type="secondary"):
                         st.session_state.squad_data = [p for p in st.session_state.squad_data if f"{p['fname']} {p['lname']}" != player_to_delete]
                         log_activity("Player removed", player_to_delete)
-                        save_data_to_server()
-                        st.success(f"Giocatore {player_to_delete} rimosso con successo!")
-                        st.rerun()
+                        if save_data_to_server():
+                            st.success(f"Giocatore {player_to_delete} rimosso con successo!")
+                            st.rerun()
         st.markdown("---")
         
     if is_admin:
@@ -1680,9 +1715,9 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             st.markdown("<br>", unsafe_allow_html=True)
             if st.form_submit_button("💾 Salva Modifiche Rosa e Ruoli", type="primary"):
                 log_activity("Squad roles/styles updated", f"{len(squad_players)} players")
-                save_data_to_server()
-                st.success("Tutte le modifiche alla rosa, ruoli e destri/mancini sono state salvate permanentemente!")
-                st.rerun()
+                if save_data_to_server():
+                    st.success("Tutte le modifiche alla rosa, ruoli e destri/mancini sono state salvate permanentemente!")
+                    st.rerun()
 
         st.markdown("---")
         st.subheader(f"🎯 {lang_dict.get('work_groups', 'Work Groups')}")
@@ -1762,8 +1797,8 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     p_obj['play_style'] = selected_style
                     p_obj['coach_note'] = new_coach_note
                     log_activity("Coach grades updated", f"{selected_player_name} – style: {selected_style}")
-                    save_data_to_server()
-                    st.success(f"✅ {selected_player_name} updated and saved successfully!")
+                    if save_data_to_server():
+                        st.success(f"✅ {selected_player_name} updated and saved successfully!")
 
     with coach_tab_stats:
         st.subheader("📊 Players Stats – Self-Evaluation vs Coach Evaluation")
@@ -1871,9 +1906,9 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                             p["c_mental"] = new_c_mental
                             p["play_style"] = new_coach_style
                             log_activity("Coach evaluation saved (Players Stats)", f"{player_name} – style: {new_coach_style}")
-                            save_data_to_server()
-                            st.success(f"✅ Coach evaluation for **{player_name}** saved!")
-                            st.rerun()
+                            if save_data_to_server():
+                                st.success(f"✅ Coach evaluation for **{player_name}** saved!")
+                                st.rerun()
                     
                     # Radar with current (possibly just-saved) values
                     current_coach = list(p.get("c_tech", [6]*len(TECH_SKILLS))) + list(p.get("c_mental", [6]*len(MENTAL_SKILLS)))
@@ -2004,9 +2039,9 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         "3° Priorità": coach_choice_p3
                     })
                     log_activity("Training planned", f"{training_date} – {coach_choice_p1}, {coach_choice_p2}, {coach_choice_p3}")
-                    save_data_to_server()
-                    st.success(f"🎉 Allenamento salvato con successo per il giorno {training_date}!")
-                    st.rerun()
+                    if save_data_to_server():
+                        st.success(f"🎉 Allenamento salvato con successo per il giorno {training_date}!")
+                        st.rerun()
 
             st.markdown("---")
             st.markdown("### 📅 Storico Calendario Allenamenti Pianificati")
@@ -2022,9 +2057,9 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     if st.form_submit_button("🗑️ Elimina Allenamento Selezionato", type="secondary"):
                         selected_index = training_options.index(selected_training_to_delete)
                         removed_training = st.session_state.planned_trainings.pop(selected_index)
-                        save_data_to_server()
-                        st.success(f"Allenamento del {removed_training['Data']} eliminato con successo dal calendario!")
-                        st.rerun()
+                        if save_data_to_server():
+                            st.success(f"Allenamento del {removed_training['Data']} eliminato con successo dal calendario!")
+                            st.rerun()
             else:
                 st.info("Nessun allenamento ancora confermato e salvato nel calendario.")
             
@@ -2163,9 +2198,9 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         })
                 
                 log_activity("SNP lineup & results saved", selected_day["label"])
-                save_data_to_server()
-                st.success(f"✅ Formazioni e risultati di tutte le piste salvati per **{selected_day['label']}**!")
-                st.rerun()
+                if save_data_to_server():
+                    st.success(f"✅ Formazioni e risultati di tutte le piste salvati per **{selected_day['label']}**!")
+                    st.rerun()
         
         # --- Riepilogo completo delle 7 giornate ---
         st.markdown("---")
@@ -2205,9 +2240,9 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             if st.button("Cancella TUTTE le formazioni e risultati SNP", type="secondary"):
                 st.session_state.snp_lineups = {}
                 st.session_state.match_results = [m for m in st.session_state.match_results if m.get("Tipo") != "SNP"]
-                save_data_to_server()
-                st.success("Dati SNP resettati.")
-                st.rerun()
+                if save_data_to_server():
+                    st.success("Dati SNP resettati.")
+                    st.rerun()
 
     with coach_tab3:
         st.subheader(f"💬 {lang_dict.get('global_comments', 'Global Comments')}")
@@ -2413,6 +2448,6 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             with col_clear1:
                 if st.button("🗑️ Clear Activity Log", type="secondary"):
                     st.session_state.activity_log = []
-                    save_data_to_server()
-                    st.success("Activity log cleared.")
-                    st.rerun()
+                    if save_data_to_server():
+                        st.success("Activity log cleared.")
+                        st.rerun()
