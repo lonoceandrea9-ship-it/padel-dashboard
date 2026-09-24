@@ -166,15 +166,15 @@ st.markdown("""
         color: #64748b !important;
         -webkit-text-fill-color: #64748b !important;
     }
-    /* Date input: black text on white background (was unreadable white-on-white) */
-    div[data-testid="stDateInput"] input,
+    /* Date input BOX only: black text on white background (was unreadable white-on-white).
+       The widget's label ("In quale data...") stays white via the global h1-p rule above. */
     div[data-testid="stDateInput"] div[data-baseweb="input"],
     div[data-testid="stDateInput"] div[data-baseweb="input"] > div {
         background-color: #ffffff !important;
     }
-    div[data-testid="stDateInput"] input,
-    div[data-testid="stDateInput"] * {
+    div[data-testid="stDateInput"] input {
         color: #000000 !important;
+        background-color: #ffffff !important;
         -webkit-text-fill-color: #000000 !important;
     }
     </style>
