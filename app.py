@@ -2229,8 +2229,40 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         
         selected_player_name = st.selectbox(lang_dict.get('select_player_eval', 'Select player:'), [f"{p['fname']} {p['lname']}" for p in squad_players], key="coach_eval_select")
         p_obj = next((p for p in squad_players if f"{p['fname']} {p['lname']}" == selected_player_name), None)
-        
+
         if p_obj:
+            st.markdown(f"### 🏆 Preferenze Partner di **{selected_player_name}**")
+            st.caption("Ranking dei compagni con cui il giocatore preferisce giocare (impostato da lui nella sua area) e chi, tra gli altri, ha indicato lui come partner preferito. Utile per capire le affinità prima di valutare.")
+            col_pref1, col_pref2 = st.columns(2)
+
+            with col_pref1:
+                st.markdown(f"**{selected_player_name} preferisce giocare con:**")
+                own_partners = p_obj.get("partners", {})
+                if own_partners:
+                    sorted_own = sorted(own_partners.items(), key=lambda x: x[1], reverse=True)
+                    df_own_partners = pd.DataFrame(sorted_own, columns=["Compagno", "Punteggio"])
+                    st.markdown(f"<div class='table-container'>{df_own_partners.to_html(escape=False, index=False, classes='custom-table')}</div>", unsafe_allow_html=True)
+                else:
+                    st.info("Nessuna preferenza impostata da questo giocatore.")
+
+            with col_pref2:
+                st.markdown(f"**Chi ha indicato {selected_player_name} come partner preferito:**")
+                reverse_prefs = []
+                for other in squad_players:
+                    if other['fname'] == p_obj['fname'] and other['lname'] == p_obj['lname']:
+                        continue
+                    score = other.get("partners", {}).get(selected_player_name)
+                    if score is not None:
+                        reverse_prefs.append((f"{other['fname']} {other['lname']}", score))
+                if reverse_prefs:
+                    reverse_prefs.sort(key=lambda x: x[1], reverse=True)
+                    df_reverse_prefs = pd.DataFrame(reverse_prefs, columns=["Giocatore", "Punteggio"])
+                    st.markdown(f"<div class='table-container'>{df_reverse_prefs.to_html(escape=False, index=False, classes='custom-table')}</div>", unsafe_allow_html=True)
+                else:
+                    st.info("Nessun altro giocatore lo ha indicato come partner preferito.")
+
+            st.markdown("---")
+
             with st.form("coach_eval_form"):
                 style_options = ["Offensive", "Defensive", "Equilibrated", "Counterattack"]
                 current_style = p_obj.get("play_style", "Equilibrated")
