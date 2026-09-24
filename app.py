@@ -4,6 +4,7 @@ import numpy as np
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
 import json
+import hashlib
 import os
 import time
 import psycopg2
@@ -988,6 +989,200 @@ CALENDAR_TRANSLATIONS = {
 for _lang, _vals in CALENDAR_TRANSLATIONS.items():
     translations.setdefault(_lang, {}).update(_vals)
 
+# --- RECUPERO PASSWORD CON DOMANDA DI SICUREZZA ---
+SECURITY_QUESTION_KEYS = ["sq_pet", "sq_city", "sq_school", "sq_friend", "sq_custom"]
+
+SECURITY_TRANSLATIONS = {
+    "Italiano": {
+        "forgot_pwd_btn": "Password dimenticata?", "forgot_title": "Recupero password",
+        "forgot_sub": "Rispondi alla tua domanda di sicurezza per impostare una nuova password.",
+        "forgot_first_login": "Non hai ancora fatto il primo accesso: la tua password è il tuo nome di battesimo.",
+        "forgot_no_question": "Non hai impostato una domanda di sicurezza, quindi non puoi recuperare la password da solo. Chiedi al coach o all'admin.",
+        "forgot_answer_lbl": "La tua risposta", "forgot_new_pwd": "Nuova password", "forgot_confirm_pwd": "Conferma nuova password",
+        "forgot_submit": "Imposta nuova password", "forgot_cancel": "Annulla",
+        "forgot_wrong_answer": "Risposta errata. Tentativi rimasti: {n}",
+        "forgot_too_many": "Troppi tentativi errati. Chiedi al coach o all'admin di aiutarti.",
+        "forgot_success": "Password aggiornata! Ora puoi accedere con la nuova password.",
+        "pwd_empty": "La password non può essere vuota.", "pwd_mismatch": "Le password non coincidono. Riprova.",
+        "sec_section_title": "Domanda di sicurezza (recupero password)",
+        "sec_section_desc": "Serve per recuperare la password se la dimentichi. La risposta non viene mostrata a nessuno.",
+        "sec_not_set_warn": "Non hai ancora impostato una domanda di sicurezza: se dimentichi la password non potrai recuperarla da solo.",
+        "sec_current_lbl": "Domanda attuale:", "sec_question_lbl": "Domanda di sicurezza",
+        "sec_custom_lbl": "Se hai scelto 'Altra domanda', scrivila qui", "sec_answer_lbl": "Risposta",
+        "sec_save_btn": "Salva domanda di sicurezza", "sec_saved": "Domanda di sicurezza salvata!",
+        "sec_answer_empty": "La risposta non può essere vuota.", "sec_custom_empty": "Scrivi la tua domanda personalizzata.",
+        "sq_pet": "Come si chiamava il tuo primo animale domestico?", "sq_city": "In che città sei nato/a?",
+        "sq_school": "Come si chiamava la tua scuola elementare?", "sq_friend": "Come si chiama il tuo migliore amico d'infanzia?",
+        "sq_custom": "Altra domanda (scrivila tu)",
+    },
+    "English": {
+        "forgot_pwd_btn": "Forgot password?", "forgot_title": "Password recovery",
+        "forgot_sub": "Answer your security question to set a new password.",
+        "forgot_first_login": "You haven't logged in for the first time yet: your password is your first name.",
+        "forgot_no_question": "You haven't set a security question, so you can't recover your password yourself. Ask the coach or the admin.",
+        "forgot_answer_lbl": "Your answer", "forgot_new_pwd": "New password", "forgot_confirm_pwd": "Confirm new password",
+        "forgot_submit": "Set new password", "forgot_cancel": "Cancel",
+        "forgot_wrong_answer": "Wrong answer. Attempts left: {n}",
+        "forgot_too_many": "Too many wrong attempts. Ask the coach or the admin for help.",
+        "forgot_success": "Password updated! You can now log in with your new password.",
+        "pwd_empty": "The password can't be empty.", "pwd_mismatch": "The passwords don't match. Try again.",
+        "sec_section_title": "Security question (password recovery)",
+        "sec_section_desc": "Used to recover your password if you forget it. The answer is never shown to anyone.",
+        "sec_not_set_warn": "You haven't set a security question yet: if you forget your password you won't be able to recover it yourself.",
+        "sec_current_lbl": "Current question:", "sec_question_lbl": "Security question",
+        "sec_custom_lbl": "If you chose 'Other question', write it here", "sec_answer_lbl": "Answer",
+        "sec_save_btn": "Save security question", "sec_saved": "Security question saved!",
+        "sec_answer_empty": "The answer can't be empty.", "sec_custom_empty": "Write your custom question.",
+        "sq_pet": "What was the name of your first pet?", "sq_city": "In which city were you born?",
+        "sq_school": "What was the name of your primary school?", "sq_friend": "What is the name of your best childhood friend?",
+        "sq_custom": "Other question (write your own)",
+    },
+    "Español": {
+        "forgot_pwd_btn": "¿Has olvidado la contraseña?", "forgot_title": "Recuperar contraseña",
+        "forgot_sub": "Responde a tu pregunta de seguridad para establecer una nueva contraseña.",
+        "forgot_first_login": "Aún no has hecho el primer acceso: tu contraseña es tu nombre de pila.",
+        "forgot_no_question": "No has configurado una pregunta de seguridad, así que no puedes recuperar la contraseña tú solo. Pide ayuda al entrenador o al admin.",
+        "forgot_answer_lbl": "Tu respuesta", "forgot_new_pwd": "Nueva contraseña", "forgot_confirm_pwd": "Confirmar nueva contraseña",
+        "forgot_submit": "Establecer nueva contraseña", "forgot_cancel": "Cancelar",
+        "forgot_wrong_answer": "Respuesta incorrecta. Intentos restantes: {n}",
+        "forgot_too_many": "Demasiados intentos fallidos. Pide ayuda al entrenador o al admin.",
+        "forgot_success": "¡Contraseña actualizada! Ya puedes acceder con la nueva contraseña.",
+        "pwd_empty": "La contraseña no puede estar vacía.", "pwd_mismatch": "Las contraseñas no coinciden. Inténtalo de nuevo.",
+        "sec_section_title": "Pregunta de seguridad (recuperar contraseña)",
+        "sec_section_desc": "Sirve para recuperar la contraseña si la olvidas. La respuesta no se muestra a nadie.",
+        "sec_not_set_warn": "Aún no has configurado una pregunta de seguridad: si olvidas la contraseña no podrás recuperarla tú solo.",
+        "sec_current_lbl": "Pregunta actual:", "sec_question_lbl": "Pregunta de seguridad",
+        "sec_custom_lbl": "Si elegiste 'Otra pregunta', escríbela aquí", "sec_answer_lbl": "Respuesta",
+        "sec_save_btn": "Guardar pregunta de seguridad", "sec_saved": "¡Pregunta de seguridad guardada!",
+        "sec_answer_empty": "La respuesta no puede estar vacía.", "sec_custom_empty": "Escribe tu pregunta personalizada.",
+        "sq_pet": "¿Cómo se llamaba tu primera mascota?", "sq_city": "¿En qué ciudad naciste?",
+        "sq_school": "¿Cómo se llamaba tu colegio de primaria?", "sq_friend": "¿Cómo se llama tu mejor amigo de la infancia?",
+        "sq_custom": "Otra pregunta (escríbela tú)",
+    },
+    "Svenska": {
+        "forgot_pwd_btn": "Glömt lösenordet?", "forgot_title": "Återställ lösenord",
+        "forgot_sub": "Svara på din säkerhetsfråga för att välja ett nytt lösenord.",
+        "forgot_first_login": "Du har inte loggat in första gången än: ditt lösenord är ditt förnamn.",
+        "forgot_no_question": "Du har inte angett någon säkerhetsfråga, så du kan inte återställa lösenordet själv. Fråga tränaren eller admin.",
+        "forgot_answer_lbl": "Ditt svar", "forgot_new_pwd": "Nytt lösenord", "forgot_confirm_pwd": "Bekräfta nytt lösenord",
+        "forgot_submit": "Spara nytt lösenord", "forgot_cancel": "Avbryt",
+        "forgot_wrong_answer": "Fel svar. Försök kvar: {n}",
+        "forgot_too_many": "För många felaktiga försök. Be tränaren eller admin om hjälp.",
+        "forgot_success": "Lösenordet är uppdaterat! Nu kan du logga in med det nya lösenordet.",
+        "pwd_empty": "Lösenordet får inte vara tomt.", "pwd_mismatch": "Lösenorden matchar inte. Försök igen.",
+        "sec_section_title": "Säkerhetsfråga (återställ lösenord)",
+        "sec_section_desc": "Används för att återställa lösenordet om du glömmer det. Svaret visas aldrig för någon.",
+        "sec_not_set_warn": "Du har inte angett någon säkerhetsfråga: om du glömmer lösenordet kan du inte återställa det själv.",
+        "sec_current_lbl": "Nuvarande fråga:", "sec_question_lbl": "Säkerhetsfråga",
+        "sec_custom_lbl": "Om du valde 'Annan fråga', skriv den här", "sec_answer_lbl": "Svar",
+        "sec_save_btn": "Spara säkerhetsfråga", "sec_saved": "Säkerhetsfrågan är sparad!",
+        "sec_answer_empty": "Svaret får inte vara tomt.", "sec_custom_empty": "Skriv din egen fråga.",
+        "sq_pet": "Vad hette ditt första husdjur?", "sq_city": "I vilken stad föddes du?",
+        "sq_school": "Vad hette din lågstadieskola?", "sq_friend": "Vad heter din bästa barndomsvän?",
+        "sq_custom": "Annan fråga (skriv själv)",
+    },
+    "Nederlands": {
+        "forgot_pwd_btn": "Wachtwoord vergeten?", "forgot_title": "Wachtwoord herstellen",
+        "forgot_sub": "Beantwoord je beveiligingsvraag om een nieuw wachtwoord in te stellen.",
+        "forgot_first_login": "Je hebt nog niet voor het eerst ingelogd: je wachtwoord is je voornaam.",
+        "forgot_no_question": "Je hebt geen beveiligingsvraag ingesteld, dus je kunt je wachtwoord niet zelf herstellen. Vraag het aan de coach of de admin.",
+        "forgot_answer_lbl": "Jouw antwoord", "forgot_new_pwd": "Nieuw wachtwoord", "forgot_confirm_pwd": "Bevestig nieuw wachtwoord",
+        "forgot_submit": "Nieuw wachtwoord instellen", "forgot_cancel": "Annuleren",
+        "forgot_wrong_answer": "Verkeerd antwoord. Resterende pogingen: {n}",
+        "forgot_too_many": "Te veel verkeerde pogingen. Vraag de coach of de admin om hulp.",
+        "forgot_success": "Wachtwoord bijgewerkt! Je kunt nu inloggen met je nieuwe wachtwoord.",
+        "pwd_empty": "Het wachtwoord mag niet leeg zijn.", "pwd_mismatch": "De wachtwoorden komen niet overeen. Probeer het opnieuw.",
+        "sec_section_title": "Beveiligingsvraag (wachtwoord herstellen)",
+        "sec_section_desc": "Wordt gebruikt om je wachtwoord te herstellen als je het vergeet. Het antwoord wordt aan niemand getoond.",
+        "sec_not_set_warn": "Je hebt nog geen beveiligingsvraag ingesteld: als je je wachtwoord vergeet, kun je het niet zelf herstellen.",
+        "sec_current_lbl": "Huidige vraag:", "sec_question_lbl": "Beveiligingsvraag",
+        "sec_custom_lbl": "Als je 'Andere vraag' koos, schrijf hem hier", "sec_answer_lbl": "Antwoord",
+        "sec_save_btn": "Beveiligingsvraag opslaan", "sec_saved": "Beveiligingsvraag opgeslagen!",
+        "sec_answer_empty": "Het antwoord mag niet leeg zijn.", "sec_custom_empty": "Schrijf je eigen vraag.",
+        "sq_pet": "Hoe heette je eerste huisdier?", "sq_city": "In welke stad ben je geboren?",
+        "sq_school": "Hoe heette je basisschool?", "sq_friend": "Hoe heet je beste jeugdvriend?",
+        "sq_custom": "Andere vraag (schrijf zelf)",
+    },
+    "Dansk": {
+        "forgot_pwd_btn": "Glemt adgangskode?", "forgot_title": "Gendan adgangskode",
+        "forgot_sub": "Svar på dit sikkerhedsspørgsmål for at vælge en ny adgangskode.",
+        "forgot_first_login": "Du har ikke logget ind første gang endnu: din adgangskode er dit fornavn.",
+        "forgot_no_question": "Du har ikke valgt et sikkerhedsspørgsmål, så du kan ikke gendanne adgangskoden selv. Spørg træneren eller admin.",
+        "forgot_answer_lbl": "Dit svar", "forgot_new_pwd": "Ny adgangskode", "forgot_confirm_pwd": "Bekræft ny adgangskode",
+        "forgot_submit": "Gem ny adgangskode", "forgot_cancel": "Annuller",
+        "forgot_wrong_answer": "Forkert svar. Forsøg tilbage: {n}",
+        "forgot_too_many": "For mange forkerte forsøg. Bed træneren eller admin om hjælp.",
+        "forgot_success": "Adgangskoden er opdateret! Nu kan du logge ind med den nye adgangskode.",
+        "pwd_empty": "Adgangskoden må ikke være tom.", "pwd_mismatch": "Adgangskoderne matcher ikke. Prøv igen.",
+        "sec_section_title": "Sikkerhedsspørgsmål (gendan adgangskode)",
+        "sec_section_desc": "Bruges til at gendanne adgangskoden, hvis du glemmer den. Svaret vises aldrig for nogen.",
+        "sec_not_set_warn": "Du har endnu ikke valgt et sikkerhedsspørgsmål: hvis du glemmer adgangskoden, kan du ikke gendanne den selv.",
+        "sec_current_lbl": "Nuværende spørgsmål:", "sec_question_lbl": "Sikkerhedsspørgsmål",
+        "sec_custom_lbl": "Hvis du valgte 'Andet spørgsmål', skriv det her", "sec_answer_lbl": "Svar",
+        "sec_save_btn": "Gem sikkerhedsspørgsmål", "sec_saved": "Sikkerhedsspørgsmålet er gemt!",
+        "sec_answer_empty": "Svaret må ikke være tomt.", "sec_custom_empty": "Skriv dit eget spørgsmål.",
+        "sq_pet": "Hvad hed dit første kæledyr?", "sq_city": "I hvilken by er du født?",
+        "sq_school": "Hvad hed din folkeskole?", "sq_friend": "Hvad hedder din bedste barndomsven?",
+        "sq_custom": "Andet spørgsmål (skriv selv)",
+    },
+}
+for _lang, _vals in SECURITY_TRANSLATIONS.items():
+    translations.setdefault(_lang, {}).update(_vals)
+
+MAX_RECOVERY_ATTEMPTS = 5
+
+
+def hash_security_answer(answer):
+    """Store only a hash of the answer; ignore case and extra spaces when comparing."""
+    normalized = " ".join((answer or "").strip().lower().split())
+    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
+
+
+def security_question_text(player, lang_dict):
+    key = player.get("security_question_key", "")
+    if key == "sq_custom":
+        return player.get("security_question_custom", "")
+    return lang_dict.get(key, "") if key else ""
+
+
+def has_security_question(player, lang_dict):
+    return bool(player.get("security_answer_hash")) and bool(security_question_text(player, lang_dict))
+
+
+def security_question_inputs(lang_dict, key_prefix, player=None):
+    """Widgets to choose a question and answer. Returns (key, custom_text, answer)."""
+    current_key = (player or {}).get("security_question_key", SECURITY_QUESTION_KEYS[0])
+    if current_key not in SECURITY_QUESTION_KEYS:
+        current_key = SECURITY_QUESTION_KEYS[0]
+    q_key = st.selectbox(
+        lang_dict.get('sec_question_lbl', 'Security question'),
+        options=SECURITY_QUESTION_KEYS,
+        index=SECURITY_QUESTION_KEYS.index(current_key),
+        format_func=lambda k: lang_dict.get(k, k),
+        key=f"{key_prefix}_q"
+    )
+    custom = st.text_input(
+        lang_dict.get('sec_custom_lbl', 'Custom question'),
+        value=(player or {}).get("security_question_custom", ""),
+        key=f"{key_prefix}_custom"
+    )
+    answer = st.text_input(lang_dict.get('sec_answer_lbl', 'Answer'), type="password", key=f"{key_prefix}_answer")
+    return q_key, custom, answer
+
+
+def validate_security_inputs(q_key, custom, answer, lang_dict):
+    if q_key == "sq_custom" and not custom.strip():
+        return lang_dict.get('sec_custom_empty', 'Write your question.')
+    if not answer.strip():
+        return lang_dict.get('sec_answer_empty', 'Answer required.')
+    return None
+
+
+def apply_security_question(player, q_key, custom, answer):
+    player["security_question_key"] = q_key
+    player["security_question_custom"] = custom.strip() if q_key == "sq_custom" else ""
+    player["security_answer_hash"] = hash_security_answer(answer)
+
 # --- LISTA DELLE SKILLS ---
 TECH_SKILLS = ["Volley", "Bandeja", "Vibora", "Smash", "Bajada", "Chiquita", "Lob"]
 
@@ -1149,14 +1344,23 @@ if st.session_state.get("force_password_change", False):
         new_pwd1 = st.text_input("Nuova Password Personale", type="password")
         new_pwd2 = st.text_input("Conferma Nuova Password", type="password")
         
+        st.markdown("---")
+        st.markdown(f"**🔐 {lang_dict.get('sec_section_title', 'Security question')}**")
+        st.caption(lang_dict.get('sec_section_desc', ''))
+        fl_q_key, fl_custom, fl_answer = security_question_inputs(lang_dict, "first_login_sec", current_player)
+        
         if st.form_submit_button("Salva Password e Accedi", type="primary"):
+            sec_error = validate_security_inputs(fl_q_key, fl_custom, fl_answer, lang_dict)
             if not new_pwd1.strip():
                 st.warning("La password non può essere vuota.")
             elif new_pwd1 != new_pwd2:
                 st.error("Le password non coincidono. Riprova.")
+            elif sec_error:
+                st.warning(sec_error)
             else:
                 current_player["password"] = new_pwd1
                 current_player["first_login_done"] = True
+                apply_security_question(current_player, fl_q_key, fl_custom, fl_answer)
                 if save_data_to_server():
                     st.session_state.force_password_change = False
                     st.session_state.nav_mode = "Player_Dashboard"
@@ -1229,8 +1433,55 @@ elif st.session_state.nav_mode == "Player_Login":
                         st.error(f"❌ {lang_dict.get('wrong_pwd', 'Wrong password')}")
     with col_pl2:
         if st.button(lang_dict.get('back_home', 'Back'), use_container_width=True):
+            st.session_state.forgot_pwd_mode = False
             st.session_state.nav_mode = "Home"
             st.rerun()
+
+    # --- Recupero password con domanda di sicurezza ---
+    if st.button(f"🔑 {lang_dict.get('forgot_pwd_btn', 'Forgot password?')}", key="forgot_pwd_toggle"):
+        st.session_state.forgot_pwd_mode = not st.session_state.get("forgot_pwd_mode", False)
+        st.rerun()
+
+    if st.session_state.get("forgot_pwd_mode", False) and player_obj:
+        st.markdown("---")
+        st.subheader(f"🔑 {lang_dict.get('forgot_title', 'Password recovery')}")
+        attempts = st.session_state.setdefault("recovery_attempts", {})
+        used = attempts.get(player_obj["fname"], 0)
+
+        if not player_obj.get("first_login_done", False):
+            st.info(lang_dict.get('forgot_first_login', 'Your password is your first name.'))
+        elif not has_security_question(player_obj, lang_dict):
+            st.warning(lang_dict.get('forgot_no_question', 'No security question set.'))
+        elif used >= MAX_RECOVERY_ATTEMPTS:
+            st.error(lang_dict.get('forgot_too_many', 'Too many attempts.'))
+        else:
+            st.markdown(lang_dict.get('forgot_sub', ''))
+            st.markdown(f"**{security_question_text(player_obj, lang_dict)}**")
+            with st.form(f"forgot_pwd_form_{player_obj['fname']}"):
+                rec_answer = st.text_input(lang_dict.get('forgot_answer_lbl', 'Your answer'), type="password")
+                rec_pwd1 = st.text_input(lang_dict.get('forgot_new_pwd', 'New password'), type="password")
+                rec_pwd2 = st.text_input(lang_dict.get('forgot_confirm_pwd', 'Confirm new password'), type="password")
+                if st.form_submit_button(lang_dict.get('forgot_submit', 'Set new password'), type="primary"):
+                    if hash_security_answer(rec_answer) != player_obj.get("security_answer_hash"):
+                        attempts[player_obj["fname"]] = used + 1
+                        left = MAX_RECOVERY_ATTEMPTS - attempts[player_obj["fname"]]
+                        log_activity("Password recovery failed", f"{player_obj['fname']} {player_obj['lname']}")
+                        if left > 0:
+                            st.error(lang_dict.get('forgot_wrong_answer', 'Wrong answer. Attempts left: {n}').format(n=left))
+                        else:
+                            st.error(lang_dict.get('forgot_too_many', 'Too many attempts.'))
+                    elif not rec_pwd1.strip():
+                        st.warning(lang_dict.get('pwd_empty', 'Password cannot be empty.'))
+                    elif rec_pwd1 != rec_pwd2:
+                        st.error(lang_dict.get('pwd_mismatch', 'Passwords do not match.'))
+                    else:
+                        player_obj["password"] = rec_pwd1
+                        player_obj["first_login_done"] = True
+                        attempts[player_obj["fname"]] = 0
+                        log_activity("Password recovered", f"{player_obj['fname']} {player_obj['lname']}")
+                        if save_data_to_server():
+                            st.session_state.forgot_pwd_mode = False
+                            st.success(f"✅ {lang_dict.get('forgot_success', 'Password updated!')}")
 
 # --- LOGIN ALLENATORE ---
 elif st.session_state.nav_mode == "Coach_Login":
@@ -1311,6 +1562,27 @@ elif st.session_state.nav_mode == "Player_Dashboard":
         st.markdown("</div>", unsafe_allow_html=True)
             
     st.markdown("---")
+
+    # --- Domanda di sicurezza per il recupero password ---
+    sec_is_set = has_security_question(current_player, lang_dict)
+    if not sec_is_set:
+        st.warning(f"🔐 {lang_dict.get('sec_not_set_warn', 'No security question set.')}")
+    with st.expander(f"🔐 {lang_dict.get('sec_section_title', 'Security question')}", expanded=not sec_is_set):
+        st.caption(lang_dict.get('sec_section_desc', ''))
+        if sec_is_set:
+            st.markdown(f"{lang_dict.get('sec_current_lbl', 'Current question:')} **{security_question_text(current_player, lang_dict)}**")
+        with st.form("security_question_form"):
+            dq_key, dq_custom, dq_answer = security_question_inputs(lang_dict, "dash_sec", current_player)
+            if st.form_submit_button(lang_dict.get('sec_save_btn', 'Save'), type="primary"):
+                sec_error = validate_security_inputs(dq_key, dq_custom, dq_answer, lang_dict)
+                if sec_error:
+                    st.warning(sec_error)
+                else:
+                    apply_security_question(current_player, dq_key, dq_custom, dq_answer)
+                    log_activity("Security question set", f"{current_player['fname']} {current_player['lname']}")
+                    if save_data_to_server():
+                        st.success(lang_dict.get('sec_saved', 'Saved!'))
+                        st.rerun()
     
     tab_eval, tab_partners, tab_history, tab_comments, tab_calendar = st.tabs([
         f"📊 {lang_dict.get('eval_coach_tab', 'Evaluation')}", 
