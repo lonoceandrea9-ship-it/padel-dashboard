@@ -953,6 +953,41 @@ translations = {
     }
 }
 
+# --- CALENDARIO SNP (condiviso tra area Coach e area Giocatore) ---
+SNP_CALENDAR = [
+    {"id": 1, "date": "27-Sep", "iso": "2026-09-27", "home": "NAC", "away": "Padelmadena", "label": "27-Sep  NAC  vs  Padelmadena"},
+    {"id": 2, "date": "03-Oct", "iso": "2026-10-03", "home": "La Ultima Ronda", "away": "NAC", "label": "03-Oct  La Ultima Ronda  vs  NAC"},
+    {"id": 3, "date": "25-Oct", "iso": "2026-10-25", "home": "NAC", "away": "Awa Pool Club", "label": "25-Oct  NAC  vs  Awa Pool Club"},
+    {"id": 4, "date": "07-Nov", "iso": "2026-11-07", "home": "Gomez Hoyos Padel", "away": "NAC", "label": "07-Nov  Gomez Hoyos Padel  vs  NAC"},
+    {"id": 5, "date": "28-Nov", "iso": "2026-11-28", "home": "Padelmadena", "away": "NAC", "label": "28-Nov  Padelmadena  vs  NAC"},
+    {"id": 6, "date": "13-Dec", "iso": "2026-12-13", "home": "NAC", "away": "La Ultima Ronda", "label": "13-Dec  NAC  vs  La Ultima Ronda"},
+    {"id": 7, "date": "10-Jan", "iso": "2027-01-10", "home": "NAC", "away": "Awa Pool Club", "label": "10-Jan  NAC  vs  Awa Pool Club"},
+]
+
+
+def normalize_snp_lineups(lineups):
+    """JSON turns the integer day ids into strings when data is saved and
+    reloaded. Convert them back to int so lookups by day id always work."""
+    fixed = {}
+    for k, v in (lineups or {}).items():
+        try:
+            fixed[int(k)] = v
+        except (TypeError, ValueError):
+            fixed[k] = v
+    return fixed
+
+
+CALENDAR_TRANSLATIONS = {
+    "Italiano": {"calendar_tab": "Calendario Partite", "cal_next": "Prossima partita", "cal_in_days": "tra {n} giorni", "cal_today": "oggi", "cal_tomorrow": "domani", "cal_home": "casa", "cal_away": "trasferta", "cal_you_play": "Giochi in pista {pista} con {partner}", "cal_you_play_alone": "Giochi in pista {pista}", "cal_not_called": "Non sei convocato per questa partita", "cal_lineup_pending": "Formazione non ancora pubblicata", "cal_date": "Data", "cal_match": "Partita", "cal_you": "Tu", "cal_court": "Pista", "cal_result": "Risultato", "cal_details": "Dettagli partite (piste, coppie e risultati)", "cal_notes": "Note", "cal_season_over": "Stagione terminata: nessuna partita in programma.", "cal_player1": "Giocatore 1", "cal_player2": "Giocatore 2"},
+    "English": {"calendar_tab": "Match Calendar", "cal_next": "Next match", "cal_in_days": "in {n} days", "cal_today": "today", "cal_tomorrow": "tomorrow", "cal_home": "home", "cal_away": "away", "cal_you_play": "You're playing on court {pista} with {partner}", "cal_you_play_alone": "You're playing on court {pista}", "cal_not_called": "You're not in the lineup for this match", "cal_lineup_pending": "Lineup not out yet", "cal_date": "Date", "cal_match": "Match", "cal_you": "You", "cal_court": "Court", "cal_result": "Result", "cal_details": "Match details (courts, pairs and results)", "cal_notes": "Notes", "cal_season_over": "Season finished: no upcoming matches.", "cal_player1": "Player 1", "cal_player2": "Player 2"},
+    "Español": {"calendar_tab": "Calendario de Partidos", "cal_next": "Próximo partido", "cal_in_days": "en {n} días", "cal_today": "hoy", "cal_tomorrow": "mañana", "cal_home": "local", "cal_away": "visitante", "cal_you_play": "Juegas en la pista {pista} con {partner}", "cal_you_play_alone": "Juegas en la pista {pista}", "cal_not_called": "No estás convocado para este partido", "cal_lineup_pending": "Alineación aún no publicada", "cal_date": "Fecha", "cal_match": "Partido", "cal_you": "Tú", "cal_court": "Pista", "cal_result": "Resultado", "cal_details": "Detalles de los partidos (pistas, parejas y resultados)", "cal_notes": "Notas", "cal_season_over": "Temporada terminada: no hay partidos programados.", "cal_player1": "Jugador 1", "cal_player2": "Jugador 2"},
+    "Svenska": {"calendar_tab": "Matchkalender", "cal_next": "Nästa match", "cal_in_days": "om {n} dagar", "cal_today": "idag", "cal_tomorrow": "imorgon", "cal_home": "hemma", "cal_away": "borta", "cal_you_play": "Du spelar på bana {pista} med {partner}", "cal_you_play_alone": "Du spelar på bana {pista}", "cal_not_called": "Du är inte uttagen till denna match", "cal_lineup_pending": "Laguppställning ej publicerad", "cal_date": "Datum", "cal_match": "Match", "cal_you": "Du", "cal_court": "Bana", "cal_result": "Resultat", "cal_details": "Matchdetaljer (banor, par och resultat)", "cal_notes": "Anteckningar", "cal_season_over": "Säsongen är slut: inga kommande matcher.", "cal_player1": "Spelare 1", "cal_player2": "Spelare 2"},
+    "Nederlands": {"calendar_tab": "Wedstrijdkalender", "cal_next": "Volgende wedstrijd", "cal_in_days": "over {n} dagen", "cal_today": "vandaag", "cal_tomorrow": "morgen", "cal_home": "thuis", "cal_away": "uit", "cal_you_play": "Je speelt op baan {pista} met {partner}", "cal_you_play_alone": "Je speelt op baan {pista}", "cal_not_called": "Je staat niet in de opstelling voor deze wedstrijd", "cal_lineup_pending": "Opstelling nog niet bekend", "cal_date": "Datum", "cal_match": "Wedstrijd", "cal_you": "Jij", "cal_court": "Baan", "cal_result": "Uitslag", "cal_details": "Wedstrijddetails (banen, koppels en uitslagen)", "cal_notes": "Notities", "cal_season_over": "Seizoen afgelopen: geen komende wedstrijden.", "cal_player1": "Speler 1", "cal_player2": "Speler 2"},
+    "Dansk": {"calendar_tab": "Kampkalender", "cal_next": "Næste kamp", "cal_in_days": "om {n} dage", "cal_today": "i dag", "cal_tomorrow": "i morgen", "cal_home": "hjemme", "cal_away": "ude", "cal_you_play": "Du spiller på bane {pista} med {partner}", "cal_you_play_alone": "Du spiller på bane {pista}", "cal_not_called": "Du er ikke udtaget til denne kamp", "cal_lineup_pending": "Holdopstilling ikke offentliggjort endnu", "cal_date": "Dato", "cal_match": "Kamp", "cal_you": "Dig", "cal_court": "Bane", "cal_result": "Resultat", "cal_details": "Kampdetaljer (baner, par og resultater)", "cal_notes": "Noter", "cal_season_over": "Sæsonen er slut: ingen kommende kampe.", "cal_player1": "Spiller 1", "cal_player2": "Spiller 2"},
+}
+for _lang, _vals in CALENDAR_TRANSLATIONS.items():
+    translations.setdefault(_lang, {}).update(_vals)
+
 # --- LISTA DELLE SKILLS ---
 TECH_SKILLS = ["Volley", "Bandeja", "Vibora", "Smash", "Bajada", "Chiquita", "Lob"]
 
@@ -1006,7 +1041,7 @@ if saved_server_data:
     if "match_results" not in st.session_state:
         st.session_state.match_results = saved_server_data.get("match_results", [])
     if "snp_lineups" not in st.session_state:
-        st.session_state.snp_lineups = saved_server_data.get("snp_lineups", {})
+        st.session_state.snp_lineups = normalize_snp_lineups(saved_server_data.get("snp_lineups", {}))
     if "activity_log" not in st.session_state:
         st.session_state.activity_log = saved_server_data.get("activity_log", [])
 else:
@@ -1062,6 +1097,7 @@ squad_players = st.session_state.squad_data
 if "activity_log" not in st.session_state:
     st.session_state.activity_log = []
 save_data_to_server()
+
 
 # --- SIDEBAR & LINGUA ---
 with st.sidebar:
@@ -1276,11 +1312,12 @@ elif st.session_state.nav_mode == "Player_Dashboard":
             
     st.markdown("---")
     
-    tab_eval, tab_partners, tab_history, tab_comments = st.tabs([
+    tab_eval, tab_partners, tab_history, tab_comments, tab_calendar = st.tabs([
         f"📊 {lang_dict.get('eval_coach_tab', 'Evaluation')}", 
         f"🏆 {lang_dict.get('partners_tab', 'Partners')}", 
         f"📈 {lang_dict.get('history_tab', 'History')}", 
-        f"💬 {lang_dict.get('comments_tab', 'Comments')}"
+        f"💬 {lang_dict.get('comments_tab', 'Comments')}",
+        f"📅 {lang_dict.get('calendar_tab', 'Match Calendar')}"
     ])
     
     with tab_eval:
@@ -1522,6 +1559,133 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                 f"{c['text']}</div>",
                 unsafe_allow_html=True
             )
+
+    with tab_calendar:
+        st.subheader(f"📅 {lang_dict.get('calendar_tab', 'Match Calendar')}")
+
+        my_name = f"{current_player['fname']} {current_player['lname']}"
+        lineups = normalize_snp_lineups(st.session_state.get("snp_lineups", {}))
+        today = datetime.now().date()
+
+        def cal_my_slot(day_lineup):
+            """Return (pista, partner, result) if the player is in this lineup, else None."""
+            for pista in range(1, 6):
+                p1 = day_lineup.get(f"pista_{pista}_p1", "")
+                p2 = day_lineup.get(f"pista_{pista}_p2", "")
+                if my_name in (p1, p2):
+                    partner = p2 if p1 == my_name else p1
+                    return pista, partner, day_lineup.get(f"pista_{pista}_risultato", "").strip()
+            return None
+
+        def cal_lineup_published(day_lineup):
+            return any(day_lineup.get(f"pista_{p}_{k}", "") for p in range(1, 6) for k in ("p1", "p2"))
+
+        def cal_you_text(day_lineup):
+            if not day_lineup or not cal_lineup_published(day_lineup):
+                return lang_dict.get('cal_lineup_pending', 'Lineup not out yet'), "#8fa3bf"
+            slot = cal_my_slot(day_lineup)
+            if not slot:
+                return lang_dict.get('cal_not_called', 'Not in the lineup'), "#8fa3bf"
+            pista, partner, result = slot
+            txt = f"{lang_dict.get('cal_court', 'Court')} {pista}" + (f" · {partner}" if partner else "")
+            if result:
+                txt += f" · {result}"
+            return txt, "#7ee2a8"
+
+        # --- Prossima partita ---
+        next_day = next((d for d in SNP_CALENDAR if datetime.strptime(d["iso"], "%Y-%m-%d").date() >= today), None)
+        if next_day:
+            match_date = datetime.strptime(next_day["iso"], "%Y-%m-%d").date()
+            days_left = (match_date - today).days
+            if days_left == 0:
+                when = lang_dict.get('cal_today', 'today')
+            elif days_left == 1:
+                when = lang_dict.get('cal_tomorrow', 'tomorrow')
+            else:
+                when = lang_dict.get('cal_in_days', 'in {n} days').format(n=days_left)
+            is_home = next_day["home"] == "NAC"
+            venue = lang_dict.get('cal_home', 'home') if is_home else lang_dict.get('cal_away', 'away')
+
+            day_lineup = lineups.get(next_day["id"], {})
+            if day_lineup and cal_lineup_published(day_lineup):
+                slot = cal_my_slot(day_lineup)
+                if slot:
+                    pista, partner, _ = slot
+                    if partner:
+                        status = lang_dict.get('cal_you_play', 'Court {pista} with {partner}').format(pista=pista, partner=partner)
+                    else:
+                        status = lang_dict.get('cal_you_play_alone', 'Court {pista}').format(pista=pista)
+                    status_bg, status_fg = "rgba(46, 204, 113, 0.18)", "#7ee2a8"
+                else:
+                    status = lang_dict.get('cal_not_called', 'Not in the lineup')
+                    status_bg, status_fg = "rgba(255, 255, 255, 0.08)", "#c9d6e8"
+            else:
+                status = lang_dict.get('cal_lineup_pending', 'Lineup not out yet')
+                status_bg, status_fg = "rgba(255, 255, 255, 0.08)", "#c9d6e8"
+
+            card_html = (
+                f"<div style='border: 2px solid #4da3ff; border-radius: 12px; padding: 16px 20px; margin-bottom: 18px; background: #1b263b;'>"
+                f"<div style='font-size: 13px;'><span style='color:#4da3ff !important;'>{lang_dict.get('cal_next', 'Next match')} · {when}</span></div>"
+                f"<div style='font-size: 22px; font-weight: 600; margin: 4px 0 2px 0;'><span>{match_date.strftime('%d %b %Y')} — {next_day['home']} vs {next_day['away']}</span></div>"
+                f"<div style='font-size: 14px; margin-bottom: 12px;'><span style='color:#8fa3bf !important;'>{venue.capitalize()}</span></div>"
+                f"<div style='background: {status_bg}; border-radius: 8px; padding: 10px 14px; font-size: 15px;'><span style='color:{status_fg} !important;'>{status}</span></div>"
+                f"</div>"
+            )
+            st.markdown(card_html, unsafe_allow_html=True)
+        else:
+            st.info(lang_dict.get('cal_season_over', 'Season finished.'))
+
+        # --- Calendario completo ---
+        rows_html = ""
+        for d in SNP_CALENDAR:
+            match_date = datetime.strptime(d["iso"], "%Y-%m-%d").date()
+            venue = lang_dict.get('cal_home', 'home') if d["home"] == "NAC" else lang_dict.get('cal_away', 'away')
+            you_txt, you_color = cal_you_text(lineups.get(d["id"], {}))
+            is_next = next_day is not None and d["id"] == next_day["id"]
+            is_past = match_date < today
+            row_style = "background: rgba(77, 163, 255, 0.15);" if is_next else ("opacity: 0.6;" if is_past else "")
+            rows_html += (
+                f"<tr style='{row_style}'>"
+                f"<td><strong>{match_date.strftime('%d %b')}</strong></td>"
+                f"<td>{d['home']} vs {d['away']} <span style='color:#8fa3bf !important;'>· {venue}</span></td>"
+                f"<td><span style='color:{you_color} !important;'>{you_txt}</span></td>"
+                f"</tr>"
+            )
+        st.markdown(
+            f"<div class='table-container'><table class='custom-table'>"
+            f"<thead><tr><th>{lang_dict.get('cal_date', 'Date')}</th><th>{lang_dict.get('cal_match', 'Match')}</th><th>{lang_dict.get('cal_you', 'You')}</th></tr></thead>"
+            f"<tbody>{rows_html}</tbody></table></div>",
+            unsafe_allow_html=True
+        )
+
+        # --- Dettagli per giornata ---
+        st.markdown(f"#### {lang_dict.get('cal_details', 'Match details')}")
+        for d in SNP_CALENDAR:
+            match_date = datetime.strptime(d["iso"], "%Y-%m-%d").date()
+            day_lineup = lineups.get(d["id"], {})
+            with st.expander(f"{match_date.strftime('%d %b')} — {d['home']} vs {d['away']}", expanded=False):
+                if day_lineup and cal_lineup_published(day_lineup):
+                    detail_rows = []
+                    for pista in range(1, 6):
+                        p1 = day_lineup.get(f"pista_{pista}_p1", "") or "—"
+                        p2 = day_lineup.get(f"pista_{pista}_p2", "") or "—"
+                        res = day_lineup.get(f"pista_{pista}_risultato", "") or "—"
+                        if my_name in (p1, p2):
+                            p1 = f"<strong>{p1}</strong>" if p1 == my_name else p1
+                            p2 = f"<strong>{p2}</strong>" if p2 == my_name else p2
+                        detail_rows.append({
+                            lang_dict.get('cal_court', 'Court'): f"{lang_dict.get('cal_court', 'Court')} {pista}",
+                            lang_dict.get('cal_player1', 'Player 1'): p1,
+                            lang_dict.get('cal_player2', 'Player 2'): p2,
+                            lang_dict.get('cal_result', 'Result'): res,
+                        })
+                    df_detail = pd.DataFrame(detail_rows)
+                    st.markdown(f"<div class='table-container'>{df_detail.to_html(escape=False, index=False, classes='custom-table')}</div>", unsafe_allow_html=True)
+                    if day_lineup.get("note"):
+                        st.markdown(f"**{lang_dict.get('cal_notes', 'Notes')}:** {day_lineup['note']}")
+                else:
+                    st.info(lang_dict.get('cal_lineup_pending', 'Lineup not out yet'))
+
 
 # --- AREA ALLENATORE / ADMIN ---
 elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coach:
@@ -2130,20 +2294,11 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         
         all_players_list = [f"{p['fname']} {p['lname']}" for p in squad_players]
         
-        # Calendario fisso delle 7 giornate SNP
-        SNP_CALENDAR = [
-            {"id": 1, "date": "27-Sep", "home": "NAC", "away": "Padelmadena", "label": "27-Sep  NAC  vs  Padelmadena"},
-            {"id": 2, "date": "03-Oct", "home": "La Ultima Ronda", "away": "NAC", "label": "03-Oct  La Ultima Ronda  vs  NAC"},
-            {"id": 3, "date": "25-Oct", "home": "NAC", "away": "Awa Pool Club", "label": "25-Oct  NAC  vs  Awa Pool Club"},
-            {"id": 4, "date": "07-Nov", "home": "Gomez Hoyos Padel", "away": "NAC", "label": "07-Nov  Gomez Hoyos Padel  vs  NAC"},
-            {"id": 5, "date": "28-Nov", "home": "Padelmadena", "away": "NAC", "label": "28-Nov  Padelmadena  vs  NAC"},
-            {"id": 6, "date": "13-Dec", "home": "NAC", "away": "La Ultima Ronda", "label": "13-Dec  NAC  vs  La Ultima Ronda"},
-            {"id": 7, "date": "10-Jan", "home": "NAC", "away": "Awa Pool Club", "label": "10-Jan  NAC  vs  Awa Pool Club"},
-        ]
         
         # Inizializza storage delle formazioni SNP se non esiste
         if "snp_lineups" not in st.session_state:
             st.session_state.snp_lineups = {}
+        st.session_state.snp_lineups = normalize_snp_lineups(st.session_state.snp_lineups)
         
         # Selettore giornata
         day_labels = [d["label"] for d in SNP_CALENDAR]
