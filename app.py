@@ -2329,18 +2329,23 @@ if not db_reachable and "squad_data" not in st.session_state:
     st.error(lang_dict.get('db_unreachable_error', "⚠️ Unable to connect to the database. Your saved data might not be visible right now. To protect it, the app will not proceed with empty data: reload the page in a few seconds. If the problem persists, contact the administrator."))
     st.stop()
 
-if saved_server_data:
-    if "squad_data" not in st.session_state:
-        st.session_state.squad_data = saved_server_data.get("squad_data", [])
-    if "planned_trainings" not in st.session_state:
-        st.session_state.planned_trainings = saved_server_data.get("planned_trainings", [])
-    if "match_results" not in st.session_state:
-        st.session_state.match_results = saved_server_data.get("match_results", [])
-    if "snp_lineups" not in st.session_state:
-        st.session_state.snp_lineups = normalize_snp_lineups(saved_server_data.get("snp_lineups", {}))
-    if "activity_log" not in st.session_state:
-        st.session_state.activity_log = saved_server_data.get("activity_log", [])
-else:
+if db_reachable and saved_server_data:
+    # IMPORTANT: always resync from the database on every rerun (not just on first
+    # load of this browser session). Each Streamlit browser tab keeps its own
+    # in-memory session_state; if we only loaded once, a coach/admin tab left open
+    # would never see other players' newly-saved self-evaluations, and worse — the
+    # next time that stale tab saves ANYTHING, it would overwrite the database with
+    # its outdated in-memory copy, silently discarding everyone else's changes made
+    # in between. Resyncing on every rerun keeps every open tab reading (and, when
+    # it saves, writing) the latest state.
+    st.session_state.squad_data = saved_server_data.get("squad_data", st.session_state.get("squad_data", []))
+    st.session_state.planned_trainings = saved_server_data.get("planned_trainings", st.session_state.get("planned_trainings", []))
+    st.session_state.match_results = saved_server_data.get("match_results", st.session_state.get("match_results", []))
+    st.session_state.snp_lineups = normalize_snp_lineups(saved_server_data.get("snp_lineups", st.session_state.get("snp_lineups", {})))
+    st.session_state.activity_log = saved_server_data.get("activity_log", st.session_state.get("activity_log", []))
+elif db_reachable and not saved_server_data:
+    # DB reachable but the row is genuinely empty (first-ever run) — seed defaults
+    # only if this session has nothing yet; never blank out data already in memory.
     if "planned_trainings" not in st.session_state:
         st.session_state.planned_trainings = []
     if "match_results" not in st.session_state:
