@@ -2289,6 +2289,17 @@ def apply_security_question(player, q_key, custom, answer):
 # --- LISTA DELLE SKILLS ---
 TECH_SKILLS = ["Volley", "Bandeja", "Vibora", "Smash", "Bajada", "Chiquita", "Lob"]
 
+# Shared 0-10 score options used by the evaluation dropdowns (player self-eval and
+# coach eval), replacing the old sliders. clamp_score() keeps any pre-existing
+# saved value (should already be 1-10) safely usable as a dropdown index.
+SCORE_OPTIONS = list(range(0, 11))
+def clamp_score(v):
+    try:
+        v = int(round(v))
+    except (TypeError, ValueError):
+        v = 0
+    return max(0, min(10, v))
+
 # --- INIZIALIZZAZIONE LINGUA & SKILLS ---
 if "language" not in st.session_state:
     st.session_state.language = "English"
@@ -2710,26 +2721,26 @@ elif st.session_state.nav_mode == "Player_Dashboard":
         
         new_tech_vals = []
         new_mental_vals = []
-        
+
         with col_eval_left:
             st.markdown(f"**{lang_dict.get('tech_skills', 'Technical Skills')}**")
             for i, skill in enumerate(TECH_SKILLS):
                 c1, c2 = st.columns(2)
                 with c1:
-                    val = st.slider(f"Tu - {skill}", 1, 10, int(current_player['tech'][i]), key=f"p_tech_{i}")
+                    val = st.selectbox(f"Tu - {skill}", SCORE_OPTIONS, index=clamp_score(current_player['tech'][i]), key=f"p_tech_{i}")
                     new_tech_vals.append(val)
                 with c2:
-                    st.slider(f"Coach - {skill}", 1, 10, int(current_player['c_tech'][i]), disabled=True, key=f"c_tech_view_{i}")
+                    st.selectbox(f"Coach - {skill}", SCORE_OPTIONS, index=clamp_score(current_player['c_tech'][i]), disabled=True, key=f"c_tech_view_{i}")
 
         with col_eval_right:
             st.markdown(f"**{lang_dict.get('mental_skills', 'Mental Skills')}**")
             for i, skill in enumerate(MENTAL_SKILLS):
                 c1, c2 = st.columns(2)
                 with c1:
-                    val = st.slider(f"Tu - {skill}", 1, 10, int(current_player['mental'][i]), key=f"p_mental_{i}")
+                    val = st.selectbox(f"Tu - {skill}", SCORE_OPTIONS, index=clamp_score(current_player['mental'][i]), key=f"p_mental_{i}")
                     new_mental_vals.append(val)
                 with c2:
-                    st.slider(f"Coach - {skill}", 1, 10, int(current_player['c_mental'][i]), disabled=True, key=f"c_mental_view_{i}")
+                    st.selectbox(f"Coach - {skill}", SCORE_OPTIONS, index=clamp_score(current_player['c_mental'][i]), disabled=True, key=f"c_mental_view_{i}")
                 
         st.markdown("---")
         current_p_style = current_player.get("player_play_style", "Equilibrated")
@@ -3395,13 +3406,13 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 with col_c_left:
                     st.markdown(f"🎾 *{lang_dict.get('tech_skills_coach', 'Technical Skills')}*")
                     for idx, t_label in enumerate(TECH_SKILLS):
-                        val = st.slider(f"Coach - {t_label}", 1, 10, int(p_obj['c_tech'][idx]), key=f"scoach_tech_{idx}")
+                        val = st.selectbox(f"Coach - {t_label}", SCORE_OPTIONS, index=clamp_score(p_obj['c_tech'][idx]), key=f"scoach_tech_{idx}")
                         c_tech_new.append(val)
-                
+
                 with col_c_right:
                     st.markdown(f"🧠 *{lang_dict.get('mental_skills_coach', 'Mental Skills')}*")
                     for idx, m_label in enumerate(MENTAL_SKILLS):
-                        val = st.slider(f"Coach - {m_label}", 1, 10, int(p_obj['c_mental'][idx]), key=f"scoach_mental_{idx}")
+                        val = st.selectbox(f"Coach - {m_label}", SCORE_OPTIONS, index=clamp_score(p_obj['c_mental'][idx]), key=f"scoach_mental_{idx}")
                         c_mental_new.append(val)
                         
                 if st.form_submit_button(lang_dict.get('save_coach_eval', 'Save Grades'), type="primary"):
@@ -3493,21 +3504,21 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         st.markdown("**Technical Skills**")
                         new_c_tech = []
                         for i, skill in enumerate(TECH_SKILLS):
-                            val = st.slider(
+                            val = st.selectbox(
                                 f"Coach – {skill}",
-                                1, 10,
-                                int(coach_full[i]),
+                                SCORE_OPTIONS,
+                                index=clamp_score(coach_full[i]),
                                 key=f"stats_ctech_{p['fname']}_{p['lname']}_{i}"
                             )
                             new_c_tech.append(val)
-                        
+
                         st.markdown("**Mental Skills**")
                         new_c_mental = []
                         for i, skill in enumerate(MENTAL_SKILLS):
-                            val = st.slider(
+                            val = st.selectbox(
                                 f"Coach – {skill}",
-                                1, 10,
-                                int(coach_full[len(TECH_SKILLS) + i]),
+                                SCORE_OPTIONS,
+                                index=clamp_score(coach_full[len(TECH_SKILLS) + i]),
                                 key=f"stats_cmental_{p['fname']}_{p['lname']}_{i}"
                             )
                             new_c_mental.append(val)
