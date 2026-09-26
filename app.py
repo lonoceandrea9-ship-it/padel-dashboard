@@ -2740,33 +2740,33 @@ elif st.session_state.nav_mode == "Player_Dashboard":
         style_options = ["Offensive", "Defensive", "Equilibrated", "Counterattack"]
         
         col_eval_left, col_eval_right = st.columns(2)
-        
+
         new_tech_vals = []
         new_mental_vals = []
 
         with col_eval_left:
+            st.markdown(f"##### 🔵 {lang_dict.get('eval_you_lbl', 'You')}")
             st.markdown(f"**{lang_dict.get('tech_skills', 'Technical Skills')}**")
             for i, skill in enumerate(TECH_SKILLS):
-                c1, c2 = st.columns(2)
-                with c1:
-                    with st.container(key=f"eval_you_tech_{i}"):
-                        val = st.selectbox(f"🔵 {lang_dict.get('eval_you_lbl', 'You')} - {skill}", SCORE_OPTIONS, index=clamp_score(current_player['tech'][i]), key=f"p_tech_{i}")
-                    new_tech_vals.append(val)
-                with c2:
-                    with st.container(key=f"eval_coach_tech_{i}"):
-                        st.selectbox(f"🟠 {lang_dict.get('eval_coach_lbl', 'Coach')} - {skill}", SCORE_OPTIONS, index=clamp_score(current_player['c_tech'][i]), disabled=True, key=f"c_tech_view_{i}")
-
-        with col_eval_right:
+                with st.container(key=f"eval_you_tech_{i}"):
+                    val = st.selectbox(f"🔵 {lang_dict.get('eval_you_lbl', 'You')} - {skill}", SCORE_OPTIONS, index=clamp_score(current_player['tech'][i]), key=f"p_tech_{i}")
+                new_tech_vals.append(val)
             st.markdown(f"**{lang_dict.get('mental_skills', 'Mental Skills')}**")
             for i, skill in enumerate(MENTAL_SKILLS):
-                c1, c2 = st.columns(2)
-                with c1:
-                    with st.container(key=f"eval_you_mental_{i}"):
-                        val = st.selectbox(f"🔵 {lang_dict.get('eval_you_lbl', 'You')} - {skill}", SCORE_OPTIONS, index=clamp_score(current_player['mental'][i]), key=f"p_mental_{i}")
-                    new_mental_vals.append(val)
-                with c2:
-                    with st.container(key=f"eval_coach_mental_{i}"):
-                        st.selectbox(f"🟠 {lang_dict.get('eval_coach_lbl', 'Coach')} - {skill}", SCORE_OPTIONS, index=clamp_score(current_player['c_mental'][i]), disabled=True, key=f"c_mental_view_{i}")
+                with st.container(key=f"eval_you_mental_{i}"):
+                    val = st.selectbox(f"🔵 {lang_dict.get('eval_you_lbl', 'You')} - {skill}", SCORE_OPTIONS, index=clamp_score(current_player['mental'][i]), key=f"p_mental_{i}")
+                new_mental_vals.append(val)
+
+        with col_eval_right:
+            st.markdown(f"##### 🟠 {lang_dict.get('eval_coach_lbl', 'Coach')}")
+            st.markdown(f"**{lang_dict.get('tech_skills', 'Technical Skills')}**")
+            for i, skill in enumerate(TECH_SKILLS):
+                with st.container(key=f"eval_coach_tech_{i}"):
+                    st.selectbox(f"🟠 {lang_dict.get('eval_coach_lbl', 'Coach')} - {skill}", SCORE_OPTIONS, index=clamp_score(current_player['c_tech'][i]), disabled=True, key=f"c_tech_view_{i}")
+            st.markdown(f"**{lang_dict.get('mental_skills', 'Mental Skills')}**")
+            for i, skill in enumerate(MENTAL_SKILLS):
+                with st.container(key=f"eval_coach_mental_{i}"):
+                    st.selectbox(f"🟠 {lang_dict.get('eval_coach_lbl', 'Coach')} - {skill}", SCORE_OPTIONS, index=clamp_score(current_player['c_mental'][i]), disabled=True, key=f"c_mental_view_{i}")
                 
         st.markdown("---")
         current_p_style = current_player.get("player_play_style", "Equilibrated")
@@ -2815,11 +2815,11 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                 polar=dict(
                     bgcolor='rgba(0,0,0,0)',
                     radialaxis=dict(visible=True, range=[0, 10], color='white', gridcolor='#334155'),
-                    angularaxis=dict(gridcolor='#334155')
+                    angularaxis=dict(gridcolor='#334155', tickfont=dict(size=10))
                 ),
                 showlegend=False,
-                height=400,
-                margin=dict(l=20, r=20, t=10, b=10)
+                height=340,
+                margin=dict(l=50, r=50, t=35, b=35)
             )
             st.plotly_chart(fig_player, use_container_width=True)
             
@@ -2843,11 +2843,11 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                 polar=dict(
                     bgcolor='rgba(0,0,0,0)',
                     radialaxis=dict(visible=True, range=[0, 10], color='white', gridcolor='#334155'),
-                    angularaxis=dict(gridcolor='#334155')
+                    angularaxis=dict(gridcolor='#334155', tickfont=dict(size=10))
                 ),
                 showlegend=False,
-                height=400,
-                margin=dict(l=20, r=20, t=10, b=10)
+                height=340,
+                margin=dict(l=50, r=50, t=35, b=35)
             )
             st.plotly_chart(fig_coach, use_container_width=True)
 
