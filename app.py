@@ -9,6 +9,12 @@ import os
 import time
 import psycopg2
 import psycopg2.extras
+import io
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import cm
+from reportlab.lib import colors as pdf_colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 
 # Streamlit page configuration
 st.set_page_config(
@@ -2502,6 +2508,64 @@ def player_avatar_html(fname, lname, size=40, font_size=None):
         f'font-size:{fs}px;flex-shrink:0;">{initials}</div>'
     )
 
+
+def generate_player_report_pdf(player, all_skills_labels, self_scores, coach_scores, attendance_pct):
+    """Build a one-page PDF report card for a player: identity, play styles,
+    a skill-by-skill self-vs-coach table with an averages row, and
+    attendance. Built with reportlab's own drawing primitives (no
+    plotly-to-image/headless-browser dependency such as kaleido), so it
+    renders identically and reliably in any deployment environment."""
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer, pagesize=A4,
+        topMargin=1.5 * cm, bottomMargin=1.5 * cm, leftMargin=1.5 * cm, rightMargin=1.5 * cm
+    )
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle("ReportTitle", parent=styles["Title"], textColor=pdf_colors.HexColor("#0d1b2a"))
+    elements = []
+
+    elements.append(Paragraph("Padel AI - Player Report Card", title_style))
+    elements.append(Paragraph(f"{player['fname']} {player['lname']} ({player['side']})", styles["Heading2"]))
+    elements.append(Spacer(1, 0.3 * cm))
+    elements.append(Paragraph(
+        f"Self play style: {player.get('player_play_style', 'N/A')} &nbsp;|&nbsp; "
+        f"Coach play style: {player.get('play_style', 'N/A')}", styles["Normal"]
+    ))
+    elements.append(Paragraph(f"Attendance: {attendance_pct}%", styles["Normal"]))
+    elements.append(Spacer(1, 0.5 * cm))
+
+    table_data = [["Skill", "Self", "Coach", "Diff"]]
+    for skill, s_val, c_val in zip(all_skills_labels, self_scores, coach_scores):
+        diff = s_val - c_val
+        diff_str = f"+{diff}" if diff > 0 else str(diff)
+        table_data.append([skill, str(s_val), str(c_val), diff_str])
+
+    avg_self = round(sum(self_scores) / len(self_scores), 1) if self_scores else 0
+    avg_coach = round(sum(coach_scores) / len(coach_scores), 1) if coach_scores else 0
+    table_data.append(["Average", str(avg_self), str(avg_coach), ""])
+
+    t = Table(table_data, colWidths=[7 * cm, 3 * cm, 3 * cm, 3 * cm])
+    t.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), pdf_colors.HexColor("#0d1b2a")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), pdf_colors.white),
+        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("GRID", (0, 0), (-1, -1), 0.5, pdf_colors.HexColor("#94a3b8")),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -2), [pdf_colors.white, pdf_colors.HexColor("#f1f5f9")]),
+        ("BACKGROUND", (0, -1), (-1, -1), pdf_colors.HexColor("#dbeafe")),
+        ("FONTNAME", (0, -1), (-1, -1), "Helvetica-Bold"),
+        ("ALIGN", (1, 0), (-1, -1), "CENTER"),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("TOPPADDING", (0, 0), (-1, -1), 5),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+    ]))
+    elements.append(t)
+    elements.append(Spacer(1, 0.5 * cm))
+    elements.append(Paragraph(f"Generated {datetime.now().strftime('%Y-%m-%d %H:%M')}", styles["Italic"]))
+
+    doc.build(elements)
+    buffer.seek(0)
+    return buffer.getvalue()
+
 # --- INIZIALIZZAZIONE LINGUA & SKILLS ---
 if "language" not in st.session_state:
     st.session_state.language = "English"
@@ -3126,6 +3190,20 @@ elif st.session_state.nav_mode == "Player_Dashboard":
             st.markdown(f"#### 🧠 {lang_dict.get('mental_feat', 'Mental Features')}")
             st.markdown(f"<div class='table-container'>{pd.DataFrame(diff_mental_rows).to_html(escape=False, index=False, classes='custom-table')}</div>", unsafe_allow_html=True)
 
+        st.markdown("---")
+        _my_trainings = int(current_player.get("trainings", 1)) or 1
+        _my_attendance_pct = round(100 * int(current_player.get("participated", 0)) / _my_trainings)
+        _my_pdf = generate_player_report_pdf(
+            current_player, all_skills_labels, player_full_vals, coach_full_vals, _my_attendance_pct
+        )
+        st.download_button(
+            lang_dict.get('download_report_pdf', '📄 Download my report card (PDF)'),
+            data=_my_pdf,
+            file_name=f"{current_player['fname']}_{current_player['lname']}_report.pdf",
+            mime="application/pdf",
+            key="my_report_pdf_download"
+        )
+
     with tab_partners:
         st.subheader(f"🏆 {lang_dict.get('partner_mgmt', 'Partner Management')}")
         all_colleagues = [f"{p['fname']} {p['lname']}" for p in squad_players if p['fname'] != current_player['fname']]
@@ -3501,10 +3579,11 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         st.markdown("---")
         
     if is_admin:
-        coach_tab1, coach_tab_evals, coach_tab_stats, coach_tab_training, coach_tab3, coach_tab_pairing, coach_tab2, coach_tab_log = st.tabs([
-            f"👥 {lang_dict.get('coach_tab_squad', 'Squad')}", 
+        coach_tab1, coach_tab_evals, coach_tab_stats, coach_tab_analytics, coach_tab_training, coach_tab3, coach_tab_pairing, coach_tab2, coach_tab_log = st.tabs([
+            f"👥 {lang_dict.get('coach_tab_squad', 'Squad')}",
             f"✏️ {lang_dict.get('coach_tab_evals', 'Grades')}",
             f"📊 Players Stats",
+            f"📈 Team Analytics",
             f"🎾 {lang_dict.get('coach_tab_training', 'Training')}",
             f"💬 {lang_dict.get('coach_tab_comments', 'Comments')}",
             f"🤖 {lang_dict.get('coach_tab_pairing', 'Pairing')}",
@@ -3512,10 +3591,11 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             "📋 Activity Log"
         ])
     else:
-        coach_tab1, coach_tab_evals, coach_tab_stats, coach_tab_training, coach_tab3, coach_tab_pairing, coach_tab2 = st.tabs([
-            f"👥 {lang_dict.get('coach_tab_squad', 'Squad')}", 
+        coach_tab1, coach_tab_evals, coach_tab_stats, coach_tab_analytics, coach_tab_training, coach_tab3, coach_tab_pairing, coach_tab2 = st.tabs([
+            f"👥 {lang_dict.get('coach_tab_squad', 'Squad')}",
             f"✏️ {lang_dict.get('coach_tab_evals', 'Grades')}",
             f"📊 Players Stats",
+            f"📈 Team Analytics",
             f"🎾 {lang_dict.get('coach_tab_training', 'Training')}",
             f"💬 {lang_dict.get('coach_tab_comments', 'Comments')}",
             f"🤖 {lang_dict.get('coach_tab_pairing', 'Pairing')}",
@@ -3890,6 +3970,146 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     })
                 df_diff = pd.DataFrame(diff_rows)
                 st.markdown(f"<div class='table-container'>{df_diff.to_html(escape=False, index=False, classes='custom-table')}</div>", unsafe_allow_html=True)
+
+                st.markdown("---")
+                _p_trainings = int(p.get("trainings", 1)) or 1
+                _p_attendance_pct = round(100 * int(p.get("participated", 0)) / _p_trainings)
+                _p_pdf = generate_player_report_pdf(p, all_skills_labels, player_full, current_coach, _p_attendance_pct)
+                st.download_button(
+                    f"📄 Download {player_name}'s report card (PDF)",
+                    data=_p_pdf,
+                    file_name=f"{p['fname']}_{p['lname']}_report.pdf",
+                    mime="application/pdf",
+                    key=f"coach_report_pdf_{p['fname']}_{p['lname']}"
+                )
+
+    with coach_tab_analytics:
+        st.subheader("📈 Team Analytics")
+        st.markdown("Squad-wide trends across evaluations and attendance, computed from the same data as the other tabs.")
+
+        _all_skills = TECH_SKILLS + MENTAL_SKILLS
+        _n_players = len(squad_players)
+
+        if _n_players == 0:
+            st.info("No players in the squad yet.")
+        else:
+            # --- Top-line metrics ---
+            _self_overall = []
+            _coach_overall = []
+            _attendance_pcts = []
+            for p in squad_players:
+                _p_self = list(p.get("tech", [])) + list(p.get("mental", []))
+                _p_coach = list(p.get("c_tech", [])) + list(p.get("c_mental", []))
+                if _p_self:
+                    _self_overall.append(sum(_p_self) / len(_p_self))
+                if _p_coach:
+                    _coach_overall.append(sum(_p_coach) / len(_p_coach))
+                _p_train = int(p.get("trainings", 0))
+                if _p_train > 0:
+                    _attendance_pcts.append(100 * int(p.get("participated", 0)) / _p_train)
+
+            m_col1, m_col2, m_col3, m_col4 = st.columns(4)
+            with m_col1:
+                st.metric("Players", _n_players)
+            with m_col2:
+                st.metric("Avg Self Score", f"{(sum(_self_overall)/len(_self_overall)):.1f}/10" if _self_overall else "N/A")
+            with m_col3:
+                st.metric("Avg Coach Score", f"{(sum(_coach_overall)/len(_coach_overall)):.1f}/10" if _coach_overall else "N/A")
+            with m_col4:
+                st.metric("Avg Attendance", f"{(sum(_attendance_pcts)/len(_attendance_pcts)):.0f}%" if _attendance_pcts else "N/A")
+
+            st.markdown("---")
+
+            # --- Per-skill team averages: self vs coach ---
+            st.markdown("#### 🎯 Team Averages by Skill (Self vs Coach)")
+            _skill_self_avgs = []
+            _skill_coach_avgs = []
+            for i, skill in enumerate(_all_skills):
+                _self_vals = []
+                _coach_vals = []
+                for p in squad_players:
+                    _full_self = list(p.get("tech", [])) + list(p.get("mental", []))
+                    _full_coach = list(p.get("c_tech", [])) + list(p.get("c_mental", []))
+                    if i < len(_full_self):
+                        _self_vals.append(_full_self[i])
+                    if i < len(_full_coach):
+                        _coach_vals.append(_full_coach[i])
+                _skill_self_avgs.append(sum(_self_vals) / len(_self_vals) if _self_vals else 0)
+                _skill_coach_avgs.append(sum(_coach_vals) / len(_coach_vals) if _coach_vals else 0)
+
+            fig_team_skills = go.Figure()
+            fig_team_skills.add_trace(go.Bar(x=_all_skills, y=_skill_self_avgs, name="Self", marker_color="#3b82f6"))
+            fig_team_skills.add_trace(go.Bar(x=_all_skills, y=_skill_coach_avgs, name="Coach", marker_color="#f97316"))
+            fig_team_skills.update_layout(
+                barmode="group",
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                font=dict(color='white'),
+                yaxis=dict(range=[0, 10], gridcolor='#334155'),
+                xaxis=dict(tickangle=-30),
+                height=380,
+                margin=dict(l=30, r=30, t=20, b=60),
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+            )
+            st.plotly_chart(fig_team_skills, use_container_width=True, key="team_analytics_skills_bar")
+
+            st.markdown("---")
+
+            comp_col1, comp_col2 = st.columns(2)
+            with comp_col1:
+                st.markdown("#### 🧭 Squad by Play Style")
+                _style_counts = {}
+                for p in squad_players:
+                    _style = p.get("play_style", "Equilibrated")
+                    _style_counts[_style] = _style_counts.get(_style, 0) + 1
+                fig_styles = go.Figure(data=[go.Bar(
+                    x=list(_style_counts.keys()), y=list(_style_counts.values()),
+                    marker_color="#22c55e"
+                )])
+                fig_styles.update_layout(
+                    paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+                    font=dict(color='white'), yaxis=dict(gridcolor='#334155'),
+                    height=300, margin=dict(l=30, r=30, t=20, b=20)
+                )
+                st.plotly_chart(fig_styles, use_container_width=True, key="team_analytics_styles_bar")
+
+            with comp_col2:
+                st.markdown("#### ✋ Squad by Side")
+                _side_counts = {}
+                for p in squad_players:
+                    _side = p.get("side", "N/A")
+                    _side_counts[_side] = _side_counts.get(_side, 0) + 1
+                fig_sides = go.Figure(data=[go.Bar(
+                    x=list(_side_counts.keys()), y=list(_side_counts.values()),
+                    marker_color="#8b5cf6"
+                )])
+                fig_sides.update_layout(
+                    paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+                    font=dict(color='white'), yaxis=dict(gridcolor='#334155'),
+                    height=300, margin=dict(l=30, r=30, t=20, b=20)
+                )
+                st.plotly_chart(fig_sides, use_container_width=True, key="team_analytics_sides_bar")
+
+            st.markdown("---")
+
+            # --- Top / bottom performers by coach score ---
+            st.markdown("#### 🏅 Top & Bottom Performers (Coach Evaluation)")
+            _ranked = []
+            for p in squad_players:
+                _p_coach = list(p.get("c_tech", [])) + list(p.get("c_mental", []))
+                if _p_coach:
+                    _ranked.append((f"{p['fname']} {p['lname']}", sum(_p_coach) / len(_p_coach)))
+            _ranked.sort(key=lambda x: x[1], reverse=True)
+
+            rank_col1, rank_col2 = st.columns(2)
+            with rank_col1:
+                st.markdown("**🔝 Top 5**")
+                for name, avg in _ranked[:5]:
+                    st.markdown(f"- {name}: **{avg:.1f}**/10")
+            with rank_col2:
+                st.markdown("**🔻 Bottom 5**")
+                for name, avg in list(reversed(_ranked))[:5]:
+                    st.markdown(f"- {name}: **{avg:.1f}**/10")
 
     with coach_tab_training:
         st.subheader(f"🎾 {lang_dict.get('training_title', 'Training Planning & Focus')}")
