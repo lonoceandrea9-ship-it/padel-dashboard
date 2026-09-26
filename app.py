@@ -220,8 +220,11 @@ def get_db_connection():
         return None
 
 
+MAX_BACKUPS_KEPT = 30
+
 def init_db():
-    """Create the app_state table if it doesn't exist yet. Safe to call every run."""
+    """Create the app_state table (and its backups table) if they don't exist
+    yet. Safe to call every run."""
     conn = get_db_connection()
     if conn is None:
         return
@@ -235,8 +238,58 @@ def init_db():
                         updated_at TIMESTAMP NOT NULL DEFAULT NOW()
                     )
                 """)
+                # Automatic backups: a rolling history of previous app_state
+                # snapshots, so an admin can undo a bad save without needing
+                # a database restore. Populated automatically inside
+                # save_data_to_server(), just before each overwrite.
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS app_state_backups (
+                        id SERIAL PRIMARY KEY,
+                        data JSONB NOT NULL,
+                        created_at TIMESTAMP NOT NULL DEFAULT NOW()
+                    )
+                """)
     except Exception:
         pass
+    finally:
+        conn.close()
+
+
+def list_backups(limit=MAX_BACKUPS_KEPT):
+    """Return recent backup snapshots as a list of (id, created_at) tuples,
+    most recent first. Returns [] if the database can't be reached."""
+    conn = get_db_connection()
+    if conn is None:
+        return []
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT id, created_at FROM app_state_backups ORDER BY created_at DESC LIMIT %s",
+                    (limit,)
+                )
+                return cur.fetchall()
+    except Exception as e:
+        print(f"[DB] list_backups failed: {type(e).__name__}: {e}", flush=True)
+        return []
+    finally:
+        conn.close()
+
+
+def get_backup_data(backup_id):
+    """Return the saved JSON data dict for a given backup id, or None."""
+    conn = get_db_connection()
+    if conn is None:
+        return None
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT data FROM app_state_backups WHERE id = %s", (backup_id,))
+                row = cur.fetchone()
+                return row[0] if row else None
+    except Exception as e:
+        print(f"[DB] get_backup_data failed: {type(e).__name__}: {e}", flush=True)
+        return None
     finally:
         conn.close()
 
@@ -283,6 +336,26 @@ def save_data_to_server(retries=3, delay=0.7):
         try:
             with conn:
                 with conn.cursor() as cur:
+                    # Snapshot whatever is currently stored BEFORE overwriting it,
+                    # so there's always a way back if this save turns out to be a
+                    # mistake (e.g. a stale tab overwriting newer data, or bad
+                    # input). This runs in the same transaction as the write
+                    # below, so a backup is only ever recorded together with the
+                    # save that made it necessary.
+                    cur.execute(
+                        """
+                        INSERT INTO app_state_backups (data, created_at)
+                        SELECT data, NOW() FROM app_state WHERE id = 1
+                        """
+                    )
+                    cur.execute(
+                        """
+                        DELETE FROM app_state_backups WHERE id NOT IN (
+                            SELECT id FROM app_state_backups ORDER BY created_at DESC LIMIT %s
+                        )
+                        """,
+                        (MAX_BACKUPS_KEPT,)
+                    )
                     cur.execute(
                         """
                         INSERT INTO app_state (id, data, updated_at)
@@ -339,7 +412,7 @@ translations = {
         "player_desc": "Accedi alla tua scheda personale protetta da password per visualizzare e aggiornare le tue valutazioni.",
         "player_btn": "Accedi come Giocatore",
         "coach_area": "Area Allenatore",
-        "eval_you_lbl": "Tu", "eval_coach_lbl": "Allenatore", "saving_spinner": "💾 Salvataggio in corso...", "confirm_destructive_checkbox": "⚠️ Confermo di voler procedere (azione permanente)", "confirm_required_warn": "Spunta la casella di conferma prima di procedere.", "clear_activity_log_btn": "🗑️ Cancella Registro Attività", "activity_log_cleared": "Registro attività cancellato.", "db_offline_banner": "🔌 Connessione al database non disponibile al momento: stai vedendo gli ultimi dati caricati con successo, ma nuovi salvataggi potrebbero non essere registrati finché la connessione non torna.", "unsaved_changes_msg": "🟡 Hai modifiche non salvate", "all_saved_msg": "🟢 Tutto salvato",
+        "eval_you_lbl": "Tu", "eval_coach_lbl": "Allenatore", "saving_spinner": "💾 Salvataggio in corso...", "confirm_destructive_checkbox": "⚠️ Confermo di voler procedere (azione permanente)", "confirm_required_warn": "Spunta la casella di conferma prima di procedere.", "clear_activity_log_btn": "🗑️ Cancella Registro Attività", "activity_log_cleared": "Registro attività cancellato.", "db_offline_banner": "🔌 Connessione al database non disponibile al momento: stai vedendo gli ultimi dati caricati con successo, ma nuovi salvataggi potrebbero non essere registrati finché la connessione non torna.", "unsaved_changes_msg": "🟡 Hai modifiche non salvate", "all_saved_msg": "🟢 Tutto salvato", "backups_title": "Backup e Ripristino", "backups_desc": "Ogni volta che viene effettuato un salvataggio viene creato automaticamente uno snapshot di rosa, allenamenti, partite, formazioni e registro attività, subito prima della sovrascrittura. Se un salvataggio si rivela un errore, puoi ripristinare uno snapshot precedente qui sotto. Anche il ripristino viene salvato come un normale salvataggio, quindi crea a sua volta un backup: puoi sempre annullare un ripristino.", "backups_none": "Nessun backup disponibile ancora: ne verrà creato uno automaticamente al prossimo salvataggio.", "backups_select": "Seleziona un backup da ripristinare:", "backups_restore_btn": "♻️ Ripristina questo backup", "backups_restore_error": "Impossibile caricare questo backup. Riprova.", "backups_restore_success": "Backup del {when} ripristinato con successo!",
         "coach_desc": "Accesso riservato allo staff tecnico per la gestione dei dati, la pianificazione e le partite.",
         "coach_btn": "Accedi come Allenatore",
         "login_player_title": "Accesso Area Giocatore",
@@ -446,7 +519,7 @@ translations = {
         "player_desc": "Access your password-protected personal card to view and update your evaluations.",
         "player_btn": "Access as Player",
         "coach_area": "Coach Area",
-        "eval_you_lbl": "You", "eval_coach_lbl": "Coach", "saving_spinner": "💾 Saving...", "confirm_destructive_checkbox": "⚠️ I confirm I want to proceed (this cannot be undone)", "confirm_required_warn": "Please check the confirmation box first.", "clear_activity_log_btn": "🗑️ Clear Activity Log", "activity_log_cleared": "Activity log cleared.", "db_offline_banner": "🔌 Database connection unavailable right now: you are seeing the last successfully loaded data, but new saves may not go through until the connection is back.", "unsaved_changes_msg": "🟡 You have unsaved changes", "all_saved_msg": "🟢 All changes saved",
+        "eval_you_lbl": "You", "eval_coach_lbl": "Coach", "saving_spinner": "💾 Saving...", "confirm_destructive_checkbox": "⚠️ I confirm I want to proceed (this cannot be undone)", "confirm_required_warn": "Please check the confirmation box first.", "clear_activity_log_btn": "🗑️ Clear Activity Log", "activity_log_cleared": "Activity log cleared.", "db_offline_banner": "🔌 Database connection unavailable right now: you are seeing the last successfully loaded data, but new saves may not go through until the connection is back.", "unsaved_changes_msg": "🟡 You have unsaved changes", "all_saved_msg": "🟢 All changes saved", "backups_title": "Backups & Restore", "backups_desc": "A snapshot of the squad, trainings, matches, lineups and activity log is saved automatically every time something is saved, right before the overwrite. If a save turns out to be a mistake, you can restore an earlier snapshot here. Restoring itself is saved as a normal save, so it also creates a fresh backup first — you can always undo an undo.", "backups_none": "No backups available yet — one is created automatically the next time something is saved.", "backups_select": "Select a backup to restore:", "backups_restore_btn": "♻️ Restore this backup", "backups_restore_error": "Could not load that backup. Please try again.", "backups_restore_success": "Backup from {when} restored successfully!",
         "coach_desc": "Restricted access for coaching staff to manage data, planning, and matches.",
         "coach_btn": "Access as Coach",
         "login_player_title": "Player Area Login",
@@ -553,7 +626,7 @@ translations = {
         "player_desc": "Accede a tu ficha personal protegida con contraseña para ver y actualizar tus valoraciones.",
         "player_btn": "Acceder como Jugador",
         "coach_area": "Área de Entrenador",
-        "eval_you_lbl": "Tú", "eval_coach_lbl": "Entrenador", "saving_spinner": "💾 Guardando...", "confirm_destructive_checkbox": "⚠️ Confirmo que quiero continuar (esta acción no se puede deshacer)", "confirm_required_warn": "Por favor marca la casilla de confirmación primero.", "clear_activity_log_btn": "🗑️ Borrar Registro de Actividad", "activity_log_cleared": "Registro de actividad borrado.", "db_offline_banner": "🔌 Conexión a la base de datos no disponible en este momento: estás viendo los últimos datos cargados correctamente, pero los nuevos guardados podrían no registrarse hasta que vuelva la conexión.", "unsaved_changes_msg": "🟡 Tienes cambios sin guardar", "all_saved_msg": "🟢 Todo guardado",
+        "eval_you_lbl": "Tú", "eval_coach_lbl": "Entrenador", "saving_spinner": "💾 Guardando...", "confirm_destructive_checkbox": "⚠️ Confirmo que quiero continuar (esta acción no se puede deshacer)", "confirm_required_warn": "Por favor marca la casilla de confirmación primero.", "clear_activity_log_btn": "🗑️ Borrar Registro de Actividad", "activity_log_cleared": "Registro de actividad borrado.", "db_offline_banner": "🔌 Conexión a la base de datos no disponible en este momento: estás viendo los últimos datos cargados correctamente, pero los nuevos guardados podrían no registrarse hasta que vuelva la conexión.", "unsaved_changes_msg": "🟡 Tienes cambios sin guardar", "all_saved_msg": "🟢 Todo guardado", "backups_title": "Copias de seguridad y restauración", "backups_desc": "Cada vez que se realiza un guardado se crea automáticamente una copia de la plantilla, entrenamientos, partidos, alineaciones y registro de actividad, justo antes de sobrescribir. Si un guardado resulta ser un error, puedes restaurar una copia anterior aquí. Restaurar también se guarda como un guardado normal, así que crea a su vez una nueva copia: siempre puedes deshacer una restauración.", "backups_none": "Todavía no hay copias de seguridad disponibles: se creará una automáticamente la próxima vez que se guarde algo.", "backups_select": "Selecciona una copia para restaurar:", "backups_restore_btn": "♻️ Restaurar esta copia", "backups_restore_error": "No se pudo cargar esa copia. Inténtalo de nuevo.", "backups_restore_success": "¡Copia del {when} restaurada con éxito!",
         "coach_desc": "Acceso restringido al cuerpo técnico para la gestión de datos, planificación y partidos.",
         "coach_btn": "Acceder como Entrenador",
         "login_player_title": "Acceso Área de Jugador",
@@ -660,7 +733,7 @@ translations = {
         "player_desc": "Gå till ditt lösenordsskyddade personliga kort för att visa och uppdatera dina utvärderingar.",
         "player_btn": "Logga in som Spelare",
         "coach_area": "Tränarområde",
-        "eval_you_lbl": "Du", "eval_coach_lbl": "Tränare", "saving_spinner": "💾 Sparar...", "confirm_destructive_checkbox": "⚠️ Jag bekräftar att jag vill fortsätta (kan inte ångras)", "confirm_required_warn": "Markera bekräftelserutan först.", "clear_activity_log_btn": "🗑️ Rensa Aktivitetslogg", "activity_log_cleared": "Aktivitetsloggen har rensats.", "db_offline_banner": "🔌 Databasanslutningen är inte tillgänglig just nu: du ser den senast inlästa datan, men nya sparningar kanske inte registreras förrän anslutningen är tillbaka.", "unsaved_changes_msg": "🟡 Du har osparade ändringar", "all_saved_msg": "🟢 Allt sparat",
+        "eval_you_lbl": "Du", "eval_coach_lbl": "Tränare", "saving_spinner": "💾 Sparar...", "confirm_destructive_checkbox": "⚠️ Jag bekräftar att jag vill fortsätta (kan inte ångras)", "confirm_required_warn": "Markera bekräftelserutan först.", "clear_activity_log_btn": "🗑️ Rensa Aktivitetslogg", "activity_log_cleared": "Aktivitetsloggen har rensats.", "db_offline_banner": "🔌 Databasanslutningen är inte tillgänglig just nu: du ser den senast inlästa datan, men nya sparningar kanske inte registreras förrän anslutningen är tillbaka.", "unsaved_changes_msg": "🟡 Du har osparade ändringar", "all_saved_msg": "🟢 Allt sparat", "backups_title": "Säkerhetskopior och återställning", "backups_desc": "Enögonblicksbild av truppen, träningar, matcher, laguppställningar och aktivitetsloggen sparas automatiskt varje gång något sparas, precis innan det skrivs över. Om ett sparande visar sig vara ett misstag kan du återställa en tidigare kopia här. Att återställa sparas också som ett vanligt sparande, så det skapar i sin tur en ny säkerhetskopia — du kan alltid ångra en återställning.", "backups_none": "Inga säkerhetskopior tillgängliga ännu — en skapas automatiskt nästa gång något sparas.", "backups_select": "Välj en säkerhetskopia att återställa:", "backups_restore_btn": "♻️ Återställ denna kopia", "backups_restore_error": "Det gick inte att läsa in den kopian. Försök igen.", "backups_restore_success": "Kopian från {when} har återställts!",
         "coach_desc": "Begränsad åtkomst för tränarstab för datahantering, planering och matcher.",
         "coach_btn": "Logga in som Tränare",
         "login_player_title": "Inloggning Spelarområde",
@@ -767,7 +840,7 @@ translations = {
         "player_desc": "Ga naar je met een wachtwoord beveiligde persoonlijke kaart om je evaluaties te bekijken en bij te werken.",
         "player_btn": "Toegang als Speler",
         "coach_area": "Coachgebied",
-        "eval_you_lbl": "Jij", "eval_coach_lbl": "Coach", "saving_spinner": "💾 Bezig met opslaan...", "confirm_destructive_checkbox": "⚠️ Ik bevestig dat ik wil doorgaan (dit kan niet ongedaan worden gemaakt)", "confirm_required_warn": "Vink eerst het bevestigingsvakje aan.", "clear_activity_log_btn": "🗑️ Activiteitenlogboek Wissen", "activity_log_cleared": "Activiteitenlogboek gewist.", "db_offline_banner": "🔌 Databaseverbinding momenteel niet beschikbaar: je ziet de laatst succesvol geladen gegevens, maar nieuwe opslagacties komen mogelijk niet door totdat de verbinding is hersteld.", "unsaved_changes_msg": "🟡 Je hebt niet-opgeslagen wijzigingen", "all_saved_msg": "🟢 Alles opgeslagen",
+        "eval_you_lbl": "Jij", "eval_coach_lbl": "Coach", "saving_spinner": "💾 Bezig met opslaan...", "confirm_destructive_checkbox": "⚠️ Ik bevestig dat ik wil doorgaan (dit kan niet ongedaan worden gemaakt)", "confirm_required_warn": "Vink eerst het bevestigingsvakje aan.", "clear_activity_log_btn": "🗑️ Activiteitenlogboek Wissen", "activity_log_cleared": "Activiteitenlogboek gewist.", "db_offline_banner": "🔌 Databaseverbinding momenteel niet beschikbaar: je ziet de laatst succesvol geladen gegevens, maar nieuwe opslagacties komen mogelijk niet door totdat de verbinding is hersteld.", "unsaved_changes_msg": "🟡 Je hebt niet-opgeslagen wijzigingen", "all_saved_msg": "🟢 Alles opgeslagen", "backups_title": "Back-ups en herstel", "backups_desc": "Elke keer dat er iets wordt opgeslagen, wordt automatisch een momentopname gemaakt van de selectie, trainingen, wedstrijden, opstellingen en het activiteitenlogboek, vlak voor het overschrijven. Als een opslagactie een vergissing blijkt te zijn, kun je hier een eerdere momentopname herstellen. Herstellen wordt zelf ook als een normale opslag behandeld, dus er wordt eerst weer een nieuwe back-up gemaakt — je kunt een herstel dus altijd ongedaan maken.", "backups_none": "Nog geen back-ups beschikbaar — er wordt er automatisch een aangemaakt zodra er iets wordt opgeslagen.", "backups_select": "Selecteer een back-up om te herstellen:", "backups_restore_btn": "♻️ Deze back-up herstellen", "backups_restore_error": "Kon die back-up niet laden. Probeer het opnieuw.", "backups_restore_success": "Back-up van {when} succesvol hersteld!",
         "coach_desc": "Beperkte toegang voor de technische staf voor gegevensbeheer, planning en wedstrijden.",
         "coach_btn": "Toegang als Coach",
         "login_player_title": "Inloggen Spelersgebied",
@@ -874,7 +947,7 @@ translations = {
         "player_desc": "Gå til dit adgangskodebeskyttede personlige kort for at se og opdatere dine evalueringer.",
         "player_btn": "Log ind som Spiller",
         "coach_area": "Trænerområde",
-        "eval_you_lbl": "Dig", "eval_coach_lbl": "Træner", "saving_spinner": "💾 Gemmer...", "confirm_destructive_checkbox": "⚠️ Jeg bekræfter, at jeg vil fortsætte (kan ikke fortrydes)", "confirm_required_warn": "Sæt venligst kryds i bekræftelsesfeltet først.", "clear_activity_log_btn": "🗑️ Ryd Aktivitetslog", "activity_log_cleared": "Aktivitetslog ryddet.", "db_offline_banner": "🔌 Databaseforbindelsen er ikke tilgængelig lige nu: du ser de sidst succesfuldt indlæste data, men nye gemte ændringer registreres muligvis ikke, før forbindelsen er tilbage.", "unsaved_changes_msg": "🟡 Du har ugemte ændringer", "all_saved_msg": "🟢 Alt gemt",
+        "eval_you_lbl": "Dig", "eval_coach_lbl": "Træner", "saving_spinner": "💾 Gemmer...", "confirm_destructive_checkbox": "⚠️ Jeg bekræfter, at jeg vil fortsætte (kan ikke fortrydes)", "confirm_required_warn": "Sæt venligst kryds i bekræftelsesfeltet først.", "clear_activity_log_btn": "🗑️ Ryd Aktivitetslog", "activity_log_cleared": "Aktivitetslog ryddet.", "db_offline_banner": "🔌 Databaseforbindelsen er ikke tilgængelig lige nu: du ser de sidst succesfuldt indlæste data, men nye gemte ændringer registreres muligvis ikke, før forbindelsen er tilbage.", "unsaved_changes_msg": "🟡 Du har ugemte ændringer", "all_saved_msg": "🟢 Alt gemt", "backups_title": "Sikkerhedskopier og gendannelse", "backups_desc": "Hver gang der gemmes noget, tages der automatisk et øjebliksbillede af truppen, træninger, kampe, opstillinger og aktivitetsloggen, lige før overskrivningen. Hvis en lagring viser sig at være en fejl, kan du gendanne et tidligere øjebliksbillede her. Gendannelse gemmes også som en normal lagring, så det skaber i sin tur en ny sikkerhedskopi — du kan altid fortryde en gendannelse.", "backups_none": "Ingen sikkerhedskopier tilgængelige endnu — en oprettes automatisk næste gang noget gemmes.", "backups_select": "Vælg en sikkerhedskopi, der skal gendannes:", "backups_restore_btn": "♻️ Gendan denne sikkerhedskopi", "backups_restore_error": "Kunne ikke indlæse den sikkerhedskopi. Prøv igen.", "backups_restore_success": "Sikkerhedskopi fra {when} gendannet!",
         "coach_desc": "Begrænset adgang for trænerstab til datahåndtering, planlægning og kampe.",
         "coach_btn": "Log ind som Træner",
         "login_player_title": "Login Spillerområde",
@@ -4347,3 +4420,33 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     if _save_ok:
                         st.toast(lang_dict.get('activity_log_cleared', 'Activity log cleared.'))
                         st.rerun()
+
+            st.markdown("---")
+            st.subheader(f"🕒 {lang_dict.get('backups_title', 'Backups & Restore')}")
+            st.caption(lang_dict.get('backups_desc', "A snapshot of the squad, trainings, matches, lineups and activity log is saved automatically every time something is saved, right before the overwrite. If a save turns out to be a mistake, you can restore an earlier snapshot here. Restoring itself is saved as a normal save, so it also creates a fresh backup first — you can always undo an undo."))
+
+            backups = list_backups()
+            if not backups:
+                st.info(lang_dict.get('backups_none', 'No backups available yet — one is created automatically the next time something is saved.'))
+            else:
+                backup_labels = [bid_created[1].strftime("%Y-%m-%d %H:%M:%S") for bid_created in backups]
+                selected_backup_label = st.selectbox(lang_dict.get('backups_select', 'Select a backup to restore:'), backup_labels, key="backup_select")
+                selected_backup_id = backups[backup_labels.index(selected_backup_label)][0]
+
+                confirm_restore = st.checkbox(lang_dict.get('confirm_destructive_checkbox', '⚠️ I confirm I want to proceed (this cannot be undone)'), key="confirm_backup_restore")
+                if st.button(lang_dict.get('backups_restore_btn', '♻️ Restore this backup'), type="secondary", disabled=not confirm_restore):
+                    backup_data = get_backup_data(selected_backup_id)
+                    if not backup_data:
+                        st.error(lang_dict.get('backups_restore_error', 'Could not load that backup. Please try again.'))
+                    else:
+                        st.session_state.squad_data = backup_data.get("squad_data", [])
+                        st.session_state.planned_trainings = backup_data.get("planned_trainings", [])
+                        st.session_state.match_results = backup_data.get("match_results", [])
+                        st.session_state.snp_lineups = normalize_snp_lineups(backup_data.get("snp_lineups", {}))
+                        st.session_state.activity_log = backup_data.get("activity_log", [])
+                        log_activity("Backup restored", f"Snapshot from {selected_backup_label}")
+                        with st.spinner(lang_dict.get('saving_spinner', '💾 Saving...')):
+                            _save_ok = save_data_to_server()
+                        if _save_ok:
+                            st.toast(lang_dict.get('backups_restore_success', 'Backup from {when} restored successfully!').format(when=selected_backup_label))
+                            st.rerun()
