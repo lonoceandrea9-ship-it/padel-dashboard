@@ -339,7 +339,7 @@ translations = {
         "player_desc": "Accedi alla tua scheda personale protetta da password per visualizzare e aggiornare le tue valutazioni.",
         "player_btn": "Accedi come Giocatore",
         "coach_area": "Area Allenatore",
-        "eval_you_lbl": "Tu", "eval_coach_lbl": "Allenatore",
+        "eval_you_lbl": "Tu", "eval_coach_lbl": "Allenatore", "saving_spinner": "💾 Salvataggio in corso...", "confirm_destructive_checkbox": "⚠️ Confermo di voler procedere (azione permanente)", "confirm_required_warn": "Spunta la casella di conferma prima di procedere.", "clear_activity_log_btn": "🗑️ Cancella Registro Attività", "activity_log_cleared": "Registro attività cancellato.", "db_offline_banner": "🔌 Connessione al database non disponibile al momento: stai vedendo gli ultimi dati caricati con successo, ma nuovi salvataggi potrebbero non essere registrati finché la connessione non torna.", "unsaved_changes_msg": "🟡 Hai modifiche non salvate", "all_saved_msg": "🟢 Tutto salvato",
         "coach_desc": "Accesso riservato allo staff tecnico per la gestione dei dati, la pianificazione e le partite.",
         "coach_btn": "Accedi come Allenatore",
         "login_player_title": "Accesso Area Giocatore",
@@ -446,7 +446,7 @@ translations = {
         "player_desc": "Access your password-protected personal card to view and update your evaluations.",
         "player_btn": "Access as Player",
         "coach_area": "Coach Area",
-        "eval_you_lbl": "You", "eval_coach_lbl": "Coach",
+        "eval_you_lbl": "You", "eval_coach_lbl": "Coach", "saving_spinner": "💾 Saving...", "confirm_destructive_checkbox": "⚠️ I confirm I want to proceed (this cannot be undone)", "confirm_required_warn": "Please check the confirmation box first.", "clear_activity_log_btn": "🗑️ Clear Activity Log", "activity_log_cleared": "Activity log cleared.", "db_offline_banner": "🔌 Database connection unavailable right now: you are seeing the last successfully loaded data, but new saves may not go through until the connection is back.", "unsaved_changes_msg": "🟡 You have unsaved changes", "all_saved_msg": "🟢 All changes saved",
         "coach_desc": "Restricted access for coaching staff to manage data, planning, and matches.",
         "coach_btn": "Access as Coach",
         "login_player_title": "Player Area Login",
@@ -553,7 +553,7 @@ translations = {
         "player_desc": "Accede a tu ficha personal protegida con contraseña para ver y actualizar tus valoraciones.",
         "player_btn": "Acceder como Jugador",
         "coach_area": "Área de Entrenador",
-        "eval_you_lbl": "Tú", "eval_coach_lbl": "Entrenador",
+        "eval_you_lbl": "Tú", "eval_coach_lbl": "Entrenador", "saving_spinner": "💾 Guardando...", "confirm_destructive_checkbox": "⚠️ Confirmo que quiero continuar (esta acción no se puede deshacer)", "confirm_required_warn": "Por favor marca la casilla de confirmación primero.", "clear_activity_log_btn": "🗑️ Borrar Registro de Actividad", "activity_log_cleared": "Registro de actividad borrado.", "db_offline_banner": "🔌 Conexión a la base de datos no disponible en este momento: estás viendo los últimos datos cargados correctamente, pero los nuevos guardados podrían no registrarse hasta que vuelva la conexión.", "unsaved_changes_msg": "🟡 Tienes cambios sin guardar", "all_saved_msg": "🟢 Todo guardado",
         "coach_desc": "Acceso restringido al cuerpo técnico para la gestión de datos, planificación y partidos.",
         "coach_btn": "Acceder como Entrenador",
         "login_player_title": "Acceso Área de Jugador",
@@ -660,7 +660,7 @@ translations = {
         "player_desc": "Gå till ditt lösenordsskyddade personliga kort för att visa och uppdatera dina utvärderingar.",
         "player_btn": "Logga in som Spelare",
         "coach_area": "Tränarområde",
-        "eval_you_lbl": "Du", "eval_coach_lbl": "Tränare",
+        "eval_you_lbl": "Du", "eval_coach_lbl": "Tränare", "saving_spinner": "💾 Sparar...", "confirm_destructive_checkbox": "⚠️ Jag bekräftar att jag vill fortsätta (kan inte ångras)", "confirm_required_warn": "Markera bekräftelserutan först.", "clear_activity_log_btn": "🗑️ Rensa Aktivitetslogg", "activity_log_cleared": "Aktivitetsloggen har rensats.", "db_offline_banner": "🔌 Databasanslutningen är inte tillgänglig just nu: du ser den senast inlästa datan, men nya sparningar kanske inte registreras förrän anslutningen är tillbaka.", "unsaved_changes_msg": "🟡 Du har osparade ändringar", "all_saved_msg": "🟢 Allt sparat",
         "coach_desc": "Begränsad åtkomst för tränarstab för datahantering, planering och matcher.",
         "coach_btn": "Logga in som Tränare",
         "login_player_title": "Inloggning Spelarområde",
@@ -767,7 +767,7 @@ translations = {
         "player_desc": "Ga naar je met een wachtwoord beveiligde persoonlijke kaart om je evaluaties te bekijken en bij te werken.",
         "player_btn": "Toegang als Speler",
         "coach_area": "Coachgebied",
-        "eval_you_lbl": "Jij", "eval_coach_lbl": "Coach",
+        "eval_you_lbl": "Jij", "eval_coach_lbl": "Coach", "saving_spinner": "💾 Bezig met opslaan...", "confirm_destructive_checkbox": "⚠️ Ik bevestig dat ik wil doorgaan (dit kan niet ongedaan worden gemaakt)", "confirm_required_warn": "Vink eerst het bevestigingsvakje aan.", "clear_activity_log_btn": "🗑️ Activiteitenlogboek Wissen", "activity_log_cleared": "Activiteitenlogboek gewist.", "db_offline_banner": "🔌 Databaseverbinding momenteel niet beschikbaar: je ziet de laatst succesvol geladen gegevens, maar nieuwe opslagacties komen mogelijk niet door totdat de verbinding is hersteld.", "unsaved_changes_msg": "🟡 Je hebt niet-opgeslagen wijzigingen", "all_saved_msg": "🟢 Alles opgeslagen",
         "coach_desc": "Beperkte toegang voor de technische staf voor gegevensbeheer, planning en wedstrijden.",
         "coach_btn": "Toegang als Coach",
         "login_player_title": "Inloggen Spelersgebied",
@@ -874,7 +874,7 @@ translations = {
         "player_desc": "Gå til dit adgangskodebeskyttede personlige kort for at se og opdatere dine evalueringer.",
         "player_btn": "Log ind som Spiller",
         "coach_area": "Trænerområde",
-        "eval_you_lbl": "Dig", "eval_coach_lbl": "Træner",
+        "eval_you_lbl": "Dig", "eval_coach_lbl": "Træner", "saving_spinner": "💾 Gemmer...", "confirm_destructive_checkbox": "⚠️ Jeg bekræfter, at jeg vil fortsætte (kan ikke fortrydes)", "confirm_required_warn": "Sæt venligst kryds i bekræftelsesfeltet først.", "clear_activity_log_btn": "🗑️ Ryd Aktivitetslog", "activity_log_cleared": "Aktivitetslog ryddet.", "db_offline_banner": "🔌 Databaseforbindelsen er ikke tilgængelig lige nu: du ser de sidst succesfuldt indlæste data, men nye gemte ændringer registreres muligvis ikke, før forbindelsen er tilbage.", "unsaved_changes_msg": "🟡 Du har ugemte ændringer", "all_saved_msg": "🟢 Alt gemt",
         "coach_desc": "Begrænset adgang for trænerstab til datahåndtering, planlægning og kampe.",
         "coach_btn": "Log ind som Træner",
         "login_player_title": "Login Spillerområde",
@@ -2362,6 +2362,12 @@ if not db_reachable and "squad_data" not in st.session_state:
     st.error(lang_dict.get('db_unreachable_error', "⚠️ Unable to connect to the database. Your saved data might not be visible right now. To protect it, the app will not proceed with empty data: reload the page in a few seconds. If the problem persists, contact the administrator."))
     st.stop()
 
+# When the DB is temporarily unreachable but this tab already has data in memory
+# (from an earlier successful load), we silently keep using that in-memory data
+# instead of stopping — but the user should still be warned that they're looking
+# at a possibly-stale snapshot and that saves may not be reaching the database.
+st.session_state["_db_offline"] = (not db_reachable) and ("squad_data" in st.session_state)
+
 if db_reachable and saved_server_data:
     # IMPORTANT: always resync from the database on every rerun (not just on first
     # load of this browser session). Each Streamlit browser tab keeps its own
@@ -2446,7 +2452,10 @@ with st.sidebar:
         st.rerun()
         
     lang_dict = translations.get(st.session_state.language, translations["English"])
-    
+
+    if st.session_state.get("_db_offline"):
+        st.warning(lang_dict.get('db_offline_banner', "🔌 Database connection unavailable right now: you are seeing the last successfully loaded data, but new saves may not go through until the connection is back."))
+
     st.markdown("---")
     if st.session_state.get("authenticated_admin"):
         st.success("🛡️ Admin Logged In")
@@ -2500,10 +2509,12 @@ if st.session_state.get("force_password_change", False):
                 current_player["password"] = new_pwd1
                 current_player["first_login_done"] = True
                 apply_security_question(current_player, fl_q_key, fl_custom, fl_answer)
-                if save_data_to_server():
+                with st.spinner(lang_dict.get('saving_spinner', '💾 Saving...')):
+                    _save_ok = save_data_to_server()
+                if _save_ok:
                     st.session_state.force_password_change = False
                     st.session_state.nav_mode = "Player_Dashboard"
-                    st.success(lang_dict.get('first_login_success', '✅ Password set and saved successfully!'))
+                    st.toast(lang_dict.get('first_login_success', '✅ Password set and saved successfully!'))
                     st.rerun()
 
 # --- HOME SELECTION ---
@@ -2620,9 +2631,11 @@ elif st.session_state.nav_mode == "Player_Login":
                         player_obj["first_login_done"] = True
                         attempts[player_obj["fname"]] = 0
                         log_activity("Password recovered", f"{player_obj['fname']} {player_obj['lname']}")
-                        if save_data_to_server():
+                        with st.spinner(lang_dict.get('saving_spinner', '💾 Saving...')):
+                            _save_ok = save_data_to_server()
+                        if _save_ok:
                             st.session_state.forgot_pwd_mode = False
-                            st.success(f"✅ {lang_dict.get('forgot_success', 'Password updated!')}")
+                            st.toast(f"✅ {lang_dict.get('forgot_success', 'Password updated!')}")
 
 # --- LOGIN ALLENATORE ---
 elif st.session_state.nav_mode == "Coach_Login":
@@ -2638,7 +2651,9 @@ elif st.session_state.nav_mode == "Coach_Login":
             if pwd_input == COACH_PASSWORD:
                 st.session_state.authenticated_coach = True
                 log_activity("Coach login", "Coach accessed the system")
-                if save_data_to_server():
+                with st.spinner(lang_dict.get('saving_spinner', '💾 Saving...')):
+                    _save_ok = save_data_to_server()
+                if _save_ok:
                     st.session_state.nav_mode = "Coach"
                     st.rerun()
             else:
@@ -2663,7 +2678,9 @@ elif st.session_state.nav_mode == "Admin_Login":
                 st.session_state.authenticated_admin = True
                 st.session_state.authenticated_coach = True  # full coach privileges
                 log_activity("Admin login", "Admin accessed the system")
-                if save_data_to_server():
+                with st.spinner(lang_dict.get('saving_spinner', '💾 Saving...')):
+                    _save_ok = save_data_to_server()
+                if _save_ok:
                     st.session_state.nav_mode = "Coach"
                     st.rerun()
             else:
@@ -2721,8 +2738,10 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                 else:
                     apply_security_question(current_player, dq_key, dq_custom, dq_answer)
                     log_activity("Security question set", f"{current_player['fname']} {current_player['lname']}")
-                    if save_data_to_server():
-                        st.success(lang_dict.get('sec_saved', 'Saved!'))
+                    with st.spinner(lang_dict.get('saving_spinner', '💾 Saving...')):
+                        _save_ok = save_data_to_server()
+                    if _save_ok:
+                        st.toast(lang_dict.get('sec_saved', 'Saved!'))
                         st.rerun()
     
     tab_eval, tab_partners, tab_history, tab_comments, tab_calendar = st.tabs([
@@ -2772,14 +2791,26 @@ elif st.session_state.nav_mode == "Player_Dashboard":
         current_p_style = current_player.get("player_play_style", "Equilibrated")
         if current_p_style not in style_options: current_p_style = "Equilibrated"
         new_player_style = st.selectbox(lang_dict.get('style_select_lbl', 'Play Style:'), options=style_options, index=style_options.index(current_p_style))
-                
+
+        eval_has_unsaved = (
+            new_tech_vals != current_player['tech']
+            or new_mental_vals != current_player['mental']
+            or new_player_style != current_p_style
+        )
+        if eval_has_unsaved:
+            st.caption(lang_dict.get('unsaved_changes_msg', '🟡 You have unsaved changes'))
+        else:
+            st.caption(lang_dict.get('all_saved_msg', '🟢 All changes saved'))
+
         if st.button(lang_dict.get('save_eval', 'Save'), type="primary"):
             current_player['tech'] = new_tech_vals
             current_player['mental'] = new_mental_vals
             current_player['player_play_style'] = new_player_style
             log_activity("Self-evaluation saved", f"{current_player['fname']} {current_player['lname']} – style: {new_player_style}")
-            if save_data_to_server():
-                st.success(lang_dict.get('eval_saved', 'Saved!'))
+            with st.spinner(lang_dict.get('saving_spinner', '💾 Saving...')):
+                _save_ok = save_data_to_server()
+            if _save_ok:
+                st.toast(lang_dict.get('eval_saved', 'Saved!'))
                 st.rerun()
 
         st.markdown("---")
@@ -2913,8 +2944,10 @@ elif st.session_state.nav_mode == "Player_Dashboard":
             if st.form_submit_button(lang_dict.get('save_partners', 'Save Partners'), type="primary"):
                 current_player["partners"] = new_partners_dict
                 log_activity("Partner ranking updated", f"{current_player['fname']} {current_player['lname']}")
-                if save_data_to_server():
-                    st.success(lang_dict.get('partners_saved', 'Saved!'))
+                with st.spinner(lang_dict.get('saving_spinner', '💾 Saving...')):
+                    _save_ok = save_data_to_server()
+                if _save_ok:
+                    st.toast(lang_dict.get('partners_saved', 'Saved!'))
                     st.rerun()
                 
         st.markdown(f"### {lang_dict.get('current_ranking', 'Current Ranking:')}")
@@ -2963,8 +2996,10 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                         "date": datetime.now().strftime("%Y-%m-%d %H:%M")
                     })
                     log_activity("Peer feedback sent", f"From {current_player['fname']} to {selected_target}")
-                    if save_data_to_server():
-                        st.success(lang_dict.get('note_sent', 'Sent!'))
+                    with st.spinner(lang_dict.get('saving_spinner', '💾 Saving...')):
+                        _save_ok = save_data_to_server()
+                    if _save_ok:
+                        st.toast(lang_dict.get('note_sent', 'Sent!'))
             else:
                 st.warning(lang_dict.get('empty_note_warn', 'Cannot be empty.'))
         
@@ -3150,7 +3185,9 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 st.session_state.admin_viewing_player = True
                 st.session_state.force_password_change = False
                 log_activity("Admin opened player profile", selected_admin_player)
-                if save_data_to_server():
+                with st.spinner(lang_dict.get('saving_spinner', '💾 Saving...')):
+                    _save_ok = save_data_to_server()
+                if _save_ok:
                     st.session_state.nav_mode = "Player_Dashboard"
                     st.rerun()
 
@@ -3181,8 +3218,10 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                             changed.append(f"{p['fname']} {p['lname']}")
                     if changed:
                         log_activity("Admin updated player password(s)", ", ".join(changed))
-                        if save_data_to_server():
-                            st.success(lang_dict.get('admin_pwd_updated', '✅ Passwords updated for: {names}').format(names=', '.join(changed)))
+                        with st.spinner(lang_dict.get('saving_spinner', '💾 Saving...')):
+                            _save_ok = save_data_to_server()
+                        if _save_ok:
+                            st.toast(lang_dict.get('admin_pwd_updated', '✅ Passwords updated for: {names}').format(names=', '.join(changed)))
                             st.rerun()
                     else:
                         st.info(lang_dict.get('no_changes_to_save', 'No changes to save.'))
@@ -3229,8 +3268,10 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                                     "first_login_done": False
                                 })
                                 log_activity("Player added", f"{new_fname.strip()} {new_lname.strip()} ({new_side})")
-                                if save_data_to_server():
-                                    st.success(lang_dict.get('roster_add_success', 'Player {name} added successfully!').format(name=f"{new_fname} {new_lname}"))
+                                with st.spinner(lang_dict.get('saving_spinner', '💾 Saving...')):
+                                    _save_ok = save_data_to_server()
+                                if _save_ok:
+                                    st.toast(lang_dict.get('roster_add_success', 'Player {name} added successfully!').format(name=f"{new_fname} {new_lname}"))
                                     st.rerun()
                         else:
                             st.warning(lang_dict.get('roster_name_required', "First and last name can't be empty."))
@@ -3239,13 +3280,19 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 st.markdown(f"#### {lang_dict.get('roster_delete_title', 'Remove Existing Player')}")
                 with st.form("modal_delete_player_form"):
                     player_to_delete = st.selectbox(lang_dict.get('roster_select_remove', 'Select player to remove'), [f"{p['fname']} {p['lname']}" for p in st.session_state.squad_data])
+                    confirm_player_delete = st.checkbox(lang_dict.get('confirm_destructive_checkbox', '⚠️ I confirm I want to proceed (this cannot be undone)'), key="confirm_roster_delete")
 
                     if st.form_submit_button(lang_dict.get('roster_remove_btn', '🗑️ Remove Player'), type="secondary"):
-                        st.session_state.squad_data = [p for p in st.session_state.squad_data if f"{p['fname']} {p['lname']}" != player_to_delete]
-                        log_activity("Player removed", player_to_delete)
-                        if save_data_to_server():
-                            st.success(lang_dict.get('roster_remove_success', 'Player {name} removed successfully!').format(name=player_to_delete))
-                            st.rerun()
+                        if not confirm_player_delete:
+                            st.warning(lang_dict.get('confirm_required_warn', 'Please check the confirmation box first.'))
+                        else:
+                            st.session_state.squad_data = [p for p in st.session_state.squad_data if f"{p['fname']} {p['lname']}" != player_to_delete]
+                            log_activity("Player removed", player_to_delete)
+                            with st.spinner(lang_dict.get('saving_spinner', '💾 Saving...')):
+                                _save_ok = save_data_to_server()
+                            if _save_ok:
+                                st.toast(lang_dict.get('roster_remove_success', 'Player {name} removed successfully!').format(name=player_to_delete))
+                                st.rerun()
         st.markdown("---")
         
     if is_admin:
@@ -3337,8 +3384,10 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             st.markdown("<br>", unsafe_allow_html=True)
             if st.form_submit_button(lang_dict.get('squad_save_btn', '💾 Save Squad and Role Changes'), type="primary"):
                 log_activity("Squad roles/styles updated", f"{len(squad_players)} players")
-                if save_data_to_server():
-                    st.success(lang_dict.get('squad_save_success', 'All changes to the squad, roles and dominant hand have been saved permanently!'))
+                with st.spinner(lang_dict.get('saving_spinner', '💾 Saving...')):
+                    _save_ok = save_data_to_server()
+                if _save_ok:
+                    st.toast(lang_dict.get('squad_save_success', 'All changes to the squad, roles and dominant hand have been saved permanently!'))
                     st.rerun()
 
         st.markdown("---")
@@ -3453,8 +3502,10 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     p_obj['play_style'] = selected_style
                     p_obj['coach_note'] = new_coach_note
                     log_activity("Coach grades updated", f"{selected_player_name} – style: {selected_style}")
-                    if save_data_to_server():
-                        st.success(f"✅ {selected_player_name} updated and saved successfully!")
+                    with st.spinner(lang_dict.get('saving_spinner', '💾 Saving...')):
+                        _save_ok = save_data_to_server()
+                    if _save_ok:
+                        st.toast(f"✅ {selected_player_name} updated and saved successfully!")
 
     with coach_tab_stats:
         st.subheader("📊 Players Stats – Self-Evaluation vs Coach Evaluation")
@@ -3564,8 +3615,10 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                             p["c_mental"] = new_c_mental
                             p["play_style"] = new_coach_style
                             log_activity("Coach evaluation saved (Players Stats)", f"{player_name} – style: {new_coach_style}")
-                            if save_data_to_server():
-                                st.success(f"✅ Coach evaluation for **{player_name}** saved!")
+                            with st.spinner(lang_dict.get('saving_spinner', '💾 Saving...')):
+                                _save_ok = save_data_to_server()
+                            if _save_ok:
+                                st.toast(f"✅ Coach evaluation for **{player_name}** saved!")
                                 st.rerun()
                     
                     # Radar with current (possibly just-saved) values
@@ -3697,8 +3750,10 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         "3° Priorità": coach_choice_p3
                     })
                     log_activity("Training planned", f"{training_date} – {coach_choice_p1}, {coach_choice_p2}, {coach_choice_p3}")
-                    if save_data_to_server():
-                        st.success(lang_dict.get('training_saved_success', '🎉 Training saved successfully for {date}!').format(date=training_date))
+                    with st.spinner(lang_dict.get('saving_spinner', '💾 Saving...')):
+                        _save_ok = save_data_to_server()
+                    if _save_ok:
+                        st.toast(lang_dict.get('training_saved_success', '🎉 Training saved successfully for {date}!').format(date=training_date))
                         st.rerun()
 
             st.markdown("---")
@@ -3782,8 +3837,10 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                                 "Gruppo": f"Gruppo {gi + 1}"
                             })
                         log_activity("Group trainings planned", f"{group_training_date} – {len(group_focus_selections)} gruppi")
-                        if save_data_to_server():
-                            st.success(lang_dict.get('group_saved_success', '🎉 {n} group trainings saved for {date}!').format(n=len(group_focus_selections), date=group_training_date))
+                        with st.spinner(lang_dict.get('saving_spinner', '💾 Saving...')):
+                            _save_ok = save_data_to_server()
+                        if _save_ok:
+                            st.toast(lang_dict.get('group_saved_success', '🎉 {n} group trainings saved for {date}!').format(n=len(group_focus_selections), date=group_training_date))
                             st.rerun()
 
             st.markdown("---")
@@ -3838,21 +3895,29 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                                 "3° Priorità": edit_p3
                             }
                             log_activity("Training edited", f"{edit_date} – {edit_p1}, {edit_p2}, {edit_p3}")
-                            if save_data_to_server():
-                                st.success(lang_dict.get('training_edit_success', 'Training edited successfully!'))
+                            with st.spinner(lang_dict.get('saving_spinner', '💾 Saving...')):
+                                _save_ok = save_data_to_server()
+                            if _save_ok:
+                                st.toast(lang_dict.get('training_edit_success', 'Training edited successfully!'))
                                 st.rerun()
 
                 st.markdown(f"#### {lang_dict.get('training_delete_title', '🗑️ Delete Training from Calendar')}")
                 with st.form("delete_training_form"):
                     training_options = [f"{t['Data']} - {t['1° Priorità']} ({t['Partecipanti'][:25]}...)" for t in st.session_state.planned_trainings]
                     selected_training_to_delete = st.selectbox(lang_dict.get('training_select_delete', 'Select training to remove'), training_options, key="delete_training_select")
+                    confirm_training_delete = st.checkbox(lang_dict.get('confirm_destructive_checkbox', '⚠️ I confirm I want to proceed (this cannot be undone)'), key="confirm_training_delete")
 
                     if st.form_submit_button(lang_dict.get('training_delete_btn', '🗑️ Delete Selected Training'), type="secondary"):
-                        selected_index = training_options.index(selected_training_to_delete)
-                        removed_training = st.session_state.planned_trainings.pop(selected_index)
-                        if save_data_to_server():
-                            st.success(lang_dict.get('training_delete_success', 'Training on {date} removed successfully from the calendar!').format(date=removed_training['Data']))
-                            st.rerun()
+                        if not confirm_training_delete:
+                            st.warning(lang_dict.get('confirm_required_warn', 'Please check the confirmation box first.'))
+                        else:
+                            selected_index = training_options.index(selected_training_to_delete)
+                            removed_training = st.session_state.planned_trainings.pop(selected_index)
+                            with st.spinner(lang_dict.get('saving_spinner', '💾 Saving...')):
+                                _save_ok = save_data_to_server()
+                            if _save_ok:
+                                st.toast(lang_dict.get('training_delete_success', 'Training on {date} removed successfully from the calendar!').format(date=removed_training['Data']))
+                                st.rerun()
             else:
                 st.info(lang_dict.get('training_none_saved', 'No training confirmed and saved to the calendar yet.'))
             
@@ -3971,8 +4036,10 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 _sync_snp_match_results(day_id, selected_day, lineup_data)
 
                 log_activity("SNP lineup saved", selected_day["label"])
-                if save_data_to_server():
-                    st.success(lang_dict.get('snp_formation_saved', '✅ Lineup saved for **{day}**! You can enter results once the match has been played.').format(day=selected_day['label']))
+                with st.spinner(lang_dict.get('saving_spinner', '💾 Saving...')):
+                    _save_ok = save_data_to_server()
+                if _save_ok:
+                    st.toast(lang_dict.get('snp_formation_saved', '✅ Lineup saved for **{day}**! You can enter results once the match has been played.').format(day=selected_day['label']))
                     st.rerun()
 
         st.markdown("---")
@@ -4019,8 +4086,10 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     _sync_snp_match_results(day_id, selected_day, lineup_data)
 
                     log_activity("SNP results saved", selected_day["label"])
-                    if save_data_to_server():
-                        st.success(lang_dict.get('snp_results_saved', '✅ Results saved for **{day}**!').format(day=selected_day['label']))
+                    with st.spinner(lang_dict.get('saving_spinner', '💾 Saving...')):
+                        _save_ok = save_data_to_server()
+                    if _save_ok:
+                        st.toast(lang_dict.get('snp_results_saved', '✅ Results saved for **{day}**!').format(day=selected_day['label']))
                         st.rerun()
 
         # --- Riepilogo completo delle 7 giornate ---
@@ -4058,11 +4127,14 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
 
         # Pulsante reset
         with st.expander(lang_dict.get('snp_reset_expander', '🗑️ Reset SNP data')):
-            if st.button(lang_dict.get('snp_reset_btn', 'Delete ALL SNP lineups and results'), type="secondary"):
+            confirm_snp_reset = st.checkbox(lang_dict.get('confirm_destructive_checkbox', '⚠️ I confirm I want to proceed (this cannot be undone)'), key="confirm_snp_reset")
+            if st.button(lang_dict.get('snp_reset_btn', 'Delete ALL SNP lineups and results'), type="secondary", disabled=not confirm_snp_reset):
                 st.session_state.snp_lineups = {}
                 st.session_state.match_results = [m for m in st.session_state.match_results if m.get("Tipo") != "SNP"]
-                if save_data_to_server():
-                    st.success(lang_dict.get('snp_reset_success', 'SNP data reset.'))
+                with st.spinner(lang_dict.get('saving_spinner', '💾 Saving...')):
+                    _save_ok = save_data_to_server()
+                if _save_ok:
+                    st.toast(lang_dict.get('snp_reset_success', 'SNP data reset.'))
                     st.rerun()
 
     with coach_tab3:
@@ -4235,7 +4307,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             
             if st.button(lang_dict.get('pairing_confirm_btn', '✅ Confirm Pairing Selection'), type="primary"):
                 st.session_state.confirmed_pairing = pd.DataFrame(new_confirmed_pairs)
-                st.success(lang_dict.get('pairing_confirm_success', 'Pairing confirmed and saved successfully!'))
+                st.toast(lang_dict.get('pairing_confirm_success', 'Pairing confirmed and saved successfully!'))
                 
             if "unmatched_cache" in st.session_state and st.session_state.unmatched_cache:
                 st.warning(f"⚠️ {lang_dict.get('unmatched_warn', 'Unmatched warning')}")
@@ -4267,8 +4339,11 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
             st.markdown("---")
             col_clear1, col_clear2 = st.columns([1, 3])
             with col_clear1:
-                if st.button("🗑️ Clear Activity Log", type="secondary"):
+                confirm_log_clear = st.checkbox(lang_dict.get('confirm_destructive_checkbox', '⚠️ I confirm I want to proceed (this cannot be undone)'), key="confirm_log_clear")
+                if st.button(lang_dict.get('clear_activity_log_btn', '🗑️ Clear Activity Log'), type="secondary", disabled=not confirm_log_clear):
                     st.session_state.activity_log = []
-                    if save_data_to_server():
-                        st.success("Activity log cleared.")
+                    with st.spinner(lang_dict.get('saving_spinner', '💾 Saving...')):
+                        _save_ok = save_data_to_server()
+                    if _save_ok:
+                        st.toast(lang_dict.get('activity_log_cleared', 'Activity log cleared.'))
                         st.rerun()
