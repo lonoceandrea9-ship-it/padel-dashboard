@@ -179,6 +179,22 @@ st.markdown("""
         background-color: #ffffff !important;
         -webkit-text-fill-color: #000000 !important;
     }
+    /* Evaluation score dropdowns: color-code "player" (blue) vs "coach" (orange)
+       so the two are easy to tell apart at a glance. Same blue/orange already
+       used elsewhere in the app for the self-eval vs coach radar charts.
+       Each dropdown is wrapped in st.container(key=...); Streamlit adds a
+       "st-key-<key>" class to that container's div, which we match here by
+       substring so every eval_you_*/eval_coach_* container gets styled. */
+    div[class*="st-key-eval_you_"] div[data-baseweb="select"] > div {
+        border: 1px solid #3b82f6 !important;
+        background-color: rgba(59, 130, 246, 0.14) !important;
+        border-radius: 8px;
+    }
+    div[class*="st-key-eval_coach_"] div[data-baseweb="select"] > div {
+        border: 1px solid #f97316 !important;
+        background-color: rgba(249, 115, 22, 0.14) !important;
+        border-radius: 8px;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -323,6 +339,7 @@ translations = {
         "player_desc": "Accedi alla tua scheda personale protetta da password per visualizzare e aggiornare le tue valutazioni.",
         "player_btn": "Accedi come Giocatore",
         "coach_area": "Area Allenatore",
+        "eval_you_lbl": "Tu", "eval_coach_lbl": "Allenatore",
         "coach_desc": "Accesso riservato allo staff tecnico per la gestione dei dati, la pianificazione e le partite.",
         "coach_btn": "Accedi come Allenatore",
         "login_player_title": "Accesso Area Giocatore",
@@ -429,6 +446,7 @@ translations = {
         "player_desc": "Access your password-protected personal card to view and update your evaluations.",
         "player_btn": "Access as Player",
         "coach_area": "Coach Area",
+        "eval_you_lbl": "You", "eval_coach_lbl": "Coach",
         "coach_desc": "Restricted access for coaching staff to manage data, planning, and matches.",
         "coach_btn": "Access as Coach",
         "login_player_title": "Player Area Login",
@@ -535,6 +553,7 @@ translations = {
         "player_desc": "Accede a tu ficha personal protegida con contraseña para ver y actualizar tus valoraciones.",
         "player_btn": "Acceder como Jugador",
         "coach_area": "Área de Entrenador",
+        "eval_you_lbl": "Tú", "eval_coach_lbl": "Entrenador",
         "coach_desc": "Acceso restringido al cuerpo técnico para la gestión de datos, planificación y partidos.",
         "coach_btn": "Acceder como Entrenador",
         "login_player_title": "Acceso Área de Jugador",
@@ -641,6 +660,7 @@ translations = {
         "player_desc": "Gå till ditt lösenordsskyddade personliga kort för att visa och uppdatera dina utvärderingar.",
         "player_btn": "Logga in som Spelare",
         "coach_area": "Tränarområde",
+        "eval_you_lbl": "Du", "eval_coach_lbl": "Tränare",
         "coach_desc": "Begränsad åtkomst för tränarstab för datahantering, planering och matcher.",
         "coach_btn": "Logga in som Tränare",
         "login_player_title": "Inloggning Spelarområde",
@@ -747,6 +767,7 @@ translations = {
         "player_desc": "Ga naar je met een wachtwoord beveiligde persoonlijke kaart om je evaluaties te bekijken en bij te werken.",
         "player_btn": "Toegang als Speler",
         "coach_area": "Coachgebied",
+        "eval_you_lbl": "Jij", "eval_coach_lbl": "Coach",
         "coach_desc": "Beperkte toegang voor de technische staf voor gegevensbeheer, planning en wedstrijden.",
         "coach_btn": "Toegang als Coach",
         "login_player_title": "Inloggen Spelersgebied",
@@ -853,6 +874,7 @@ translations = {
         "player_desc": "Gå til dit adgangskodebeskyttede personlige kort for at se og opdatere dine evalueringer.",
         "player_btn": "Log ind som Spiller",
         "coach_area": "Trænerområde",
+        "eval_you_lbl": "Dig", "eval_coach_lbl": "Træner",
         "coach_desc": "Begrænset adgang for trænerstab til datahåndtering, planlægning og kampe.",
         "coach_btn": "Log ind som Træner",
         "login_player_title": "Login Spillerområde",
@@ -2727,20 +2749,24 @@ elif st.session_state.nav_mode == "Player_Dashboard":
             for i, skill in enumerate(TECH_SKILLS):
                 c1, c2 = st.columns(2)
                 with c1:
-                    val = st.selectbox(f"Tu - {skill}", SCORE_OPTIONS, index=clamp_score(current_player['tech'][i]), key=f"p_tech_{i}")
+                    with st.container(key=f"eval_you_tech_{i}"):
+                        val = st.selectbox(f"🔵 {lang_dict.get('eval_you_lbl', 'You')} - {skill}", SCORE_OPTIONS, index=clamp_score(current_player['tech'][i]), key=f"p_tech_{i}")
                     new_tech_vals.append(val)
                 with c2:
-                    st.selectbox(f"Coach - {skill}", SCORE_OPTIONS, index=clamp_score(current_player['c_tech'][i]), disabled=True, key=f"c_tech_view_{i}")
+                    with st.container(key=f"eval_coach_tech_{i}"):
+                        st.selectbox(f"🟠 {lang_dict.get('eval_coach_lbl', 'Coach')} - {skill}", SCORE_OPTIONS, index=clamp_score(current_player['c_tech'][i]), disabled=True, key=f"c_tech_view_{i}")
 
         with col_eval_right:
             st.markdown(f"**{lang_dict.get('mental_skills', 'Mental Skills')}**")
             for i, skill in enumerate(MENTAL_SKILLS):
                 c1, c2 = st.columns(2)
                 with c1:
-                    val = st.selectbox(f"Tu - {skill}", SCORE_OPTIONS, index=clamp_score(current_player['mental'][i]), key=f"p_mental_{i}")
+                    with st.container(key=f"eval_you_mental_{i}"):
+                        val = st.selectbox(f"🔵 {lang_dict.get('eval_you_lbl', 'You')} - {skill}", SCORE_OPTIONS, index=clamp_score(current_player['mental'][i]), key=f"p_mental_{i}")
                     new_mental_vals.append(val)
                 with c2:
-                    st.selectbox(f"Coach - {skill}", SCORE_OPTIONS, index=clamp_score(current_player['c_mental'][i]), disabled=True, key=f"c_mental_view_{i}")
+                    with st.container(key=f"eval_coach_mental_{i}"):
+                        st.selectbox(f"🟠 {lang_dict.get('eval_coach_lbl', 'Coach')} - {skill}", SCORE_OPTIONS, index=clamp_score(current_player['c_mental'][i]), disabled=True, key=f"c_mental_view_{i}")
                 
         st.markdown("---")
         current_p_style = current_player.get("player_play_style", "Equilibrated")
@@ -3406,13 +3432,15 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 with col_c_left:
                     st.markdown(f"🎾 *{lang_dict.get('tech_skills_coach', 'Technical Skills')}*")
                     for idx, t_label in enumerate(TECH_SKILLS):
-                        val = st.selectbox(f"Coach - {t_label}", SCORE_OPTIONS, index=clamp_score(p_obj['c_tech'][idx]), key=f"scoach_tech_{idx}")
+                        with st.container(key=f"eval_coach_grades_tech_{idx}"):
+                            val = st.selectbox(f"🟠 {lang_dict.get('eval_coach_lbl', 'Coach')} - {t_label}", SCORE_OPTIONS, index=clamp_score(p_obj['c_tech'][idx]), key=f"scoach_tech_{idx}")
                         c_tech_new.append(val)
 
                 with col_c_right:
                     st.markdown(f"🧠 *{lang_dict.get('mental_skills_coach', 'Mental Skills')}*")
                     for idx, m_label in enumerate(MENTAL_SKILLS):
-                        val = st.selectbox(f"Coach - {m_label}", SCORE_OPTIONS, index=clamp_score(p_obj['c_mental'][idx]), key=f"scoach_mental_{idx}")
+                        with st.container(key=f"eval_coach_grades_mental_{idx}"):
+                            val = st.selectbox(f"🟠 {lang_dict.get('eval_coach_lbl', 'Coach')} - {m_label}", SCORE_OPTIONS, index=clamp_score(p_obj['c_mental'][idx]), key=f"scoach_mental_{idx}")
                         c_mental_new.append(val)
                         
                 if st.form_submit_button(lang_dict.get('save_coach_eval', 'Save Grades'), type="primary"):
@@ -3504,23 +3532,25 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         st.markdown("**Technical Skills**")
                         new_c_tech = []
                         for i, skill in enumerate(TECH_SKILLS):
-                            val = st.selectbox(
-                                f"Coach – {skill}",
-                                SCORE_OPTIONS,
-                                index=clamp_score(coach_full[i]),
-                                key=f"stats_ctech_{p['fname']}_{p['lname']}_{i}"
-                            )
+                            with st.container(key=f"eval_coach_stats_tech_{p['fname']}_{p['lname']}_{i}"):
+                                val = st.selectbox(
+                                    f"🟠 {lang_dict.get('eval_coach_lbl', 'Coach')} - {skill}",
+                                    SCORE_OPTIONS,
+                                    index=clamp_score(coach_full[i]),
+                                    key=f"stats_ctech_{p['fname']}_{p['lname']}_{i}"
+                                )
                             new_c_tech.append(val)
 
                         st.markdown("**Mental Skills**")
                         new_c_mental = []
                         for i, skill in enumerate(MENTAL_SKILLS):
-                            val = st.selectbox(
-                                f"Coach – {skill}",
-                                SCORE_OPTIONS,
-                                index=clamp_score(coach_full[len(TECH_SKILLS) + i]),
-                                key=f"stats_cmental_{p['fname']}_{p['lname']}_{i}"
-                            )
+                            with st.container(key=f"eval_coach_stats_mental_{p['fname']}_{p['lname']}_{i}"):
+                                val = st.selectbox(
+                                    f"🟠 {lang_dict.get('eval_coach_lbl', 'Coach')} - {skill}",
+                                    SCORE_OPTIONS,
+                                    index=clamp_score(coach_full[len(TECH_SKILLS) + i]),
+                                    key=f"stats_cmental_{p['fname']}_{p['lname']}_{i}"
+                                )
                             new_c_mental.append(val)
                         
                         saved = st.form_submit_button("💾 Save Coach Evaluation", type="primary")
