@@ -47,6 +47,37 @@ st.markdown("""
             flex: 1 1 100% !important;
             min-width: 100% !important;
         }
+        /* Reduce the wasted side padding around the main content area so
+           more of the narrow screen is usable. */
+        .block-container {
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+            padding-top: 1.2rem !important;
+        }
+        /* Bigger tap targets: buttons, checkboxes and selects are easy to
+           mis-tap at desktop sizing on a phone screen. */
+        div.stButton > button, div.stFormSubmitButton > button {
+            min-height: 44px;
+            font-size: 1rem;
+        }
+        div[data-baseweb="select"] > div {
+            min-height: 44px;
+        }
+        div[data-testid="stCheckbox"] label {
+            min-height: 32px;
+        }
+        /* Titles/headers are oversized on a phone and wrap awkwardly. */
+        h1 { font-size: 1.5rem !important; }
+        h2 { font-size: 1.25rem !important; }
+        h3 { font-size: 1.1rem !important; }
+        /* Let tabs scroll horizontally instead of squeezing every label. */
+        .stTabs [data-baseweb="tab-list"] {
+            overflow-x: auto;
+            flex-wrap: nowrap !important;
+        }
+        .stTabs [data-baseweb="tab-list"] button {
+            white-space: nowrap;
+        }
     }
     .element-container:has(button:contains("Allenatore")) button,
     .element-container:has(button:contains("Giocatore")) button,
@@ -2447,6 +2478,30 @@ def clamp_score(v):
         v = 0
     return max(0, min(10, v))
 
+# Fixed, deterministic color palette for player avatars: no photo upload
+# exists in the app, so a colored initials badge gives each player a quick
+# visual identifier that stays the same across reruns/redeploys (a plain
+# hash() would shuffle colors every process restart, since Python randomizes
+# string hashing per-run).
+AVATAR_PALETTE = ["#ef4444", "#f97316", "#eab308", "#22c55e", "#14b8a6", "#3b82f6", "#8b5cf6", "#ec4899"]
+
+def player_avatar_html(fname, lname, size=40, font_size=None):
+    """Return a small HTML circular avatar with the player's initials,
+    colored consistently for the same name every time. Meant to be embedded
+    inline via st.markdown(..., unsafe_allow_html=True)."""
+    fname = fname or ""
+    lname = lname or ""
+    initials = f"{fname[:1]}{lname[:1]}".upper() or "?"
+    color_idx = sum(ord(c) for c in (fname + lname)) % len(AVATAR_PALETTE)
+    color = AVATAR_PALETTE[color_idx]
+    fs = font_size or max(10, int(size * 0.4))
+    return (
+        f'<div style="display:inline-flex;align-items:center;justify-content:center;'
+        f'width:{size}px;height:{size}px;min-width:{size}px;border-radius:50%;'
+        f'background-color:{color};color:#ffffff !important;font-weight:700;'
+        f'font-size:{fs}px;flex-shrink:0;">{initials}</div>'
+    )
+
 # --- INIZIALIZZAZIONE LINGUA & SKILLS ---
 if "language" not in st.session_state:
     st.session_state.language = "English"
@@ -2835,11 +2890,20 @@ elif st.session_state.nav_mode == "Player_Dashboard":
     
     col_top1, col_top2 = st.columns([5, 2])
     with col_top1:
+        _player_avatar = player_avatar_html(current_player['fname'], current_player['lname'], size=48, font_size=20)
         if admin_viewing:
-            st.title(f"🛡️ Admin → 👤 {current_player['fname']} {current_player['lname']} ({current_player['side']})")
+            st.markdown(
+                f"<div style='display:flex;align-items:center;gap:12px;'>{_player_avatar}"
+                f"<span style='font-size:2rem;font-weight:700;'>🛡️ Admin → {current_player['fname']} {current_player['lname']} ({current_player['side']})</span></div>",
+                unsafe_allow_html=True
+            )
             st.caption("You are viewing this player profile as Admin. You can edit all fields.")
         else:
-            st.title(f"👤 {current_player['fname']} {current_player['lname']} ({current_player['side']})")
+            st.markdown(
+                f"<div style='display:flex;align-items:center;gap:12px;'>{_player_avatar}"
+                f"<span style='font-size:2rem;font-weight:700;'>{current_player['fname']} {current_player['lname']} ({current_player['side']})</span></div>",
+                unsafe_allow_html=True
+            )
     with col_top2:
         st.markdown("<div style='text-align: right;'>", unsafe_allow_html=True)
         if admin_viewing:
@@ -3338,7 +3402,10 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 for p in squad_players:
                     col_pw1, col_pw2 = st.columns([2, 2])
                     with col_pw1:
-                        st.markdown(f"**{p['fname']} {p['lname']}**")
+                        st.markdown(
+                            f"<div style='display:flex;align-items:center;gap:8px;'>{player_avatar_html(p['fname'], p['lname'], size=28, font_size=12)}<b>{p['fname']} {p['lname']}</b></div>",
+                            unsafe_allow_html=True
+                        )
                     with col_pw2:
                         new_pwd_values[p['fname']] = st.text_input(
                             lang_dict.get('admin_pwd_of', 'Password for {name}').format(name=p['fname']),
@@ -3495,7 +3562,10 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                     calc_participated = int(p.get("participated", 1))
 
                 with col_n:
-                    st.markdown(f"**{p['fname']} {p['lname']}**")
+                    st.markdown(
+                        f"<div style='display:flex;align-items:center;gap:8px;'>{player_avatar_html(p['fname'], p['lname'], size=28, font_size=12)}<b>{p['fname']} {p['lname']}</b></div>",
+                        unsafe_allow_html=True
+                    )
                 with col_r:
                     new_side = st.selectbox("Role", ["Left", "Right"], index=0 if p["side"]=="Left" else 1, key=f"side_{idx}", label_visibility="collapsed")
                 with col_h:
@@ -3561,6 +3631,12 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         p_obj = next((p for p in squad_players if f"{p['fname']} {p['lname']}" == selected_player_name), None)
 
         if p_obj:
+            st.markdown(
+                f"<div style='display:flex;align-items:center;gap:10px;margin-bottom:6px;'>"
+                f"{player_avatar_html(p_obj['fname'], p_obj['lname'], size=36, font_size=15)}"
+                f"<span style='font-size:1.15rem;font-weight:700;'>{selected_player_name}</span></div>",
+                unsafe_allow_html=True
+            )
             st.markdown(f"### {lang_dict.get('partner_prefs_title', '🏆 Partner Preferences of **{name}**').format(name=selected_player_name)}")
             st.caption(lang_dict.get('partner_prefs_desc', 'Ranking of the partners the player prefers to play with (set by them in their own area), and who among the others has ranked them as a preferred partner. Useful to understand affinities before grading.'))
             col_pref1, col_pref2 = st.columns(2)
