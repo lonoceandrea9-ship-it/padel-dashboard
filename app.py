@@ -1142,11 +1142,12 @@ translations = {
 SNP_CALENDAR = [
     {"id": 1, "date": "27-Sep", "iso": "2026-09-27", "home": "NAC", "away": "Padelmadena", "label": "27-Sep  NAC  vs  Padelmadena"},
     {"id": 2, "date": "03-Oct", "iso": "2026-10-03", "home": "La Ultima Ronda", "away": "NAC", "label": "03-Oct  La Ultima Ronda  vs  NAC"},
-    {"id": 3, "date": "25-Oct", "iso": "2026-10-25", "home": "NAC", "away": "Awa Pool Club", "label": "25-Oct  NAC  vs  Awa Pool Club"},
-    {"id": 4, "date": "07-Nov", "iso": "2026-11-07", "home": "Gomez Hoyos Padel", "away": "NAC", "label": "07-Nov  Gomez Hoyos Padel  vs  NAC"},
+    {"id": 3, "date": "25-Oct", "iso": "2026-10-25", "home": "NAC", "away": "AudioVelez Awa Pool Club", "label": "25-Oct  NAC  vs  AudioVelez Awa Pool Club"},
+    {"id": 4, "date": "07-Nov", "iso": "2026-11-07", "home": "Gomez Hoyos El Mirador", "away": "NAC", "label": "07-Nov  Gomez Hoyos El Mirador  vs  NAC"},
     {"id": 5, "date": "28-Nov", "iso": "2026-11-28", "home": "Padelmadena", "away": "NAC", "label": "28-Nov  Padelmadena  vs  NAC"},
     {"id": 6, "date": "13-Dec", "iso": "2026-12-13", "home": "NAC", "away": "La Ultima Ronda", "label": "13-Dec  NAC  vs  La Ultima Ronda"},
-    {"id": 7, "date": "10-Jan", "iso": "2027-01-10", "home": "NAC", "away": "Awa Pool Club", "label": "10-Jan  NAC  vs  Awa Pool Club"},
+    {"id": 7, "date": "10-Jan", "iso": "2027-01-10", "home": "AudioVelez Awa Pool Club", "away": "NAC", "label": "10-Jan  AudioVelez Awa Pool Club  vs  NAC"},
+    {"id": 8, "date": "17-Jan", "iso": "2027-01-17", "home": "NAC", "away": "Gomez Hoyos El Mirador", "label": "17-Jan  NAC  vs  Gomez Hoyos El Mirador"},
 ]
 
 
@@ -1399,7 +1400,7 @@ COACH_TRANSLATIONS = {
         'training_delete_success': 'Allenamento del {date} eliminato con successo dal calendario!',
         'no_trainings_saved': 'Nessun allenamento ancora confermato e salvato nel calendario.',
         'snp_mgmt_title': '📅 Calendario & Registrazione Partite SNP',
-        'snp_mgmt_desc': 'Gestione delle **7 giornate SNP**. Per ogni incontro assegna i giocatori NAC e il **risultato di ogni pista**.',
+        'snp_mgmt_desc': 'Gestione delle **8 giornate SNP**. Per ogni incontro assegna i giocatori NAC e il **risultato di ogni pista**.',
         'snp_select_day': '📆 Seleziona la giornata SNP',
         'snp_formation_title': '1️⃣ Formazione',
         'snp_formation_desc': 'Scegli 2 giocatori NAC per ogni pista. Potrai inserire il risultato in un secondo momento, quando la partita sarà giocata.',
@@ -1509,7 +1510,7 @@ COACH_TRANSLATIONS = {
         'training_delete_success': 'Training on {date} deleted successfully from the calendar!',
         'no_trainings_saved': 'No training sessions confirmed and saved in the calendar yet.',
         'snp_mgmt_title': '📅 SNP Match Calendar & Registration',
-        'snp_mgmt_desc': 'Manage the **7 SNP matchdays**. For each match, assign the NAC players and the **result of each court**.',
+        'snp_mgmt_desc': 'Manage the **8 SNP matchdays**. For each match, assign the NAC players and the **result of each court**.',
         'snp_select_day': '📆 Select the SNP matchday',
         'snp_formation_title': '1️⃣ Lineup',
         'snp_formation_desc': "Choose 2 NAC players for each court. You'll be able to enter the result later, once the match has been played.",
@@ -1619,7 +1620,7 @@ COACH_TRANSLATIONS = {
         'training_delete_success': '¡Entrenamiento del {date} eliminado con éxito del calendario!',
         'no_trainings_saved': 'Aún no hay entrenamientos confirmados y guardados en el calendario.',
         'snp_mgmt_title': '📅 Calendario y Registro de Partidos SNP',
-        'snp_mgmt_desc': 'Gestión de las **7 jornadas SNP**. Para cada partido, asigna los jugadores de NAC y el **resultado de cada pista**.',
+        'snp_mgmt_desc': 'Gestión de las **8 jornadas SNP**. Para cada partido, asigna los jugadores de NAC y el **resultado de cada pista**.',
         'snp_select_day': '📆 Selecciona la jornada SNP',
         'snp_formation_title': '1️⃣ Alineación',
         'snp_formation_desc': 'Elige 2 jugadores de NAC para cada pista. Podrás introducir el resultado más adelante, una vez jugado el partido.',
@@ -1729,7 +1730,7 @@ COACH_TRANSLATIONS = {
         'training_delete_success': 'Träningen den {date} har tagits bort från kalendern!',
         'no_trainings_saved': 'Inga träningspass har ännu bekräftats och sparats i kalendern.',
         'snp_mgmt_title': '📅 SNP-matchkalender & Registrering',
-        'snp_mgmt_desc': 'Hantering av de **7 SNP-matchdagarna**. För varje match, tilldela NAC-spelarna och **resultatet för varje bana**.',
+        'snp_mgmt_desc': 'Hantering av de **8 SNP-matchdagarna**. För varje match, tilldela NAC-spelarna och **resultatet för varje bana**.',
         'snp_select_day': '📆 Välj SNP-matchdag',
         'snp_formation_title': '1️⃣ Laguppställning',
         'snp_formation_desc': 'Välj 2 NAC-spelare för varje bana. Du kan ange resultatet senare, när matchen har spelats.',
@@ -1839,7 +1840,7 @@ COACH_TRANSLATIONS = {
         'training_delete_success': 'Training van {date} succesvol uit de kalender verwijderd!',
         'no_trainings_saved': 'Er zijn nog geen trainingen bevestigd en opgeslagen in de kalender.',
         'snp_mgmt_title': '📅 SNP-wedstrijdkalender & Registratie',
-        'snp_mgmt_desc': 'Beheer van de **7 SNP-wedstrijddagen**. Wijs voor elke wedstrijd de NAC-spelers en de **uitslag van elke baan** toe.',
+        'snp_mgmt_desc': 'Beheer van de **8 SNP-wedstrijddagen**. Wijs voor elke wedstrijd de NAC-spelers en de **uitslag van elke baan** toe.',
         'snp_select_day': '📆 Selecteer de SNP-wedstrijddag',
         'snp_formation_title': '1️⃣ Opstelling',
         'snp_formation_desc': 'Kies 2 NAC-spelers voor elke baan. Je kunt de uitslag later invoeren, zodra de wedstrijd is gespeeld.',
@@ -1949,7 +1950,7 @@ COACH_TRANSLATIONS = {
         'training_delete_success': 'Træningen den {date} er slettet fra kalenderen!',
         'no_trainings_saved': 'Ingen træningspas er endnu bekræftet og gemt i kalenderen.',
         'snp_mgmt_title': '📅 SNP-kampkalender & Registrering',
-        'snp_mgmt_desc': 'Håndtering af de **7 SNP-kampdage**. Tildel for hver kamp NAC-spillerne og **resultatet for hver bane**.',
+        'snp_mgmt_desc': 'Håndtering af de **8 SNP-kampdage**. Tildel for hver kamp NAC-spillerne og **resultatet for hver bane**.',
         'snp_select_day': '📆 Vælg SNP-kampdag',
         'snp_formation_title': '1️⃣ Holdopstilling',
         'snp_formation_desc': 'Vælg 2 NAC-spillere til hver bane. Du kan indtaste resultatet senere, når kampen er spillet.',
@@ -2020,7 +2021,7 @@ TRAINING_SNP_TRANSLATIONS = {
         'priority2_label': '2° Priorità',
         'priority3_label': '3° Priorità',
         'snp_title': '📅 Calendario & Registrazione Partite SNP',
-        'snp_desc': 'Gestione delle **7 giornate SNP**. Per ogni incontro assegna i giocatori NAC e il **risultato di ogni pista**.',
+        'snp_desc': 'Gestione delle **8 giornate SNP**. Per ogni incontro assegna i giocatori NAC e il **risultato di ogni pista**.',
         'snp_select_day': '📆 Seleziona la giornata SNP',
         'snp_formation_title': '1️⃣ Formazione',
         'snp_formation_desc': 'Scegli 2 giocatori NAC per ogni pista. Potrai inserire il risultato in un secondo momento, quando la partita sarà giocata.',
@@ -2092,7 +2093,7 @@ TRAINING_SNP_TRANSLATIONS = {
         'priority2_label': '2nd Priority',
         'priority3_label': '3rd Priority',
         'snp_title': '📅 Calendar & SNP Match Registration',
-        'snp_desc': 'Management of the **7 SNP matchdays**. For each fixture, assign the NAC players and the **result of each court**.',
+        'snp_desc': 'Management of the **8 SNP matchdays**. For each fixture, assign the NAC players and the **result of each court**.',
         'snp_select_day': '📆 Select the SNP matchday',
         'snp_formation_title': '1️⃣ Lineup',
         'snp_formation_desc': 'Choose 2 NAC players for each court. You can enter the result later, once the match has been played.',
@@ -2164,7 +2165,7 @@ TRAINING_SNP_TRANSLATIONS = {
         'priority2_label': '2ª Prioridad',
         'priority3_label': '3ª Prioridad',
         'snp_title': '📅 Calendario y Registro de Partidos SNP',
-        'snp_desc': 'Gestión de las **7 jornadas SNP**. Para cada encuentro asigna los jugadores NAC y el **resultado de cada pista**.',
+        'snp_desc': 'Gestión de las **8 jornadas SNP**. Para cada encuentro asigna los jugadores NAC y el **resultado de cada pista**.',
         'snp_select_day': '📆 Selecciona la jornada SNP',
         'snp_formation_title': '1️⃣ Alineación',
         'snp_formation_desc': 'Elige 2 jugadores NAC para cada pista. Podrás introducir el resultado más adelante, cuando se haya jugado el partido.',
@@ -2236,7 +2237,7 @@ TRAINING_SNP_TRANSLATIONS = {
         'priority2_label': '2:a Prioritet',
         'priority3_label': '3:e Prioritet',
         'snp_title': '📅 Kalender & SNP-matchregistrering',
-        'snp_desc': 'Hantering av de **7 SNP-omgångarna**. Tilldela NAC-spelarna och **resultatet för varje bana** för varje match.',
+        'snp_desc': 'Hantering av de **8 SNP-omgångarna**. Tilldela NAC-spelarna och **resultatet för varje bana** för varje match.',
         'snp_select_day': '📆 Välj SNP-omgången',
         'snp_formation_title': '1️⃣ Uppställning',
         'snp_formation_desc': 'Välj 2 NAC-spelare för varje bana. Du kan ange resultatet senare, när matchen har spelats.',
@@ -2308,7 +2309,7 @@ TRAINING_SNP_TRANSLATIONS = {
         'priority2_label': '2e Prioriteit',
         'priority3_label': '3e Prioriteit',
         'snp_title': '📅 Kalender & SNP-wedstrijdregistratie',
-        'snp_desc': 'Beheer van de **7 SNP-speeldagen**. Wijs voor elke wedstrijd de NAC-spelers en het **resultaat van elke baan** toe.',
+        'snp_desc': 'Beheer van de **8 SNP-speeldagen**. Wijs voor elke wedstrijd de NAC-spelers en het **resultaat van elke baan** toe.',
         'snp_select_day': '📆 Selecteer de SNP-speeldag',
         'snp_formation_title': '1️⃣ Opstelling',
         'snp_formation_desc': 'Kies 2 NAC-spelers voor elke baan. Je kunt het resultaat later invoeren, zodra de wedstrijd is gespeeld.',
@@ -2380,7 +2381,7 @@ TRAINING_SNP_TRANSLATIONS = {
         'priority2_label': '2. Prioritet',
         'priority3_label': '3. Prioritet',
         'snp_title': '📅 Kalender & SNP-kampregistrering',
-        'snp_desc': 'Håndtering af de **7 SNP-spilledage**. Tildel NAC-spillerne og **resultatet for hver bane** for hver kamp.',
+        'snp_desc': 'Håndtering af de **8 SNP-spilledage**. Tildel NAC-spillerne og **resultatet for hver bane** for hver kamp.',
         'snp_select_day': '📆 Vælg SNP-spilledagen',
         'snp_formation_title': '1️⃣ Opstilling',
         'snp_formation_desc': 'Vælg 2 NAC-spillere til hver bane. Du kan indtaste resultatet senere, når kampen er spillet.',
@@ -4360,7 +4361,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
 
     with coach_tab2:
         st.subheader(lang_dict.get('snp_title', '📅 Calendar & SNP Match Registration'))
-        st.markdown(lang_dict.get('snp_desc', 'Management of the **7 SNP matchdays**. For each fixture, assign the NAC players and the **result of each court**.'))
+        st.markdown(lang_dict.get('snp_desc', 'Management of the **8 SNP matchdays**. For each fixture, assign the NAC players and the **result of each court**.'))
 
         all_players_list = [f"{p['fname']} {p['lname']}" for p in squad_players]
 
@@ -4526,7 +4527,7 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         st.toast(lang_dict.get('snp_results_saved', '✅ Results saved for **{day}**!').format(day=selected_day['label']))
                         st.rerun()
 
-        # --- Riepilogo completo delle 7 giornate ---
+        # --- Riepilogo completo delle 8 giornate ---
         st.markdown("---")
         st.markdown(f"### {lang_dict.get('snp_summary_title', '📋 Complete SNP Calendar Summary')}")
 
