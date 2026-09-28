@@ -335,8 +335,19 @@ def test_admin_no_cross_player_widget_leak():
     at.run()
     assert not at.exception, [e.message for e in at.exception]
 
-    lars_partner_sel0 = [s for s in at.selectbox if s.key == "partner_sel_Lars_Mikkelsen_0"][0]
-    lars_partner_sel3 = [s for s in at.selectbox if s.key == "partner_sel_Lars_Mikkelsen_3"][0]
+    def _partner_sel(at_, i):
+        # The partner-ranking selectbox keys carry a fingerprint of the
+        # CURRENT saved ranking (see app.py), so they aren't a fixed string -
+        # find them by prefix/suffix instead of an exact key.
+        matches = [
+            s for s in at_.selectbox
+            if s.key and s.key.startswith("partner_sel_Lars_Mikkelsen_") and s.key.endswith(f"_{i}")
+        ]
+        assert len(matches) == 1, f"expected exactly one slot-{i} selectbox, found {len(matches)}"
+        return matches[0]
+
+    lars_partner_sel0 = _partner_sel(at, 0)
+    lars_partner_sel3 = _partner_sel(at, 3)
     assert lars_partner_sel0.value == "Jairo Lopez", lars_partner_sel0.value
     assert lars_partner_sel3.value == "Josu Usabiaga", lars_partner_sel3.value
 
@@ -346,7 +357,7 @@ def test_admin_no_cross_player_widget_leak():
     # Swap position 1 and 4, save, and confirm the write lands correctly
     # and doesn't disturb Josu's own (untouched) data.
     lars_partner_sel0.set_value("Josu Usabiaga").run()
-    lars_partner_sel3 = [s for s in at.selectbox if s.key == "partner_sel_Lars_Mikkelsen_3"][0]
+    lars_partner_sel3 = _partner_sel(at, 3)
     lars_partner_sel3.set_value("Jairo Lopez").run()
     save_btn = [b for b in at.button if b.label == "Save Partner Ranking"][0]
     save_btn.click().run()
@@ -357,6 +368,49 @@ def test_admin_no_cross_player_widget_leak():
     assert lars_final["Jairo Lopez"] == 2
     josu_final = next(p for p in at.session_state["squad_data"] if p["fname"] == "Josu")["partners"]
     assert josu_final == {"Alvaro Gomez": 5}
+
+
+def test_partner_ranking_stale_resubmit_does_not_revert():
+    """Regression test for the real production bug reported by the user:
+    Player A's Partner Ranking tab is left open (untouched) from before the
+    ranking changed elsewhere (another device, an admin edit). Submitting
+    that stale, never-touched form must NOT silently revert the ranking
+    back to what it showed when the tab was first opened - whether or not
+    that tab has had a chance to rerun and pick up the change first."""
+    from streamlit.testing.v1 import AppTest
+    APP = APP_TEST
+
+    at = AppTest.from_file(APP, default_timeout=60)
+    at.run()
+    for p in at.session_state["squad_data"]:
+        if p["fname"] == "Lars":
+            p["partners"] = {
+                "Jairo Lopez": 5, "Pedro Rios": 4, "Mikkel Hoff": 3,
+                "Josu Usabiaga": 2, "Doug Ramsay": 1,
+            }
+
+    at.session_state["authenticated_player"] = "Lars"
+    at.session_state["nav_mode"] = "Player_Dashboard"
+    at.run()
+    assert not at.exception, [e.message for e in at.exception]
+    save_btn = [b for b in at.button if b.label == "Save Partner Ranking"][0]
+
+    # The ranking changes elsewhere (e.g. an admin's edit lands) in the exact
+    # same .run() that processes Lars's stale click - the worst case, with
+    # no intervening rerun for his tab to notice the change first.
+    for p in at.session_state["squad_data"]:
+        if p["fname"] == "Lars":
+            p["partners"] = {
+                "Josu Usabiaga": 5, "Pedro Rios": 4, "Mikkel Hoff": 3,
+                "Jairo Lopez": 2, "Doug Ramsay": 1,
+            }
+
+    save_btn.click().run()
+    assert not at.exception, [e.message for e in at.exception]
+
+    result = next(p for p in at.session_state["squad_data"] if p["fname"] == "Lars")["partners"]
+    assert result["Josu Usabiaga"] == 5, f"BUG: stale resubmit reverted the ranking: {result}"
+    assert result["Jairo Lopez"] == 2, f"BUG: stale resubmit reverted the ranking: {result}"
 
 
 def test_login_and_admin_pwd():
@@ -812,6 +866,7 @@ def test_pdf_generation():
 TESTS = [
     test_match_and_training,
     test_admin_no_cross_player_widget_leak,
+    test_partner_ranking_stale_resubmit_does_not_revert,
     test_login_and_admin_pwd,
     test_partner_prefs,
     test_languages,
