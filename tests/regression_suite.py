@@ -413,6 +413,65 @@ def test_partner_ranking_stale_resubmit_does_not_revert():
     assert result["Jairo Lopez"] == 2, f"BUG: stale resubmit reverted the ranking: {result}"
 
 
+def test_partner_ranking_display_order_survives_key_reorder():
+    """Regression test for the real production bug: the 'Current Ranking'
+    table and the ranking form's own defaults were built from raw Python
+    dict KEY order (list(partners.keys())), not from the saved SCORE. That
+    works fine for an in-memory dict, which keeps insertion order - but this
+    data is persisted as Postgres JSONB, and JSONB does NOT preserve the
+    original key order: it returns object keys sorted by key length then
+    alphabetically. So after any reload, a correctly-saved ranking (correct
+    scores) could display in a completely different, seemingly-reverted
+    order. This test builds a partners dict whose key order does NOT match
+    score order (simulating exactly what comes back after a JSONB
+    round-trip) and asserts the UI still shows/derives the SCORE order, not
+    the dict order."""
+    from streamlit.testing.v1 import AppTest
+    APP = APP_TEST
+
+    at = AppTest.from_file(APP, default_timeout=60)
+    at.run()
+    for p in at.session_state["squad_data"]:
+        if p["fname"] == "Lars":
+            # Insertion/key order here is deliberately scrambled relative to
+            # score - e.g. exactly what Postgres JSONB would hand back
+            # (shortest key first, then alphabetically), which does NOT
+            # match the intended rank order (Josu=5 ... Hector=1).
+            p["partners"] = {
+                "Jairo Lopez": 2,
+                "Alvaro Gomez": 4,
+                "Andrea Lonoce": 3,
+                "Josu Usabiaga": 5,
+                "Hector Guerrero": 1,
+            }
+
+    at.session_state["authenticated_player"] = "Lars"
+    at.session_state["nav_mode"] = "Player_Dashboard"
+    at.run()
+    assert not at.exception, [e.message for e in at.exception]
+
+    # The "Current Ranking" table must list partners by score, descending -
+    # Josu Usabiaga (5) first, Hector Guerrero (1) last - regardless of the
+    # scrambled dict key order above.
+    tables = [m.value for m in at.markdown if "custom-table" in (m.value or "") and "Josu Usabiaga" in (m.value or "")]
+    assert tables, "Current Ranking table not found"
+    table_html = tables[0]
+    assert table_html.index("Josu Usabiaga") < table_html.index("Alvaro Gomez") < table_html.index("Andrea Lonoce") < table_html.index("Jairo Lopez") < table_html.index("Hector Guerrero"), \
+        f"BUG: Current Ranking table is not ordered by score: {table_html}"
+
+    # The form's own defaults (Partner #1..#5) must also reflect score order,
+    # not dict key order, so re-submitting an untouched form doesn't silently
+    # re-save the scrambled order.
+    partner_sels = sorted(
+        [s for s in at.selectbox if s.key and s.key.startswith("partner_sel_Lars_Mikkelsen_")],
+        key=lambda s: int(s.key.rsplit("_", 1)[1]),
+    )
+    assert len(partner_sels) == 5
+    expected_order = ["Josu Usabiaga", "Alvaro Gomez", "Andrea Lonoce", "Jairo Lopez", "Hector Guerrero"]
+    actual_order = [s.value for s in partner_sels]
+    assert actual_order == expected_order, f"BUG: form defaults not ordered by score: {actual_order}"
+
+
 def test_login_and_admin_pwd():
     from streamlit.testing.v1 import AppTest
     APP = APP_TEST
@@ -867,6 +926,7 @@ TESTS = [
     test_match_and_training,
     test_admin_no_cross_player_widget_leak,
     test_partner_ranking_stale_resubmit_does_not_revert,
+    test_partner_ranking_display_order_survives_key_reorder,
     test_login_and_admin_pwd,
     test_partner_prefs,
     test_languages,
