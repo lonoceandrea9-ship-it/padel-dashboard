@@ -2738,6 +2738,29 @@ if _SNP_DAY1_MIGRATION_ID not in st.session_state.applied_migrations:
     log_activity("SNP results auto-synced from SNP Galaxy", _day1_meta["label"])
     _defaults_were_applied = True
 
+# TEMPORARY one-time fix: force Lars Mikkelsen's Partner Ranking to the order
+# he and the admin actually set (Josu Usabiaga swapped into #1, Jairo Lopez
+# into #4). The underlying display bug (Current Ranking / form defaults
+# reading raw dict-key order instead of sorting by score, so the ranking
+# looked "reverted" after every reload) is fixed above in tab_partners; this
+# migration just repairs the one ranking that was being displayed wrong
+# while that bug was live, so Lars sees the correct order immediately
+# without needing to redo the swap. Gated so it only ever runs once.
+_LARS_PARTNER_FIX_MIGRATION_ID = "lars_partner_ranking_fix_v1"
+if _LARS_PARTNER_FIX_MIGRATION_ID not in st.session_state.applied_migrations:
+    for _p in st.session_state.squad_data:
+        if _p["fname"] == "Lars" and _p["lname"] == "Mikkelsen":
+            _p["partners"] = {
+                "Josu Usabiaga": 5,
+                "Alvaro Gomez": 4,
+                "Andrea Lonoce": 3,
+                "Jairo Lopez": 2,
+                "Hector Guerrero": 1,
+            }
+    st.session_state.applied_migrations.append(_LARS_PARTNER_FIX_MIGRATION_ID)
+    log_activity("Partner ranking display bug fixed; Lars Mikkelsen's ranking repaired", "Josu Usabiaga #1, Jairo Lopez #4")
+    _defaults_were_applied = True
+
 if _defaults_were_applied or (db_reachable and not saved_server_data):
     # Either the migration pass above actually changed something, or this is
     # a genuinely empty database being seeded for the first time — both are
@@ -3291,7 +3314,21 @@ elif st.session_state.nav_mode == "Player_Dashboard":
         with st.form(f"partners_form_{_pform_key}"):
             new_partners_dict = {}
             for i in range(5):
-                existing_keys = list(current_partners.keys())
+                # IMPORTANT: order by score (rank), never by raw dict key
+                # order. A Python dict keeps insertion order in memory, but
+                # once this ranking round-trips through Postgres as JSONB it
+                # comes back with its keys reordered by Postgres's own
+                # internal rule (shortest key first, then alphabetically) -
+                # NOT the order they were saved in. Relying on dict order
+                # here was the real cause behind swapped rankings appearing
+                # to silently "revert": the scores were saved correctly, but
+                # this default lookup (and the "Current Ranking" table
+                # below) displayed raw key order instead of rank order, so
+                # right after a reload the display fell back to whatever
+                # order Postgres happened to return - which for this squad's
+                # names always matches the ORIGINAL ranking by coincidence
+                # of name length, making every edit look reverted.
+                existing_keys = [name for name, _score in sorted(current_partners.items(), key=lambda kv: kv[1], reverse=True)]
                 default_partner = existing_keys[i] if i < len(existing_keys) else (all_colleagues[0] if all_colleagues else "")
 
                 p_sel = st.selectbox(f"Partner #{i+1}", all_colleagues, index=all_colleagues.index(default_partner) if default_partner in all_colleagues else 0, key=f"partner_sel_{_pform_key}_{i}")
@@ -3320,7 +3357,10 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                 
         st.markdown(f"### {lang_dict.get('current_ranking', 'Current Ranking:')}")
         if current_player.get("partners"):
-            df_part = pd.DataFrame(list(current_player["partners"].keys()), columns=[lang_dict.get('col_partner', 'Partner')]).reset_index(drop=True)
+            # Sorted by score (rank), same reasoning as the form defaults
+            # above - never trust raw dict key order for this field.
+            _ranked_names = [name for name, _score in sorted(current_player["partners"].items(), key=lambda kv: kv[1], reverse=True)]
+            df_part = pd.DataFrame(_ranked_names, columns=[lang_dict.get('col_partner', 'Partner')]).reset_index(drop=True)
             df_part.index = df_part.index + 1
             st.markdown(f"<div class='table-container'>{df_part.to_html(escape=False, index=True, classes='custom-table')}</div>", unsafe_allow_html=True)
         else:
