@@ -341,6 +341,7 @@ def apply_server_data_to_session(server_data):
     st.session_state.match_results = server_data.get("match_results", st.session_state.get("match_results", []))
     st.session_state.snp_lineups = normalize_snp_lineups(server_data.get("snp_lineups", st.session_state.get("snp_lineups", {})))
     st.session_state.activity_log = server_data.get("activity_log", st.session_state.get("activity_log", []))
+    st.session_state.applied_migrations = server_data.get("applied_migrations", st.session_state.get("applied_migrations", []))
 
 
 def log_activity(action, detail=""):
@@ -373,7 +374,8 @@ def save_data_to_server(retries=3, delay=0.7):
         "planned_trainings": st.session_state.planned_trainings,
         "match_results": st.session_state.match_results,
         "snp_lineups": st.session_state.get("snp_lineups", {}),
-        "activity_log": st.session_state.get("activity_log", [])
+        "activity_log": st.session_state.get("activity_log", []),
+        "applied_migrations": st.session_state.get("applied_migrations", [])
     }
     # Optimistic locking: only overwrite the row if it still has the exact
     # version (updated_at) we last read. If another tab/user saved in
@@ -2634,6 +2636,8 @@ elif db_reachable and not saved_server_data:
         st.session_state.snp_lineups = {}
     if "activity_log" not in st.session_state:
         st.session_state.activity_log = []
+    if "applied_migrations" not in st.session_state:
+        st.session_state.applied_migrations = []
     if "squad_data" not in st.session_state:
         st.session_state.squad_data = [
             {"fname": "Alexander", "lname": "Wennstam", "side": "Left", "hand": "Mancino", "trainings": 1, "participated": 1, "tech": [8, 8, 7, 7, 8, 6, 7], "mental": [7, 7, 8, 8, 7, 7, 8], "c_tech": [7, 7, 6, 6, 7, 5, 6], "c_mental": [6, 6, 7, 7, 6, 6, 7], "play_style": "Equilibrated", "player_play_style": "Equilibrated", "history": [], "coach_note": "", "partners": {}, "comments": [], "password": "Alexander", "first_login_done": False},
@@ -2689,6 +2693,51 @@ if "activity_log" not in st.session_state:
 
 _squad_after_defaults = json.dumps(st.session_state.squad_data, sort_keys=True, default=str)
 _defaults_were_applied = _squad_before_defaults != _squad_after_defaults
+
+# --- One-time data correction: real SNP Galaxy result for matchday 1
+# (27-Sep NAC vs Padelmadena, final 7-5, status "Convalidato" on SNP Galaxy).
+# Written here (not through the Coach UI) so it applies automatically on
+# deploy. Gated by a persisted migration id so it runs exactly ONCE: after
+# that, the Coach can freely edit/correct this matchday's lineup or result
+# from the UI without this block silently fighting them on every rerun.
+if "snp_lineups" not in st.session_state:
+    st.session_state.snp_lineups = {}
+if "applied_migrations" not in st.session_state:
+    st.session_state.applied_migrations = []
+_SNP_DAY1_MIGRATION_ID = "snp_day1_result_sync_v1"
+_SNP_DAY1_REAL_RESULTS = {
+    1: {"p1": "Gonzalo Diez de Onate", "p2": "Nacho Saracho", "res": "3-6, 4-6"},
+    2: {"p1": "Josu Usabiaga", "p2": "Benjamin Thyrell", "res": "3-6, 6-1, 6-0"},
+    3: {"p1": "Hector Guerrero", "p2": "Lars Mikkelsen", "res": "1-6, 3-6"},
+    4: {"p1": "Alexander Wennstam", "p2": "Alvaro Gomez", "res": "6-2, 7-5"},
+    5: {"p1": "Andrea Lonoce", "p2": "Yannik Langeslag", "res": "6-4, 7-5"},
+}
+if _SNP_DAY1_MIGRATION_ID not in st.session_state.applied_migrations:
+    _snp_day1 = st.session_state.snp_lineups.get(1, {})
+    _day1_meta = next(d for d in SNP_CALENDAR if d["id"] == 1)
+    _new_day1 = {
+        "date": _day1_meta["date"], "home": _day1_meta["home"], "away": _day1_meta["away"],
+        "label": _day1_meta["label"], "note": _snp_day1.get("note", ""),
+    }
+    for p, v in _SNP_DAY1_REAL_RESULTS.items():
+        _new_day1[f"pista_{p}_p1"] = v["p1"]
+        _new_day1[f"pista_{p}_p2"] = v["p2"]
+        _new_day1[f"pista_{p}_risultato"] = v["res"]
+    st.session_state.snp_lineups[1] = _new_day1
+    st.session_state.match_results = [
+        m for m in st.session_state.match_results
+        if not (m.get("Tipo") == "SNP" and m.get("Giornata_ID") == 1)
+    ]
+    for p, v in _SNP_DAY1_REAL_RESULTS.items():
+        st.session_state.match_results.append({
+            "Data": _day1_meta["date"], "Tipo": "SNP", "Giornata_ID": 1,
+            "Incontro": _day1_meta["label"], "Casa": _day1_meta["home"], "Trasferta": _day1_meta["away"],
+            "Pista": f"Pista {p}", "Giocatori_NAC": f"{v['p1']} / {v['p2']}", "Risultato_Pista": v["res"],
+        })
+    st.session_state.applied_migrations.append(_SNP_DAY1_MIGRATION_ID)
+    log_activity("SNP results auto-synced from SNP Galaxy", _day1_meta["label"])
+    _defaults_were_applied = True
+
 if _defaults_were_applied or (db_reachable and not saved_server_data):
     # Either the migration pass above actually changed something, or this is
     # a genuinely empty database being seeded for the first time — both are
@@ -2996,8 +3045,13 @@ elif st.session_state.nav_mode == "Player_Dashboard":
         st.caption(lang_dict.get('sec_section_desc', ''))
         if sec_is_set:
             st.markdown(f"{lang_dict.get('sec_current_lbl', 'Current question:')} **{security_question_text(current_player, lang_dict)}**")
-        with st.form("security_question_form"):
-            dq_key, dq_custom, dq_answer = security_question_inputs(lang_dict, "dash_sec", current_player)
+        with st.form(f"security_question_form_{current_player['fname']}_{current_player['lname']}"):
+            # Prefix scoped to the viewed player for the same reason as the
+            # Partner Ranking / Evaluation widgets above: otherwise an
+            # admin browsing from one player's dashboard to another would
+            # see (and could silently save) the previous player's stale
+            # security-question selections.
+            dq_key, dq_custom, dq_answer = security_question_inputs(lang_dict, f"dash_sec_{current_player['fname']}_{current_player['lname']}", current_player)
             if st.form_submit_button(lang_dict.get('sec_save_btn', 'Save'), type="primary"):
                 sec_error = validate_security_inputs(dq_key, dq_custom, dq_answer, lang_dict)
                 if sec_error:
@@ -3030,34 +3084,43 @@ elif st.session_state.nav_mode == "Player_Dashboard":
         new_tech_vals = []
         new_mental_vals = []
 
+        # Every widget key below includes the viewed player's identity
+        # (_pkey). Without that, Streamlit remembers the LAST player's
+        # widget values by key when a coach/admin browses from one
+        # player's evaluation tab to another in the same session, so the
+        # scores shown (and saved) for this player could silently be the
+        # previous player's leftover selections instead of this player's
+        # own saved values. Same class of bug as the Partner Ranking form.
+        _pkey = f"{current_player['fname']}_{current_player['lname']}"
+
         with col_eval_left:
             st.markdown(f"##### 🔵 {lang_dict.get('eval_you_lbl', 'You')}")
             st.markdown(f"**{lang_dict.get('tech_skills', 'Technical Skills')}**")
             for i, skill in enumerate(TECH_SKILLS):
-                with st.container(key=f"eval_you_tech_{i}"):
-                    val = st.selectbox(f"🔵 {lang_dict.get('eval_you_lbl', 'You')} - {skill}", SCORE_OPTIONS, index=clamp_score(current_player['tech'][i]), key=f"p_tech_{i}")
+                with st.container(key=f"eval_you_tech_{_pkey}_{i}"):
+                    val = st.selectbox(f"🔵 {lang_dict.get('eval_you_lbl', 'You')} - {skill}", SCORE_OPTIONS, index=clamp_score(current_player['tech'][i]), key=f"p_tech_{_pkey}_{i}")
                 new_tech_vals.append(val)
             st.markdown(f"**{lang_dict.get('mental_skills', 'Mental Skills')}**")
             for i, skill in enumerate(MENTAL_SKILLS):
-                with st.container(key=f"eval_you_mental_{i}"):
-                    val = st.selectbox(f"🔵 {lang_dict.get('eval_you_lbl', 'You')} - {skill}", SCORE_OPTIONS, index=clamp_score(current_player['mental'][i]), key=f"p_mental_{i}")
+                with st.container(key=f"eval_you_mental_{_pkey}_{i}"):
+                    val = st.selectbox(f"🔵 {lang_dict.get('eval_you_lbl', 'You')} - {skill}", SCORE_OPTIONS, index=clamp_score(current_player['mental'][i]), key=f"p_mental_{_pkey}_{i}")
                 new_mental_vals.append(val)
 
         with col_eval_right:
             st.markdown(f"##### 🟠 {lang_dict.get('eval_coach_lbl', 'Coach')}")
             st.markdown(f"**{lang_dict.get('tech_skills', 'Technical Skills')}**")
             for i, skill in enumerate(TECH_SKILLS):
-                with st.container(key=f"eval_coach_tech_{i}"):
-                    st.selectbox(f"🟠 {lang_dict.get('eval_coach_lbl', 'Coach')} - {skill}", SCORE_OPTIONS, index=clamp_score(current_player['c_tech'][i]), disabled=True, key=f"c_tech_view_{i}")
+                with st.container(key=f"eval_coach_tech_{_pkey}_{i}"):
+                    st.selectbox(f"🟠 {lang_dict.get('eval_coach_lbl', 'Coach')} - {skill}", SCORE_OPTIONS, index=clamp_score(current_player['c_tech'][i]), disabled=True, key=f"c_tech_view_{_pkey}_{i}")
             st.markdown(f"**{lang_dict.get('mental_skills', 'Mental Skills')}**")
             for i, skill in enumerate(MENTAL_SKILLS):
-                with st.container(key=f"eval_coach_mental_{i}"):
-                    st.selectbox(f"🟠 {lang_dict.get('eval_coach_lbl', 'Coach')} - {skill}", SCORE_OPTIONS, index=clamp_score(current_player['c_mental'][i]), disabled=True, key=f"c_mental_view_{i}")
+                with st.container(key=f"eval_coach_mental_{_pkey}_{i}"):
+                    st.selectbox(f"🟠 {lang_dict.get('eval_coach_lbl', 'Coach')} - {skill}", SCORE_OPTIONS, index=clamp_score(current_player['c_mental'][i]), disabled=True, key=f"c_mental_view_{_pkey}_{i}")
                 
         st.markdown("---")
         current_p_style = current_player.get("player_play_style", "Equilibrated")
         if current_p_style not in style_options: current_p_style = "Equilibrated"
-        new_player_style = st.selectbox(lang_dict.get('style_select_lbl', 'Play Style:'), options=style_options, index=style_options.index(current_p_style))
+        new_player_style = st.selectbox(lang_dict.get('style_select_lbl', 'Play Style:'), options=style_options, index=style_options.index(current_p_style), key=f"player_style_sel_{_pkey}")
 
         eval_has_unsaved = (
             new_tech_vals != current_player['tech']
@@ -3202,7 +3265,7 @@ elif st.session_state.nav_mode == "Player_Dashboard":
             data=_my_pdf,
             file_name=f"{current_player['fname']}_{current_player['lname']}_report.pdf",
             mime="application/pdf",
-            key="my_report_pdf_download"
+            key=f"my_report_pdf_download_{_pkey}"
         )
 
     with tab_partners:
@@ -3210,14 +3273,19 @@ elif st.session_state.nav_mode == "Player_Dashboard":
         all_colleagues = [f"{p['fname']} {p['lname']}" for p in squad_players if p['fname'] != current_player['fname']]
         current_partners = current_player.get("partners", {})
         
-        with st.form("partners_form"):
+        with st.form(f"partners_form_{current_player['fname']}_{current_player['lname']}"):
             new_partners_dict = {}
             for i in range(5):
                 existing_keys = list(current_partners.keys())
                 default_partner = existing_keys[i] if i < len(existing_keys) else (all_colleagues[0] if all_colleagues else "")
                 default_val = int(current_partners.get(default_partner, 5 - i))
-                
-                p_sel = st.selectbox(f"Partner #{i+1}", all_colleagues, index=all_colleagues.index(default_partner) if default_partner in all_colleagues else 0, key=f"partner_sel_{i}")
+
+                # Key includes the viewed player's identity: without this, Streamlit
+                # keeps remembering the LAST player's dropdown selections by key when
+                # a coach/admin browses from one player's card to another in the same
+                # session, silently showing/saving the wrong player's stale choices
+                # instead of this player's actual saved ranking.
+                p_sel = st.selectbox(f"Partner #{i+1}", all_colleagues, index=all_colleagues.index(default_partner) if default_partner in all_colleagues else 0, key=f"partner_sel_{current_player['fname']}_{current_player['lname']}_{i}")
                 
                 if p_sel:
                     new_partners_dict[p_sel] = default_val
