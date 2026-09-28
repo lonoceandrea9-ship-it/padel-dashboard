@@ -3272,19 +3272,29 @@ elif st.session_state.nav_mode == "Player_Dashboard":
         st.subheader(f"🏆 {lang_dict.get('partner_mgmt', 'Partner Management')}")
         all_colleagues = [f"{p['fname']} {p['lname']}" for p in squad_players if p['fname'] != current_player['fname']]
         current_partners = current_player.get("partners", {})
-        
-        with st.form(f"partners_form_{current_player['fname']}_{current_player['lname']}"):
+
+        # Fingerprint of the CURRENTLY SAVED ranking, folded into every widget
+        # key below. Streamlit remembers a widget's value by key across
+        # reruns, ignoring the "index" default once a key already has a
+        # value - so if this ranking changes anywhere else (this player
+        # editing it from another device, an admin editing it, another
+        # player's tab having been open last) while this tab sits open
+        # untouched, its dropdowns would otherwise keep showing OLD stale
+        # selections. Submitting that stale form would silently overwrite
+        # the newer ranking with the old one - which is exactly what was
+        # happening. Baking a fingerprint of the real saved data into the
+        # key makes any such change invalidate the old widget state, so the
+        # dropdowns always re-render from the CURRENT data instead.
+        _partners_fp = hashlib.md5(str(sorted(current_partners.items())).encode()).hexdigest()[:8]
+        _pform_key = f"{current_player['fname']}_{current_player['lname']}_{_partners_fp}"
+
+        with st.form(f"partners_form_{_pform_key}"):
             new_partners_dict = {}
             for i in range(5):
                 existing_keys = list(current_partners.keys())
                 default_partner = existing_keys[i] if i < len(existing_keys) else (all_colleagues[0] if all_colleagues else "")
 
-                # Key includes the viewed player's identity: without this, Streamlit
-                # keeps remembering the LAST player's dropdown selections by key when
-                # a coach/admin browses from one player's card to another in the same
-                # session, silently showing/saving the wrong player's stale choices
-                # instead of this player's actual saved ranking.
-                p_sel = st.selectbox(f"Partner #{i+1}", all_colleagues, index=all_colleagues.index(default_partner) if default_partner in all_colleagues else 0, key=f"partner_sel_{current_player['fname']}_{current_player['lname']}_{i}")
+                p_sel = st.selectbox(f"Partner #{i+1}", all_colleagues, index=all_colleagues.index(default_partner) if default_partner in all_colleagues else 0, key=f"partner_sel_{_pform_key}_{i}")
 
                 if p_sel:
                     # Score is fixed by SLOT POSITION (5,4,3,2,1), never looked
