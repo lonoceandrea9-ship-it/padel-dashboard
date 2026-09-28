@@ -3278,7 +3278,6 @@ elif st.session_state.nav_mode == "Player_Dashboard":
             for i in range(5):
                 existing_keys = list(current_partners.keys())
                 default_partner = existing_keys[i] if i < len(existing_keys) else (all_colleagues[0] if all_colleagues else "")
-                default_val = int(current_partners.get(default_partner, 5 - i))
 
                 # Key includes the viewed player's identity: without this, Streamlit
                 # keeps remembering the LAST player's dropdown selections by key when
@@ -3286,9 +3285,19 @@ elif st.session_state.nav_mode == "Player_Dashboard":
                 # session, silently showing/saving the wrong player's stale choices
                 # instead of this player's actual saved ranking.
                 p_sel = st.selectbox(f"Partner #{i+1}", all_colleagues, index=all_colleagues.index(default_partner) if default_partner in all_colleagues else 0, key=f"partner_sel_{current_player['fname']}_{current_player['lname']}_{i}")
-                
+
                 if p_sel:
-                    new_partners_dict[p_sel] = default_val
+                    # Score is fixed by SLOT POSITION (5,4,3,2,1), never looked
+                    # up from the current saved ranking. Looking it up by name
+                    # was the real bug behind rankings silently reverting: if
+                    # this tab was left open from before someone else's edit,
+                    # its dropdowns still hold the OLD selections, but a lookup
+                    # against the (by-then-already-changed) saved ranking would
+                    # reattach each stale name to its stale position's score -
+                    # reconstructing the very ranking that had just been
+                    # overwritten. Tying the score to the slot itself makes a
+                    # save depend only on what's visibly selected on screen.
+                    new_partners_dict[p_sel] = 5 - i
                     
             if st.form_submit_button(lang_dict.get('save_partners', 'Save Partners'), type="primary"):
                 current_player["partners"] = new_partners_dict
