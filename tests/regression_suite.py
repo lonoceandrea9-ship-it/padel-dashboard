@@ -278,7 +278,13 @@ def test_match_and_training():
     assert match_result_rows[0]["Risultato_Pista"] == "6-4, 6-2"
     assert match_result_rows[0]["Giocatori_NAC"] == "Andrea Lonoce / Alvaro Gomez"
 
+    # Matchday 1 (27-Sep) is auto-seeded on startup with the real SNP Galaxy
+    # result once it's actually played, so it's no longer the "empty" matchday
+    # to check the no-lineup-yet message against — matchday 2 still is.
     at2 = fresh()
+    day_sel = [s for s in at2.selectbox if isinstance(s.value, str) and s.value.startswith("27-Sep")][0]
+    day_sel.set_value("03-Oct  La Ultima Ronda  vs  NAC").run()
+    assert not at2.exception, [e.message for e in at2.exception]
     info_texts = [i.value for i in at2.info if "First assign the players" in i.value]
     assert len(info_texts) > 0
 
@@ -293,6 +299,64 @@ def test_match_and_training():
     assert not at3.exception, [e.message for e in at3.exception]
     group_trainings = [t for t in at3.session_state["planned_trainings"] if "Gruppo" in t]
     assert len(group_trainings) >= 1
+
+
+def test_admin_no_cross_player_widget_leak():
+    """Regression test for a real bug: an Admin browsing from one player's
+    dashboard to another's (in the same browser session, no page reload)
+    must see THAT player's own saved data in the Partner Ranking and
+    Evaluation forms - not the previous player's leftover widget selections.
+    Streamlit remembers widget values by key across reruns, so any widget
+    key that isn't scoped to the viewed player leaks state between them."""
+    from streamlit.testing.v1 import AppTest
+    APP = APP_TEST
+
+    at = AppTest.from_file(APP, default_timeout=60)
+    at.run()
+
+    for p in at.session_state["squad_data"]:
+        if p["fname"] == "Lars":
+            p["partners"] = {
+                "Jairo Lopez": 5, "Pedro Rios": 4, "Mikkel Hoff": 3,
+                "Josu Usabiaga": 2, "Doug Ramsay": 1,
+            }
+        if p["fname"] == "Josu":
+            p["partners"] = {"Alvaro Gomez": 5}
+            p["tech"] = [1] * len(p["tech"])
+
+    at.session_state["authenticated_admin"] = True
+    at.session_state["admin_viewing_player"] = True
+    at.session_state["authenticated_player"] = "Josu"
+    at.session_state["nav_mode"] = "Player_Dashboard"
+    at.run()
+    assert not at.exception, [e.message for e in at.exception]
+
+    at.session_state["authenticated_player"] = "Lars"
+    at.run()
+    assert not at.exception, [e.message for e in at.exception]
+
+    lars_partner_sel0 = [s for s in at.selectbox if s.key == "partner_sel_Lars_Mikkelsen_0"][0]
+    lars_partner_sel3 = [s for s in at.selectbox if s.key == "partner_sel_Lars_Mikkelsen_3"][0]
+    assert lars_partner_sel0.value == "Jairo Lopez", lars_partner_sel0.value
+    assert lars_partner_sel3.value == "Josu Usabiaga", lars_partner_sel3.value
+
+    lars_tech0 = [s for s in at.selectbox if s.key == "p_tech_Lars_Mikkelsen_0"][0]
+    assert lars_tech0.value != 1, "Lars's evaluation tab is showing Josu's leftover tech score"
+
+    # Swap position 1 and 4, save, and confirm the write lands correctly
+    # and doesn't disturb Josu's own (untouched) data.
+    lars_partner_sel0.set_value("Josu Usabiaga").run()
+    lars_partner_sel3 = [s for s in at.selectbox if s.key == "partner_sel_Lars_Mikkelsen_3"][0]
+    lars_partner_sel3.set_value("Jairo Lopez").run()
+    save_btn = [b for b in at.button if b.label == "Save Partner Ranking"][0]
+    save_btn.click().run()
+    assert not at.exception, [e.message for e in at.exception]
+
+    lars_final = next(p for p in at.session_state["squad_data"] if p["fname"] == "Lars")["partners"]
+    assert lars_final["Josu Usabiaga"] == 5
+    assert lars_final["Jairo Lopez"] == 2
+    josu_final = next(p for p in at.session_state["squad_data"] if p["fname"] == "Josu")["partners"]
+    assert josu_final == {"Alvaro Gomez": 5}
 
 
 def test_login_and_admin_pwd():
@@ -747,6 +811,7 @@ def test_pdf_generation():
 
 TESTS = [
     test_match_and_training,
+    test_admin_no_cross_player_widget_leak,
     test_login_and_admin_pwd,
     test_partner_prefs,
     test_languages,
