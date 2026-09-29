@@ -301,6 +301,75 @@ def test_match_and_training():
     assert len(group_trainings) >= 1
 
 
+def test_snp_mvp_badge():
+    """The Coach can name an MVP for a played SNP matchday from Match
+    Management; that player's name should then show a 'MVP {n}th Match ⭐'
+    badge on their own dashboard header (and on the Admin's view of them),
+    and clearing the MVP selection should remove the badge again."""
+    from streamlit.testing.v1 import AppTest
+    APP = APP_TEST
+
+    at = AppTest.from_file(APP, default_timeout=60)
+    at.session_state["nav_mode"] = "Coach"
+    at.session_state["authenticated_coach"] = True
+    at.session_state["force_password_change"] = False
+    at.run()
+    assert not at.exception, [e.message for e in at.exception]
+
+    # Matchday 2 (03-Oct) has no lineup yet by default - switch to it and
+    # assign a lineup so the Results/MVP steps unlock.
+    day_sel = [s for s in at.selectbox if isinstance(s.value, str) and s.value.startswith("27-Sep")][0]
+    day_sel.set_value("03-Oct  La Ultima Ronda  vs  NAC").run()
+    assert not at.exception, [e.message for e in at.exception]
+
+    p1_sel = [s for s in at.selectbox if s.key == "lineup_day2_pista1_p1"][0]
+    p2_sel = [s for s in at.selectbox if s.key == "lineup_day2_pista1_p2"][0]
+    p1_sel.set_value("Andrea Lonoce").run()
+    p2_sel.set_value("Alvaro Gomez").run()
+    lineup_btn = [b for b in at.button if b.label == "💾 Save Lineup"][0]
+    lineup_btn.click().run()
+    assert not at.exception, [e.message for e in at.exception]
+
+    mvp_sel = [s for s in at.selectbox if s.key == "snp_mvp_sel_2"][0]
+    assert "Andrea Lonoce" in mvp_sel.options
+    mvp_sel.set_value("Andrea Lonoce").run()
+    mvp_save_btn = [b for b in at.button if b.label == "⭐ Save MVP"][0]
+    mvp_save_btn.click().run()
+    assert not at.exception, [e.message for e in at.exception]
+
+    assert at.session_state["snp_lineups"][2]["mvp"] == "Andrea Lonoce"
+
+    player = AppTest.from_file(APP, default_timeout=60)
+    player.session_state["nav_mode"] = "Player_Dashboard"
+    player.session_state["authenticated_player"] = "Andrea"
+    player.session_state["force_password_change"] = False
+    player.session_state["snp_lineups"] = at.session_state["snp_lineups"]
+    player.run()
+    assert not player.exception, [e.message for e in player.exception]
+    headers = [m.value for m in player.markdown if "Andrea Lonoce" in (m.value or "")]
+    assert any("MVP 2nd Match" in h and "⭐" in h for h in headers), \
+        f"BUG: MVP badge not shown on player's own header: {headers}"
+
+    # Clear the MVP for this matchday and confirm the badge disappears.
+    at.session_state["squad_data"] = at.session_state["squad_data"]  # keep same session
+    mvp_sel2 = [s for s in at.selectbox if s.key == "snp_mvp_sel_2"][0]
+    mvp_sel2.set_value("").run()
+    mvp_save_btn2 = [b for b in at.button if b.label == "⭐ Save MVP"][0]
+    mvp_save_btn2.click().run()
+    assert not at.exception, [e.message for e in at.exception]
+    assert "mvp" not in at.session_state["snp_lineups"].get(2, {})
+
+    player2 = AppTest.from_file(APP, default_timeout=60)
+    player2.session_state["nav_mode"] = "Player_Dashboard"
+    player2.session_state["authenticated_player"] = "Andrea"
+    player2.session_state["force_password_change"] = False
+    player2.session_state["snp_lineups"] = at.session_state["snp_lineups"]
+    player2.run()
+    assert not player2.exception, [e.message for e in player2.exception]
+    headers2 = [m.value for m in player2.markdown if "Andrea Lonoce" in (m.value or "")]
+    assert not any("MVP" in h for h in headers2), f"BUG: MVP badge still shown after clearing: {headers2}"
+
+
 def test_admin_no_cross_player_widget_leak():
     """Regression test for a real bug: an Admin browsing from one player's
     dashboard to another's (in the same browser session, no page reload)
@@ -925,6 +994,7 @@ def test_pdf_generation():
 TESTS = [
     test_match_and_training,
     test_admin_no_cross_player_widget_leak,
+    test_snp_mvp_badge,
     test_partner_ranking_stale_resubmit_does_not_revert,
     test_partner_ranking_display_order_survives_key_reorder,
     test_login_and_admin_pwd,
