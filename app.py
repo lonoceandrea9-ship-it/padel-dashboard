@@ -2512,6 +2512,37 @@ def player_avatar_html(fname, lname, size=40, font_size=None):
     )
 
 
+def _ordinal(n):
+    """1 -> '1st', 2 -> '2nd', 3 -> '3rd', 4 -> '4th', etc."""
+    if 10 <= n % 100 <= 20:
+        suffix = "th"
+    else:
+        suffix = {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
+    return f"{n}{suffix}"
+
+
+def get_mvp_badges_html(player_full_name):
+    """Return small inline HTML star badges for every SNP matchday this
+    player was named MVP for (set by the Coach in Match Management), e.g.
+    'MVP 1st Match ⭐'. Meant to be appended right after a player's name
+    wherever it's shown."""
+    lineups = st.session_state.get("snp_lineups", {}) or {}
+    badge_days = sorted(
+        day_id for day_id, lineup in lineups.items()
+        if isinstance(lineup, dict) and lineup.get("mvp") == player_full_name
+    )
+    if not badge_days:
+        return ""
+    badges = "".join(
+        f'<span style="display:inline-flex;align-items:center;background:#3a2f0b;'
+        f'color:#ffd54f;border:1px solid #7a6416;border-radius:999px;'
+        f'padding:2px 10px;font-size:0.75rem;font-weight:700;margin-left:8px;'
+        f'white-space:nowrap;">MVP {_ordinal(day_id)} Match ⭐</span>'
+        for day_id in badge_days
+    )
+    return badges
+
+
 def generate_player_report_pdf(player, all_skills_labels, self_scores, coach_scores, attendance_pct):
     """Build a one-page PDF report card for a player: identity, play styles,
     a skill-by-skill self-vs-coach table with an averages row, and
@@ -3028,17 +3059,18 @@ elif st.session_state.nav_mode == "Player_Dashboard":
     col_top1, col_top2 = st.columns([5, 2])
     with col_top1:
         _player_avatar = player_avatar_html(current_player['fname'], current_player['lname'], size=48, font_size=20)
+        _mvp_badges = get_mvp_badges_html(f"{current_player['fname']} {current_player['lname']}")
         if admin_viewing:
             st.markdown(
-                f"<div style='display:flex;align-items:center;gap:12px;'>{_player_avatar}"
-                f"<span style='font-size:2rem;font-weight:700;'>🛡️ Admin → {current_player['fname']} {current_player['lname']} ({current_player['side']})</span></div>",
+                f"<div style='display:flex;align-items:center;gap:12px;flex-wrap:wrap;'>{_player_avatar}"
+                f"<span style='font-size:2rem;font-weight:700;'>🛡️ Admin → {current_player['fname']} {current_player['lname']} ({current_player['side']})</span>{_mvp_badges}</div>",
                 unsafe_allow_html=True
             )
             st.caption("You are viewing this player profile as Admin. You can edit all fields.")
         else:
             st.markdown(
-                f"<div style='display:flex;align-items:center;gap:12px;'>{_player_avatar}"
-                f"<span style='font-size:2rem;font-weight:700;'>{current_player['fname']} {current_player['lname']} ({current_player['side']})</span></div>",
+                f"<div style='display:flex;align-items:center;gap:12px;flex-wrap:wrap;'>{_player_avatar}"
+                f"<span style='font-size:2rem;font-weight:700;'>{current_player['fname']} {current_player['lname']} ({current_player['side']})</span>{_mvp_badges}</div>",
                 unsafe_allow_html=True
             )
     with col_top2:
@@ -4652,6 +4684,48 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         _save_ok = save_data_to_server()
                     if _save_ok:
                         st.toast(lang_dict.get('snp_results_saved', '✅ Results saved for **{day}**!').format(day=selected_day['label']))
+                        st.rerun()
+
+        # --- STEP 3: MVP of the matchday ---
+        st.markdown(f"#### {lang_dict.get('snp_mvp_title', '3️⃣ MVP of the matchday')}")
+        if not pistas_con_giocatori:
+            st.info(lang_dict.get('snp_mvp_no_lineup', 'ℹ️ Assign the Lineup above first: you can then pick the MVP here.'))
+        else:
+            st.caption(lang_dict.get('snp_mvp_desc', "Pick the standout player of this matchday. Their name will show a ⭐ MVP badge on their own profile."))
+            mvp_candidates = []
+            for pista in pistas_con_giocatori:
+                for pk in (f"pista_{pista}_p1", f"pista_{pista}_p2"):
+                    name = existing.get(pk, "")
+                    if name and name not in mvp_candidates:
+                        mvp_candidates.append(name)
+
+            existing_mvp = existing.get("mvp", "")
+            mvp_options = [""] + mvp_candidates
+            mvp_idx = mvp_options.index(existing_mvp) if existing_mvp in mvp_options else 0
+
+            with st.form(f"snp_mvp_form_{day_id}"):
+                mvp_selected = st.selectbox(
+                    lang_dict.get('snp_mvp_select', 'MVP of this matchday'),
+                    options=mvp_options,
+                    index=mvp_idx,
+                    format_func=lambda n: n if n else lang_dict.get('snp_mvp_none', '— None —'),
+                    key=f"snp_mvp_sel_{day_id}"
+                )
+                if st.form_submit_button(lang_dict.get('snp_mvp_save_btn', '⭐ Save MVP'), type="primary"):
+                    lineup_data = dict(existing)
+                    if mvp_selected:
+                        lineup_data["mvp"] = mvp_selected
+                    else:
+                        lineup_data.pop("mvp", None)
+                    st.session_state.snp_lineups[day_id] = lineup_data
+                    log_activity("SNP matchday MVP set", f"{selected_day['label']}: {mvp_selected or '(none)'}")
+                    with st.spinner(lang_dict.get('saving_spinner', '💾 Saving...')):
+                        _save_ok = save_data_to_server()
+                    if _save_ok:
+                        if mvp_selected:
+                            st.toast(lang_dict.get('snp_mvp_saved', '⭐ {name} is MVP of {day}!').format(name=mvp_selected, day=selected_day['label']))
+                        else:
+                            st.toast(lang_dict.get('snp_mvp_cleared', 'MVP cleared for {day}.').format(day=selected_day['label']))
                         st.rerun()
 
         # --- Riepilogo completo delle 8 giornate ---
