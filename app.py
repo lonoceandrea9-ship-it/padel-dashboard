@@ -3791,7 +3791,14 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 participated_count = 0
                 for session in st.session_state.planned_trainings:
                     attendees_str = session.get("Partecipanti", "")
-                    if player_first_name in attendees_str:
+                    # IMPORTANT: match against the exact comma-separated
+                    # tokens, never a raw substring check. "if name in
+                    # attendees_str" would also count a player whose first
+                    # name merely happens to appear inside another player's
+                    # name (or inside the string by coincidence), silently
+                    # inflating or corrupting the commitment % below.
+                    attendee_fnames = [x.strip() for x in attendees_str.split(",") if x.strip()]
+                    if player_first_name in attendee_fnames:
                         participated_count += 1
                 
                 if total_scheduled_trainings > 0:
@@ -4276,6 +4283,18 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
         st.markdown(lang_dict.get('training_desc', ''))
         
         all_player_names = [f"{p['fname']} {p['lname']}" for p in squad_players]
+        # IMPORTANT: this widget's key is popped from session_state right
+        # after every successful save below (both the single-training and
+        # the group-training paths). Streamlit remembers a keyed widget's
+        # last value across reruns and ignores `default=` once that key has
+        # been used - so without the pop, saving a training with only some
+        # players selected left THAT SAME partial selection sitting in the
+        # box the next time the coach opened this tab, instead of resetting
+        # to "everyone" as the default implies. The coach would then plan
+        # the next training believing everyone was selected (since default
+        # is supposed to mean that), save it, and only a part of the squad
+        # would end up in "Partecipanti" - which then also corrupts the
+        # Commitment % on the Squad Management tab.
         selected_attendees_names = st.multiselect(
             lang_dict.get('select_attendees', 'Select attendees:'),
             options=all_player_names,
@@ -4348,6 +4367,11 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         _save_ok = save_data_to_server()
                     if _save_ok:
                         st.toast(lang_dict.get('training_saved_success', '🎉 Training saved successfully for {date}!').format(date=training_date))
+                        # Reset the attendee picker so the NEXT training this
+                        # coach plans starts fresh from "everyone selected"
+                        # instead of silently carrying over this training's
+                        # (possibly partial) selection - see note above.
+                        st.session_state.pop("captain_attendees_select", None)
                         st.rerun()
 
             st.markdown("---")
@@ -4435,6 +4459,12 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                             _save_ok = save_data_to_server()
                         if _save_ok:
                             st.toast(lang_dict.get('group_saved_success', '🎉 {n} group trainings saved for {date}!').format(n=len(group_focus_selections), date=group_training_date))
+                            # Same reset as the single-training save above -
+                            # otherwise the next training planned in this
+                            # session would silently inherit this group's
+                            # attendee subset instead of defaulting back to
+                            # everyone.
+                            st.session_state.pop("captain_attendees_select", None)
                             st.rerun()
 
             st.markdown("---")
@@ -4453,12 +4483,22 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                 edit_index = training_options_edit.index(selected_training_to_edit_label)
                 training_to_edit = st.session_state.planned_trainings[edit_index]
 
-                with st.form("edit_training_form"):
+                # IMPORTANT: every widget inside this form is keyed with
+                # "_{edit_index}" so it re-initializes from THIS training's
+                # own data whenever the coach switches which training is
+                # selected above. Without that suffix, all these widgets
+                # shared one fixed key across every training in the
+                # dropdown, so Streamlit kept whatever was on screen for the
+                # PREVIOUS training selected and ignored the fresh
+                # `default=`/`index=` for the new one - silently carrying a
+                # stale (and possibly partial) attendee list, date or
+                # priority over onto a different training's edit.
+                with st.form(f"edit_training_form_{edit_index}"):
                     try:
                         default_edit_date = datetime.strptime(training_to_edit["Data"], "%Y-%m-%d").date()
                     except (ValueError, TypeError):
                         default_edit_date = datetime.now().date()
-                    edit_date = st.date_input(lang_dict.get('training_edit_date_label', '📅 Training date'), default_edit_date, key="edit_training_date")
+                    edit_date = st.date_input(lang_dict.get('training_edit_date_label', '📅 Training date'), default_edit_date, key=f"edit_training_date_{edit_index}")
 
                     all_player_names_edit = [f"{p['fname']} {p['lname']}" for p in squad_players]
                     current_participant_fnames = [x.strip() for x in training_to_edit.get("Partecipanti", "").split(",") if x.strip()]
@@ -4467,15 +4507,15 @@ elif st.session_state.nav_mode == "Coach" and st.session_state.authenticated_coa
                         lang_dict.get('training_participants_label', 'Participants'),
                         options=all_player_names_edit,
                         default=default_selected_full,
-                        key="edit_training_attendees"
+                        key=f"edit_training_attendees_{edit_index}"
                     )
 
                     edit_p1_default = training_to_edit.get("1° Priorità")
                     edit_p2_default = training_to_edit.get("2° Priorità")
                     edit_p3_default = training_to_edit.get("3° Priorità")
-                    edit_p1 = st.selectbox(lang_dict.get('priority1_label', '1st Priority'), options=ALL_SKILLS, index=ALL_SKILLS.index(edit_p1_default) if edit_p1_default in ALL_SKILLS else 0, key="edit_training_p1")
-                    edit_p2 = st.selectbox(lang_dict.get('priority2_label', '2nd Priority'), options=ALL_SKILLS, index=ALL_SKILLS.index(edit_p2_default) if edit_p2_default in ALL_SKILLS else 1, key="edit_training_p2")
-                    edit_p3 = st.selectbox(lang_dict.get('priority3_label', '3rd Priority'), options=ALL_SKILLS, index=ALL_SKILLS.index(edit_p3_default) if edit_p3_default in ALL_SKILLS else 2, key="edit_training_p3")
+                    edit_p1 = st.selectbox(lang_dict.get('priority1_label', '1st Priority'), options=ALL_SKILLS, index=ALL_SKILLS.index(edit_p1_default) if edit_p1_default in ALL_SKILLS else 0, key=f"edit_training_p1_{edit_index}")
+                    edit_p2 = st.selectbox(lang_dict.get('priority2_label', '2nd Priority'), options=ALL_SKILLS, index=ALL_SKILLS.index(edit_p2_default) if edit_p2_default in ALL_SKILLS else 1, key=f"edit_training_p2_{edit_index}")
+                    edit_p3 = st.selectbox(lang_dict.get('priority3_label', '3rd Priority'), options=ALL_SKILLS, index=ALL_SKILLS.index(edit_p3_default) if edit_p3_default in ALL_SKILLS else 2, key=f"edit_training_p3_{edit_index}")
 
                     if st.form_submit_button(lang_dict.get('training_edit_save_btn', '💾 Save Training Changes'), type="primary"):
                         if not edit_attendees:
